@@ -15,6 +15,7 @@ mbedtls:
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LIBS) arch/zos/libascii/libascii.a
+	mv a.out clax
 
 clean:
 	rm -f $(PROGRAM) $(OBJECTS)
