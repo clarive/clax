@@ -26,7 +26,7 @@ OBJS	= ctype_a.o ctypet_a.o dirent_a.o dll_a.o dynit_a.o \
 
 # Define archive dependencies and archive command
 libascii.a	: $(OBJS)
-	cat license | more
+#	cat license | more
 	ar -rc libascii.a $(OBJS) 
 
 # Define compile dependencies and command for each part
