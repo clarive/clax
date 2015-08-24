@@ -11,7 +11,7 @@ libascii:
 	$(MAKE) -C arch/zos/libascii
 
 mbedtls:
-	$(MAKE) CC=c99 CFLAGS="-D_ALL_SOURCE -D__STRING_CODE_SET__=\"ISO8859-1\" -qlanglvl=extc99" WARNING_CFLAGS="" -C contrib/mbedtls
+	$(MAKE) AR=../../arch/zos/bin/ar CC=c99 CFLAGS="-D_ALL_SOURCE -D__STRING_CODE_SET__=\"ISO8859-1\" -qlanglvl=extc99" WARNING_CFLAGS="" -C contrib/mbedtls
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LIBS) arch/zos/libascii/libascii.a
