@@ -2,7 +2,7 @@ CC=c99
 PROGRAM=clax
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
-CFLAGS=-Icontrib/mbedtls -D_ALL_SOURCE -D__STRING_CODE_SET__="ISO8859-1" -qlanglvl=extc99
+CFLAGS=-DMVS -Icontrib/mbedtls -D_ALL_SOURCE -D__STRING_CODE_SET__="ISO8859-1" -qlanglvl=extc99
 LIBS=contrib/mbedtls/*.o
 
 all: libascii mbedtls $(PROGRAM)
