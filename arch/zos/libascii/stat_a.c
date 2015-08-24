@@ -1,1 +1,74 @@
-a\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\aa\\aa\@Õ”…z@¢££mKƒ@\aa\@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\aa\@Ã–—¨™‰‡ˆ£z@@@Ó‰ƒ…•¢…„@Ô£…™‰“¢@`@×™–—…™£¨@–†@ÉÂÔK@@@@@@@@@@@@@@@\aa\@@@@@@@@@@@@@@MÃ]@Ã–—¨™‰‡ˆ£@ÉÂÔ@Ã–™—K@ñùù÷K@@@@@@@@@@@@@@@@@@@@@@@\aa\@@@@@@@@@@@@@@Á““@™‰‡ˆ£¢@™…¢…™¥…„K@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\aa\@\aa\@Æ¤•ƒ£‰–•@zÃ–•£‰•¢@ÁâÃÉÉ`£–`ÅÂÃÄÉÃ@†™–•£@…•„@£–@£ˆ…\aa\@@¢££@†¤•ƒ£‰–•¢K@@@@\aa\@\aa\@Ã–”—‰“…zÇÅÕm×ÙÁÇÔÁmÅç×ÖÙã@`@‡…•…™£…@×ÙÁÇÔÁ@¢££…”…•£¢@£–\aa\@Ö—£‰–•¢…§—–™£@£ˆ…¢…@…•£™¨@—–‰•£¢@†™–”@£ˆ…\aa\ÄÓÓ\aa\\aa\@Õ–£…¢zÁ““@£ˆ…@—™–ƒ…„¤™…¢@™…@•”…@mm§§§§§§§§m@¦ˆ…™…\aa\§§§§§§§§@‰¢@£ˆ…@•”…@–†@£ˆ…@¢£•„™„@Ã@™¤•`£‰”…\aa\†¤•ƒ£‰–•@•”…K@ä•“…¢¢@–£ˆ…™¦‰¢…@•–£…„k@““@†¤•ƒ£‰–•¢\aa\@£’…@£ˆ…@¢”…@™‡¤”…•£k—™–„¤ƒ…@£ˆ…@¢”…@–¤£—¤£@•„\aa\™…£¤™•@£ˆ…@¢”…@¥“¤…¢@¢@£ˆ…@¢£•„™„@†¤•ƒ£‰–•¢K\aa\\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a{‰•ƒ“¤„…@L¢£„“‰‚Kˆn{‰•ƒ“¤„…@L¢£„™‡Kˆn{‰•ƒ“¤„…@L¢£„‰–Kˆn{‰•ƒ“¤„…@L¢¨¢a¢££Kˆn{‰•ƒ“¤„…@L¢¨¢a¢££¥†¢Kˆn{‰•ƒ“¤„…@‡“–‚“mKˆ@{‰†„…†@ÇÅÕm×ÙÁÇÔÁmÅç×ÖÙã{—™‡”@…§—–™£Mmmƒˆ”–„m]{—™‡”@…§—–™£Mmm”’„‰™m]{—™‡”@…§—–™£Mmm”’•–„m]{—™‡”@…§—–™£Mmm¢££m]{—™‡”@…§—–™£Mmm¢££¥†¢m]{…•„‰†@a\l×ÁÇÅ\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\aa\\aa\@ÁâÃÉÉ@†™–•£`…•„@™–¤£‰•…¢@†–™@âãÁã@†¤•ƒ£‰–•¢\aa\\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a@‰•£@mmƒˆ”–„mMƒ–•¢£@ƒˆ™@\—£ˆk@”–„…m£@”–„…]À™…£¤™•@ƒˆ”–„MMƒ–•¢£@ƒˆ™@\]@mm‡…£Å¢£™‰•‡ñmM—£ˆ]k@”–„…]^Ð@‰•£@mm”’„‰™mMƒ–•¢£@ƒˆ™@\—£ˆk@”–„…m£@”–„…]À™…£¤™•@”’„‰™MMƒ–•¢£@ƒˆ™@\]@mm‡…£Å¢£™‰•‡ñmM—£ˆ]k@”–„…]^Ð@‰•£@mm”’•–„mMƒ–•¢£@ƒˆ™@\—£ˆk@”–„…m£@”–„…k@„…¥m£@„…¥m‰„…•£‰†‰…™]À™…£¤™•@”’•–„MMƒ–•¢£@ƒˆ™@\]mm‡…£Å¢£™‰•‡ñmM—£ˆ]k@”–„…k@„…¥m‰„…•£‰†‰…™]^Ð@‰•£@mm¢££mMƒ–•¢£@ƒˆ™@\—£ˆk@¢£™¤ƒ£@¢££@\‚¤†]À™…£¤™•@¢££MMƒ–•¢£@ƒˆ™@\]@mm‡…£Å¢£™‰•‡ñmM—£ˆ]k@‚¤†]^Ð@‰•£@mm¢££¥†¢mMƒ–•¢£@ƒˆ™@\—£ˆk@¢£™¤ƒ£@¢££¥†¢@\†¢‰•†–]À‰•£@™ƒ^@™ƒ@~@¢££¥†¢MMƒ–•¢£@ƒˆ™@\]@mm‡…£Å¢£™‰•‡ñmM—£ˆ]k@†¢‰•†–]^‰†@M™ƒ~~ð]mm£–¢ƒ‰‰mM†¢‰•†–`n†mÖÅƒ‚‰„k@†¢‰•†–`n†mÖÅƒ‚‰„]^™…£¤™•@™ƒ^Ð
+/********************************************************************/
+/*																	*/
+/* Name		: 	stat_a.c 											*/	
+/*                                                                  */
+/* Copyright:   Licensed Materials - Property of IBM.               */
+/*              (C) Copyright IBM Corp. 1997.                       */
+/*              All rights reserved.                                */
+/* 																	*/
+/* Function :	Contains ASCII-to-EBCDIC front end to the			*/
+/*			  	stat functions.    									*/
+/* 																	*/
+/* Compile	:	GEN_PRAGMA_EXPORT - generate PRAGMA statements to	*/
+/* Options						export these entry points from the	*/
+/*								DLL									*/
+/*																	*/
+/* Notes	:	All the procedures are name "__xxxxxxxx_a" where	*/
+/*				xxxxxxxx is the name of the standard C run-time		*/
+/*				function name. Unless otherwise noted, all functions*/
+/* 				take the same argument,produce the same output and	*/
+/*				return the same values as the standard functions.	*/
+/*																	*/
+/********************************************************************/
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/statvfs.h>
+#include "global_a.h"
+ 
+#ifdef GEN_PRAGMA_EXPORT
+#pragma export(__chmod_a)
+#pragma export(__mkdir_a)
+#pragma export(__mknod_a)
+#pragma export(__stat_a)
+#pragma export(__statvfs_a)
+#endif
+ 
+/*%PAGE																*/
+/********************************************************************/
+/*																	*/
+/* ASCII front-end routines for STAT functions						*/
+/*																	*/
+/********************************************************************/
+ 
+int __chmod_a(const char *path, mode_t mode)
+{
+	return chmod((const char *) __getEstring1_a(path), mode);
+}
+ 
+int __mkdir_a(const char *path, mode_t mode)
+{
+	return mkdir((const char *) __getEstring1_a(path), mode);
+}
+ 
+int __mknod_a(const char *path, mode_t mode, dev_t dev_identifier)
+{
+	return mknod((const char *)__getEstring1_a(path),
+				 mode, dev_identifier);
+}
+ 
+int __stat_a(const char *path, struct stat *buf)
+{
+	return stat((const char *) __getEstring1_a(path), buf);
+}
+ 
+int __statvfs_a(const char *path, struct statvfs *fsinfo)
+{
+	int rc;
+ 
+	rc = statvfs((const char *) __getEstring1_a(path), fsinfo);
+	if (rc==0)
+		__toascii_a(fsinfo->f_OEcbid, fsinfo->f_OEcbid);
+	return rc;
+}

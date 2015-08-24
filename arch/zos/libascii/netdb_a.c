@@ -1,1 +1,71 @@
-a\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\aa\\aa\@Õ”…z@•…£„‚mKƒ@@\aa\@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\aa\@Ã–—¨™‰‡ˆ£z@@@Ó‰ƒ…•¢…„@Ô£…™‰“¢@`@×™–—…™£¨@–†@ÉÂÔK@@@@@@@@@@@@@@@\aa\@@@@@@@@@@@@@@MÃ]@Ã–—¨™‰‡ˆ£@ÉÂÔ@Ã–™—K@ñùù÷k@ñùùøK@@@@@@@@@@@@@@@@@\aa\@@@@@@@@@@@@@@Á““@™‰‡ˆ£¢@™…¢…™¥…„K@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\aa\@\aa\@Æ¤•ƒ£‰–•@zÃ–•£‰•¢@ÁâÃÉÉ`£–`ÅÂÃÄÉÃ@†™–•£@…•„@£–@£ˆ…\aa\@@•…£„‚@†¤•ƒ£‰–•¢@†–™@çaÖ×ÅÕ@†–™”£@ƒ““¢\aa\@\aa\@Ã–”—‰“…zÇÅÕm×ÙÁÇÔÁmÅç×ÖÙã@`@‡…•…™£…@×ÙÁÇÔÁ@¢££…”…•£¢@£–\aa\@Ö—£‰–•¢…§—–™£@£ˆ…¢…@…•£™¨@—–‰•£¢@†™–”@£ˆ…\aa\ÄÓÓ\aa\\aa\@Õ–£…¢zÁ““@£ˆ…@—™–ƒ…„¤™…¢@™…@•”…@mm§§§§§§§§m@¦ˆ…™…\aa\§§§§§§§§@‰¢@£ˆ…@•”…@–†@£ˆ…@¢£•„™„@Ã@™¤•`£‰”…\aa\†¤•ƒ£‰–•@•”…K@ä•“…¢¢@–£ˆ…™¦‰¢…@•–£…„k@““@†¤•ƒ£‰–•¢\aa\@£’…@£ˆ…@¢”…@™‡¤”…•£k—™–„¤ƒ…@£ˆ…@¢”…@–¤£—¤£@•„\aa\™…£¤™•@£ˆ…@¢”…@¥“¤…¢@¢@£ˆ…@¢£•„™„@†¤•ƒ£‰–•¢K\aa\\aa\@Ãˆ•‡…¢z””a„„a¨¨@¦ˆ–@¥K™K”@„…¢ƒ™‰—£‰–•\aa\ğñaò÷aù÷@—†’@ñKñKö@„„…„@‡…£ˆ–¢£‚¨„„™\aa\@@@@ğñaò÷aù÷@—†’@ñKñKö@Ã–•¥…™£…„@ƒˆ™@¢£™‰•‡¢@™…£¤™•…„\aa\@@@‚¨@‡…£ˆ–¢£‚¨„„™a‡…£ˆ–¢£‚¨•”…\aa\@@@£–@ÁâÃÉÉ@‚…†–™…@™…£¤™•‰•‡\aa\\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a{„…†‰•…@mçÖ×ÅÕmâÖäÙÃÅmÅçãÅÕÄÅÄ@ñ{‰•ƒ“¤„…@L•…£„‚Kˆn{‰•ƒ“¤„…@‡“–‚“mKˆ@{‰†„…†@ÇÅÕm×ÙÁÇÔÁmÅç×ÖÙã{—™‡”@…§—–™£Mmm‡…£ˆ–¢£‚¨„„™m]{—™‡”@…§—–™£Mmm‡…£ˆ–¢£‚¨•”…m]{—™‡”@…§—–™£Mmm‡…£¢…™¥‚¨•”…m]{…•„‰†…§£…™•@¥–‰„@Ã–•¥…™£mˆ–¢£…•£m£–m¢ƒ‰‰M¢£™¤ƒ£@ˆ–¢£…•£@\]^@a\l×ÁÇÅ\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\aa\\aa\@ÁâÃÉÉ@†™–•£`…•„@™–¤£‰•…¢@†–™@ÕÅãÄÂ@†¤•ƒ£‰–•¢\aa\\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a¢£™¤ƒ£@ˆ–¢£…•£@\mm‡…£ˆ–¢£‚¨„„™mMƒ–•¢£@¥–‰„@\@„„™…¢¢k@¢‰©…m£@„„™…¢¢m“…•k@‰•£@„–”‰•]À¢£™¤ƒ£@ˆ–¢£…•£\”¨mˆ–¢£…•£^”¨mˆ–¢£…•£@~@‡…£ˆ–¢£‚¨„„™M„„™…¢¢k@„„™…¢¢m“…•k@„–”‰•]^‰†@M”¨mˆ–¢£…•£]Ã–•¥…™£mˆ–¢£…•£m£–m¢ƒ‰‰M”¨mˆ–¢£…•£]^™…£¤™•@”¨mˆ–¢£…•£^Ğ¢£™¤ƒ£@ˆ–¢£…•£@\mm‡…£ˆ–¢£‚¨•”…mMƒ–•¢£@ƒˆ™@\•”…]À¢£™¤ƒ£@ˆ–¢£…•£\”¨mˆ–¢£…•£^”¨mˆ–¢£…•£@~@‡…£ˆ–¢£‚¨•”…MMƒ–•¢£@ƒˆ™@\]@mm‡…£Å¢£™‰•‡ñmM•”…]]^‰†@M”¨mˆ–¢£…•£]Ã–•¥…™£mˆ–¢£…•£m£–m¢ƒ‰‰M”¨mˆ–¢£…•£]^™…£¤™•@”¨mˆ–¢£…•£^Ğ¢£™¤ƒ£@¢…™¥…•£@\mm‡…£¢…™¥‚¨•”…mMƒ–•¢£@ƒˆ™@\@•”…k@ƒ–•¢£@ƒˆ™@\@—™–£–]À™…£¤™•@‡…£¢…™¥‚¨•”…MMƒ–•¢£@ƒˆ™@\]@mm‡…£Å¢£™‰•‡ñmM•”…]k@Mƒ–•¢£@ƒˆ™@\]@mm‡…£Å¢£™‰•‡òmM—™–£–]]^Ğ
+/********************************************************************/
+/*																	*/
+/* Name		: 	netdb_a.c  											*/	
+/*                                                                  */
+/* Copyright:   Licensed Materials - Property of IBM.               */
+/*              (C) Copyright IBM Corp. 1997, 1998.                 */
+/*              All rights reserved.                                */
+/* 																	*/
+/* Function :	Contains ASCII-to-EBCDIC front end to the			*/
+/*			  	netdb functions for X/OPEN format calls				*/
+/* 																	*/
+/* Compile	:	GEN_PRAGMA_EXPORT - generate PRAGMA statements to	*/
+/* Options						export these entry points from the	*/
+/*								DLL									*/
+/*																	*/
+/* Notes	:	All the procedures are name "__xxxxxxxx_a" where	*/
+/*				xxxxxxxx is the name of the standard C run-time		*/
+/*				function name. Unless otherwise noted, all functions*/
+/* 				take the same argument,produce the same output and	*/
+/*				return the same values as the standard functions.	*/
+/*																	*/
+/* Changes	:	mm/dd/yy who v.r.m description						*/
+/*				01/27/97 pfk 1.1.6 added gethostbyaddr				*/
+/*			    01/27/97 pfk 1.1.6 Converted char strings returned	*/
+/*								   by gethostbyaddr/gethostbyname	*/
+/*								   to ASCII before returning		*/
+/*																	*/
+/********************************************************************/
+
+#define _XOPEN_SOURCE_EXTENDED 1
+#include <netdb.h>
+#include "global_a.h"
+ 
+#ifdef GEN_PRAGMA_EXPORT
+#pragma export(__gethostbyaddr_a)
+#pragma export(__gethostbyname_a)
+#pragma export(__getservbyname_a)
+#endif
+
+extern void Convert_hostent_to_ascii(struct hostent *);
+ 
+/*%PAGE																*/
+/********************************************************************/
+/*																	*/
+/* ASCII front-end routines for NETDB functions						*/
+/*																	*/
+/********************************************************************/
+
+struct hostent *__gethostbyaddr_a(const void * address, size_t address_len, int domain)
+{
+	struct hostent*	my_hostent;
+	my_hostent = gethostbyaddr(address, address_len, domain);
+	if (my_hostent)
+		Convert_hostent_to_ascii(my_hostent);
+	return my_hostent;
+}
+
+struct hostent *__gethostbyname_a(const char *name)
+{
+	struct hostent*	my_hostent;
+	my_hostent = gethostbyname((const char *) __getEstring1_a(name));
+	if (my_hostent)
+		Convert_hostent_to_ascii(my_hostent);
+	return my_hostent;
+}
+
+struct servent *__getservbyname_a(const char * name, const char * proto)
+{
+	return getservbyname((const char *) __getEstring1_a(name),
+						 (const char *) __getEstring2_a(proto));
+}

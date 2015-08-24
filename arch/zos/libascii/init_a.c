@@ -1,1 +1,148 @@
-a\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\aa\\aa\@Õ”…z@‰•‰£mKƒ@\aa\@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\aa\@Ã–—¨™‰‡ˆ£z@@@Ó‰ƒ…•¢…„@Ô£…™‰“¢@`@×™–—…™£¨@–†@ÉÂÔK@@@@@@@@@@@@@@@\aa\@@@@@@@@@@@@@@MÃ]@Ã–—¨™‰‡ˆ£@ÉÂÔ@Ã–™—K@ñùù÷k@ñùùøK@@@@@@@@@@@@@@@@@\aa\@@@@@@@@@@@@@@Á““@™‰‡ˆ£¢@™…¢…™¥…„K@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\aa\@\aa\@Æ¤•ƒ£‰–•@zÔ‰¢ƒ““•…–¤¢@™–¤£‰•…¢@™…˜¤‰™…„@‚¨@ÁâÃÉÉaÅÂÃÄÉÃ\aa\‰•£…™†ƒ…@ƒ–„…K@Á““@£ˆ…¢…@™–¤£‰•…¢@™…@‰•£…™•“\aa\¤¢…@–•“¨@•„@£ˆ¤¢@£ˆ…@†¤•ƒ£‰–•¢@™…@•–£@…§—–™£…„K\aa\\aa\@Ã–”—‰“…zÕ–•…\aa\@Ö—£‰–•¢\aa\\aa\@Õ–£…¢@@zÕ–•…\aa\\a@a\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a{‰•ƒ“¤„…@L¢£„“‰‚Kˆn{‰•ƒ“¤„…@L¢£„‰–Kˆn{‰•ƒ“¤„…@L“‰”‰£¢Kˆn{‰•ƒ“¤„…@L…™™•–Kˆn{‰•ƒ“¤„…@‡“–‚“mKˆƒˆ™@¥…™¢‰–•­òð½~“‰‚¢ƒ‰‰@åñKñKù^—£ˆ™…„m’…¨m£@\’…¨—£™@~@M—£ˆ™…„m’…¨m£@\]@ÕäÓÓ^—£ˆ™…„m’…¨m£@’…¨^ƒˆ™@£ˆ„‰„­õ½@~@ÁãÈÄ^ÁãÈÄm£@\@@mm‰•‰£ÁâÃÉÉ“‰‚mM]^¥–‰„@mm£…™”ÁâÃÉÉ“‰‚mM¥–‰„@\]^a\l×ÁÇÅ\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\Õ”…@@@@z‡…££ˆ„—\Æ¤•ƒ£‰–•@zÙ…£¤™•¢@—–‰•£…™@£–@ƒ¤™™…•£@£ˆ™…„}¢@ÁãÈÄ@£ˆ™…„\¢£™¤ƒ£¤™…K\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a¢£™¤ƒ£@ÁãÈÄ@\‡…££ˆ„—M]À‰•£@¢££¤¢^ÁãÈÄm£@\£ˆ„—£™^a\@\@Ã““@—£ˆ™…„m‡…£¢—…ƒ‰†‰ƒM]@£–@‡…£@£ˆ…@„„™…¢¢@–†@£ˆ…@ƒ¤™™…•£@£ˆ™…„}¢@\@ÁãÈÄ@¢£™¤ƒ£¤™…K@@É†@£ˆ…@ƒ¤™™…•£@£ˆ™…„@„–…¢•}£@ˆ¥……@@ÁãÈÄ@¢£™¤ƒ£¤™…@\@£ˆ…•@ƒ““@mm‰•‰£ÁâÃÉÉ“‰‚mM]@£–@‚¤‰“„@–•…K@\a‰†@MMM¢££¤¢@~@—£ˆ™…„m‡…£¢—…ƒ‰†‰ƒM’…¨k@M¥–‰„@\\]@P£ˆ„—£™]]@~~@`ñ]@@OOM£ˆ„—£™@~~@ÕäÓÓ]@]À£ˆ„—£™@~@mm‰•‰£ÁâÃÉÉ“‰‚mM]^Ð™…£¤™•M£ˆ„—£™]^Ða\l×ÁÇÅ\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\Õ”…@@@@zmm‰•‰£ÁâÃÉÉ“‰‚m\Æ¤•ƒ£‰–•@zÔ‰•@‰•‰£‰“‰©£‰–•@†–™@““@ÁâÃÉÉ@“‰‚™™¨@™–¤£‰•…¢k\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\aÁãÈÄm£@\@mm‰•‰£ÁâÃÉÉ“‰‚mM]ÀÁãÈÄm£@\£ˆ„—£™^‰•£@£ˆ„¢©^a\@×…™†–™”@’…¨@ƒ™…£…@†–™@—™–ƒ…¢¢@‰†@•…ƒ…¢¢™¨@\a‰†@M’…¨—£™@~~@M—£ˆ™…„m’…¨m£@\]@ÕäÓÓ]@À’…¨—£™@~@P’…¨^—£ˆ™…„m’…¨mƒ™…£…M’…¨—£™kmm£…™”ÁâÃÉÉ“‰‚m]^Ða\@Á¢¢¤”…@£ˆ…@ƒ¤™™…•£@£ˆ™…„@„–…¢•}£@ˆ¥…@@¥“‰„@£ˆ„@„£@™…K@\a£ˆ„¢©@~@¢‰©…–†MÁãÈÄm£]^£ˆ„—£™@~@MÁãÈÄm£@\]@ƒ““–ƒMñk£ˆ„¢©]^@‰†@MM—£ˆ™…„m¢…£¢—…ƒ‰†‰ƒM’…¨k@M¥–‰„@\]@£ˆ„—£™]@~~@`ñ]@PP@@@@M@…™™•–@~~@ÅÉÕåÁÓ]@]@Àa\@\@×£ˆ™…„m¢…£¢—…ƒ‰†‰ƒ@†‰“…„@‚…ƒ¤¢…@—™”@’…¨@‰¢@‰•¥“‰„K@\@Á£@£ˆ‰¢@—–‰•£@É@”@•–£@¢¤™…@‰†@£ˆ‰¢@ƒ–„…@¦‰““@…¥…™@‚…@\@•……„…„K@\a’…¨—£™@~@P’…¨^—£ˆ™…„m’…¨mƒ™…£…M’…¨—£™k@mm£…™”ÁâÃÉÉ“‰‚m]^—£ˆ™…„m¢…£¢—…ƒ‰†‰ƒM’…¨k@M¥–‰„@\]@£ˆ„—£™]^Ða\@É•‰£‰“‰©…@£ˆ„@¢£™¤ƒ£¤™…K@\a”…”ƒ—¨M£ˆ„—£™`nƒ£ˆ„…¨…k£ˆ„‰„kô]^@£ˆ„—£™`n—‰„@~@‡…£—‰„M]^£ˆ„—£™`n£ˆ™…„‰„@~@—£ˆ™…„m¢…“†M]^a\@É•‰£‰“‰©…@ÁâÃÉÉ@£™•¢“£‰–•@™–¤£‰•…¢K@\a‰•‰£m£™•¢mM]^a\@É•‰£‰“‰©…@…‚ƒ„‰ƒ@—£ˆ@•”…@¤¢…„@”¨@”•¨@™–¤£‰•…¢K@\a£ˆ„—£™`n…—£ˆ•”…@~@”““–ƒMM¢‰©…m£]@m×ÖâÉçm×ÁãÈmÔÁç]^a\@â…£@†“‡@‰•„‰£‰•‡@£ˆ„@‰•‰£‰“‰©£‰–•@ƒ–”—“…£…„K@@\a£ˆ„—£™`n‰•‰£„–•…@~@ñ^™…£¤™•M£ˆ„—£™]^Ða\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\Õ”…@@@@zmm£…™”ÁâÃÉÉ“‰‚m\Æ¤•ƒ£‰–•@zãˆ™…„@£…™”‰•£‰–•@™–¤£‰•…@†–™@ÁâÃÉÉ@“‰‚™™¨K\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a¥–‰„@mm£…™”ÁâÃÉÉ“‰‚mM¥–‰„@\‰•—™”]ÀÁãÈÄm£@\£ˆ„—£™^a\@\@É†@£ˆ„@„£@™…@…§‰¢£¢@•„@‰•‰£‰“‰©£‰–•…@ƒ–”—“…£…„@£ˆ…•@\@—…™†–™”@£…™”‰•£‰–•K@\a£ˆ„—£™@~@MÁãÈÄm£@\]@‰•—™”^‰†@M£ˆ„—£™@Z~@ÕäÓÓ]@À‰†@M@£ˆ„—£™`n‰•‰£„–•…@~~@ñ]@À£ˆ„—£™`n‰•‰£„–•…@~@ð^@a\@‘¤¢£@£–@‚…@¢¤™…@•–@™…ƒ¤™¢‰¥…@ƒ““¢K@\a£…™”m‡…£…•¥M£ˆ„—£™]^@a\@ƒ““@‡…£…•¥@£ˆ™…„@£…™”‰•£‰–•K@@@@@@\a£…™”m£™•¢M£ˆ„—£™]^@@a\@ƒ““@£™•¢“£‰–•@£ˆ™…„@£…™”‰•£‰–•K@\a£…™”m“–ƒ“…M£ˆ„—£™]^@a\@ƒ““@“–ƒ“…@£ˆ™…„@£…™”‰•£‰–•@@@@@@@\a†™……M£ˆ„—£™`n…—£ˆ•”…]^Ð†™……M£ˆ„—£™]^@@@@@a\@†™……@£ˆ„@„£@™…@†–™@ƒ¤™™…•£@£ˆ™…„@\aÐ@@@@™…£¤™•^@@a\@†–™@•–¦@‘¤¢£@™…£¤™•@\aÐ@a\l×ÁÇÅ\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\Õ”…@@@@zmm—•‰ƒm\Æ¤•ƒ£‰–•@zÙ–¤£‰•…@ƒ““…„@¦ˆ…•@¤•¤¢¤“@ƒ–•„‰£‰–•@…•ƒ–¤•£…™…„@@\†–™@¦ˆ‰ƒˆ@£ˆ…™…@‰¢@•–@™…ƒ–¥…™¨K\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a¥–‰„@mm—•‰ƒmMƒˆ™@\™…¢–•]À‰•£âm…™™•–@~@…™™•–^‰•£âm…™™•–ò@~@mm…™™•–òM]^mmƒ„¤”—M™…¢–•]^—…™™–™M™…¢–•]^Ð
+/********************************************************************/
+/*																	*/
+/* Name		: 	init_a.c 											*/	
+/*                                                                  */
+/* Copyright:   Licensed Materials - Property of IBM.               */
+/*              (C) Copyright IBM Corp. 1997, 1998.                 */
+/*              All rights reserved.                                */
+/* 																	*/
+/* Function :	Miscallaneous routines required by ASCII/EBCDIC		*/
+/*				interface code. All these routines are internal		*/
+/*				use only and thus the functions are not exported.	*/	
+/*																	*/
+/* Compile	:	None												*/
+/* Options															*/
+/*																	*/
+/* Notes  	:	None												*/
+/*																	*/ 
+/********************************************************************/
+#include <stdlib.h>
+#include <stdio.h>
+#include <limits.h>
+#include <errno.h>
+#include "global_a.h"
+
+char version[20]="libascii V1.1.9";
+pthread_key_t *keyptr = (pthread_key_t *) NULL;
+pthread_key_t key;
+char athdid[5] = "ATHD";
+
+ATHD_t *  __initASCIIlib_a();
+void __termASCIIlib_a(void *);
+
+/*%PAGE																*/
+/*********************************************************************
+*
+*	Name   	 :	getathdp
+*	Function :	Returns pointer to current thread's ATHD thread
+*				structure.
+*
+*********************************************************************/
+struct ATHD *getathdp()
+{
+	int status;
+	ATHD_t *athdptr;
+	/*
+	 * Call pthread_getspecific() to get the address of the current thread's
+	 * ATHD structure.  If the current thread doesn't havee a ATHD structure
+	 * then call __initASCIIlib_a() to build one.
+	 */
+	if (((status = pthread_getspecific(key, (void **) &athdptr)) == -1)  ||
+		(athdptr == NULL) ){
+		athdptr = __initASCIIlib_a();
+	}
+	return(athdptr);
+}
+
+/*%PAGE																*/
+/*********************************************************************
+*
+*	Name   	 :	__initASCIIlib_a
+*	Function :	Main initialization for all ASCII library routines,
+*
+*********************************************************************/
+ATHD_t * __initASCIIlib_a()
+{
+	ATHD_t *athdptr;
+	int athdsz;
+	/* Perform key create for process if necessary */
+	if (keyptr == (pthread_key_t *) NULL) {
+		keyptr = &key;
+		pthread_key_create(keyptr,__termASCIIlib_a);
+	}
+
+	/* Assume the current thread doesn't have a valid athd data area. */
+	athdsz = sizeof(ATHD_t);
+	athdptr = (ATHD_t *) calloc(1,athdsz); 
+	if ((pthread_setspecific(key, (void *) athdptr) == -1) &&
+	    ( errno == EINVAL) ) {
+		/*
+		 * Pthread_setspecific failed because parm key is invalid.
+		 * At this point I am not sure if this code will ever be
+		 * needed.
+		 */
+		keyptr = &key;
+		pthread_key_create(keyptr, __termASCIIlib_a);
+		pthread_setspecific(key, (void *) athdptr);
+	}		
+
+	/* Initialize athd structure. */
+
+	memcpy(athdptr->cthdeye,athdid,4); 
+	athdptr->pid = getpid();
+	athdptr->threadid = pthread_self();
+
+	/* Initialize ASCII translation routines. */
+	init_trans_a();	
+
+	/* Initialize ebcdic path name used my many routines. */
+	athdptr->epathname = malloc((size_t) _POSIX_PATH_MAX);
+
+	/* Set flag indiating athd initialization completed.  */
+	athdptr->initdone = 1;
+
+	return(athdptr);
+}
+/*********************************************************************
+*
+*	Name   	 :	__termASCIIlib_a
+*	Function :	Thread termination routine for ASCII library.
+*
+*********************************************************************/
+void __termASCIIlib_a(void *inparm)
+{
+	ATHD_t *athdptr;
+	/*
+	 * If athd data area exists and initializatione completed then
+	 * perform termination.
+	 */
+	athdptr = (ATHD_t *) inparm;
+	if (athdptr != NULL) {
+		if ( athdptr->initdone == 1) {
+			athdptr->initdone = 0; /* just to be sure no recursive calls. */
+			term_getenv(athdptr); /* call getenv thread termination.      */
+			term_trans(athdptr);  /* call translation thread termination. */
+			term_locale(athdptr); /* call locale thread termination       */
+			free(athdptr->epathname);
+		}
+		free(athdptr);     /* free athd data area for current thread */
+	}
+    return;  /* for now just return */
+}
+ 
+/*%PAGE																*/
+/*********************************************************************
+*
+*	Name   	 :	__panic_a
+*	Function :	Routine called when unusual condition encountered  
+*				for which there is no recovery.
+*
+*********************************************************************/
+void __panic_a(char *reason)
+{
+	int	S_errno = errno;
+	int	S_errno2 = __errno2();
+
+	__cdump(reason);
+	perror(reason);
+}

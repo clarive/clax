@@ -1,1 +1,344 @@
-a\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\aa\\aa\@Õ”…z@£™•¢mKƒ@\aa\@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\aa\@Ã–—¨™‰‡ˆ£z@@@Ó‰ƒ…•¢…„@Ô£…™‰“¢@`@×™–—…™£¨@–†@ÉÂÔK@@@@@@@@@@@@@@@\aa\@@@@@@@@@@@@@@MÃ]@Ã–—¨™‰‡ˆ£@ÉÂÔ@Ã–™—K@ñùù÷K@@@@@@@@@@@@@@@@@@@@@@@\aa\@@@@@@@@@@@@@@Á““@™‰‡ˆ£¢@™…¢…™¥…„K@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\aa\@\aa\@Æ¤•ƒ£‰–•@zÃ–•£‰•¢@£ˆ…@†–““–¦‰•@ÁâÃÉÉ`ÅÂÃÄÉÃ@£™•¢“£‰–•\aa\@@†¤•ƒ£‰–•¢z@\aa\`@mm™‡¥£–¢ƒ‰‰m\aa\`@mm™‡¥£–…‚ƒ„‰ƒm\aa\`@mm‡…£Á¢£™‰•‡ñm\aa\`@mm‡…£Á¢£™‰•‡òm\aa\`@mm‡…£Å¢£™‰•‡ñm\aa\`@mm‡…£Å¢£™‰•‡òm\aa\`@mm‡…£Å¢£™‰•‡óm\aa\`@mm‡…£Å¢£™‰•‡ôm\aa\`@mm£–¢ƒ‰‰m\aa\`@mm£–…‚ƒ„‰ƒm\aa\\aa\@Ã–”—‰“…zÇÅÕm×ÙÁÇÔÁmÅç×ÖÙã@`@‡…•…™£…@×ÙÁÇÔÁ@¢££…”…•£¢@£–\aa\@Ö—£‰–•¢…§—–™£@£ˆ…¢…@…•£™¨@—–‰•£¢@†™–”@£ˆ…\aa\ÄÓÓ\aa\ÇÅÕmÆÖÙmÕÖãÅâ`@‡…•…™£…¢@ƒ–„…@¢¢¤”‰•‡@£ˆ£@£ˆ‰¢\aa\¦‰““@‚…@™¤••‰•‡@‰•@ÕÖãÅâ\aa\…•¥‰™–•”…•£@M¦‰£ˆ‰•@ÓÉÂÕÖãÅâ]\aa\\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a{‰•ƒ“¤„…@L¢£„“‰‚Kˆn{‰•ƒ“¤„…@L‰ƒ–•¥Kˆn{‰•ƒ“¤„…@‡“–‚“mKˆ{‰†„…†@ÇÅÕm×ÙÁÇÔÁmÅç×ÖÙã{—™‡”@…§—–™£Mmm™‡¥£–¢ƒ‰‰m]{—™‡”@…§—–™£Mmm™‡¥£–…‚ƒ„‰ƒm]{—™‡”@…§—–™£Mmm‡…£Á¢£™‰•‡ñm]{—™‡”@…§—–™£Mmm‡…£Á¢£™‰•‡òm]{—™‡”@…§—–™£Mmm‡…£Å¢£™‰•‡ñm]{—™‡”@…§—–™£Mmm‡…£Å¢£™‰•‡òm]{—™‡”@…§—–™£Mmm‡…£Å¢£™‰•‡óm]{—™‡”@…§—–™£Mmm‡…£Å¢£™‰•‡ôm]{—™‡”@…§—–™£Mmm£–¢ƒ‰‰m]{—™‡”@…§—–™£Mmm£–¢ƒ‰‰“…•m]{—™‡”@…§—–™£Mmm£–…‚ƒ„‰ƒm]{…•„‰†a\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\aa\@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\aa\@…‚¤††…™¢@™…@£–@ˆ–“„@‚¤††…™¢@—–‰•£…„@£–@‚¨@ÁÈÄ@@@@@@@@@@@@@@@@@@\aa\@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a¢£™¤ƒ£@…‚¤††…™¢Àa\@Â¤††…™¢@—–‰•£…„@£–@‚¨@£ˆ…@…¢£™‰•‡§m@—–‰•£…™¢@‰•@ÁãÈÄ@@@@@@@@@@\aƒˆ™@@@…¢£™‰•‡ñm‚¤††…™­ÔÁçâãÙÉÕÇmNñ½^@a\@æ™•‰•‡@£ˆ‰¢@†‰…“„@”¤¢£@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@‚…@†‰™¢£@@@@@@@@@@@@@@@@\aƒˆ™@@@…¢£™‰•‡òm‚¤††…™­ÔÁçâãÙÉÕÇmNñ½^ƒˆ™@@@…¢£™‰•‡óm‚¤††…™­ÔÁçâãÙÉÕÇmNñ½^@@@@@@@@@@@@@@@@@@@@@@@@@@ƒˆ™@@@…¢£™‰•‡ôm‚¤††…™­ÔÁçâãÙÉÕÇmNñ½^Ğ@^@£¨—…„…†@¢£™¤ƒ£@…‚¤††…™¢@…‚¤††…™¢m£^¥–‰„@Â„â£™M]^a\l×ÁÇÅ\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\Õ”…@@@@zmm™‡¥£–¢ƒ‰‰m\Æ¤•ƒ£‰–•@zÃ–•¥…™£¢@ÅÂÃÄÉÃ@™‡¤”…•£@¢£™‰•‡¢@£–@ÁâÃÉÉ\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a‰•£@mm™‡¥£–¢ƒ‰‰mM‰•£@™‡ƒk@ƒˆ™@\™‡¥­½]À‰•£@‰^†–™@M‰~ğ^@‰@L@™‡ƒ@^@‰NN]@@@mm£–¢ƒ‰‰mM™‡¥­‰½k@Mƒ–•¢£@ƒˆ™@\]@™‡¥­‰½]^™…£¤™•@ğ^Ğa\l×ÁÇÅ\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\Õ”…@@@@zmm™‡¥£–…‚ƒ„‰ƒ\Æ¤•ƒ£‰–•@zÃ–•¥…™£¢@ÁâÃÉÉ@™‡¤”…•£@¢£™‰•‡¢@£–@ÅÂÃÄÉÃ\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a‰•£@mm™‡¥£–…‚ƒ„‰ƒmM‰•£@™‡ƒk@ƒˆ™@\™‡¥­½]À‰•£@‰^†–™@M‰~ğ^@‰@L@™‡ƒ@^@‰NN]@@@mm£–…‚ƒ„‰ƒmM™‡¥­‰½k@Mƒ–•¢£@ƒˆ™@\]@™‡¥­‰½]^™…£¤™•@ğ^Ğa\l×ÁÇÅ\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\Õ”…@@@@zmm‡…£Á¢£™‰•‡ñm\Æ¤•ƒ£‰–•@zÙ…£¤™•¢@„„™…¢¢@–†@•@ÁâÃÉÉ@¢£™‰•‡@ƒ–—¨@–†@£ˆ…\ÅÂÃÄÉÃ@‰•—¤£@¢£™‰•‡K\Õ–£…¢@@@@z@ñ]Ô¨@–•“¨@‚…@ƒ““…„@–•ƒ…@—…™@ÁâÃÉÉ@“‰‚™™¨@™–¤£‰•…\‚…ƒ¤¢…@£ˆ…@¢£™‰•‡@‰¢@•–£@”““–ƒM]…„K\ò]@Ô¤“£‰—“…@ƒ–—‰…¢@““–¦¢@†–™@“‰”‰£…„@”¤“£‰—“…@ƒ““¢\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\aƒˆ™@\@mm‡…£Á¢£™‰•‡ñmMƒ–•¢£@ƒˆ™@\…‰•¢£™ñ]ÀÁãÈÄm£@\”¨£ˆ„—^”¨£ˆ„—@~@£ˆ„—M]^¢£™•ƒ—¨M”¨£ˆ„—`n…¢£™‰•‡ñmk…‰•¢£™ñkÔÁçâãÙÉÕÇm]^mm£–¢ƒ‰‰mM”¨£ˆ„—`n…¢£™‰•‡ñmk”¨£ˆ„—`n…¢£™‰•‡ñm]^™…£¤™•@”¨£ˆ„—`n…¢£™‰•‡ñm^Ğƒˆ™@\@mm‡…£Á¢£™‰•‡òmMƒ–•¢£@ƒˆ™@\…‰•¢£™ò]ÀÁãÈÄm£@\”¨£ˆ„—^”¨£ˆ„—@~@£ˆ„—M]^¢£™•ƒ—¨M”¨£ˆ„—`n…¢£™‰•‡òmk…‰•¢£™òkÔÁçâãÙÉÕÇm]^mm£–¢ƒ‰‰mM”¨£ˆ„—`n…¢£™‰•‡òmk”¨£ˆ„—`n…¢£™‰•‡òm]^™…£¤™•@”¨£ˆ„—`n…¢£™‰•‡òm^Ğa\l×ÁÇÅ\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\Õ”…@@@@zmm‡…£Å¢£™‰•‡ñm\Æ¤•ƒ£‰–•@zÙ…£¤™•¢@„„™…¢¢@–†@•@ÅÂÃÄÉÃ@¢£™‰•‡@ƒ–—¨@–†@£ˆ…\ÁâÃÉÉ@‰•—¤£@¢£™‰•‡K\Õ–£…¢@@@@z@ñ]@Ô¨@–•“¨@‚…@ƒ““…„@–•ƒ…@—…™@ÁâÃÉÉ@“‰‚™™¨@™–¤£‰•…\‚…ƒ¤¢…@£ˆ…@¢£™‰•‡@‰¢@•–£@”““–ƒM]…„K\ò]@Ô¤“£‰—“…@ƒ–—‰…¢@““–¦¢@†–™@“‰”‰£…„@”¤“£‰—“…@ƒ““¢\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\aƒˆ™@\@mm‡…£Å¢£™‰•‡ñmMƒ–•¢£@ƒˆ™@\‰•¢£™ñ]ÀÁãÈÄm£@\”¨£ˆ„—^”¨£ˆ„—@~@£ˆ„—M]^¢£™•ƒ—¨M”¨£ˆ„—`n…¢£™‰•‡ñmk‰•¢£™ñkÔÁçâãÙÉÕÇm]^mm£–…‚ƒ„‰ƒmM”¨£ˆ„—`n…¢£™‰•‡ñmk”¨£ˆ„—`n…¢£™‰•‡ñm]^™…£¤™•@”¨£ˆ„—`n…¢£™‰•‡ñm^Ğƒˆ™@\@mm‡…£Å¢£™‰•‡òmMƒ–•¢£@ƒˆ™@\‰•¢£™ò]ÀÁãÈÄm£@\”¨£ˆ„—^”¨£ˆ„—@~@£ˆ„—M]^¢£™•ƒ—¨M”¨£ˆ„—`n…¢£™‰•‡òmk‰•¢£™òkÔÁçâãÙÉÕÇm]^mm£–…‚ƒ„‰ƒmM”¨£ˆ„—`n…¢£™‰•‡òmk”¨£ˆ„—`n…¢£™‰•‡òm]^™…£¤™•@”¨£ˆ„—`n…¢£™‰•‡òm^Ğƒˆ™@\@mm‡…£Å¢£™‰•‡ómMƒ–•¢£@ƒˆ™@\‰•¢£™ó]ÀÁãÈÄm£@\”¨£ˆ„—^”¨£ˆ„—@~@£ˆ„—M]^¢£™•ƒ—¨M”¨£ˆ„—`n…¢£™‰•‡ómk‰•¢£™ókÔÁçâãÙÉÕÇm]^mm£–…‚ƒ„‰ƒmM”¨£ˆ„—`n…¢£™‰•‡ómk”¨£ˆ„—`n…¢£™‰•‡óm]^™…£¤™•@”¨£ˆ„—`n…¢£™‰•‡óm^Ğƒˆ™@\@mm‡…£Å¢£™‰•‡ômMƒ–•¢£@ƒˆ™@\‰•¢£™ô]ÀÁãÈÄm£@\”¨£ˆ„—^”¨£ˆ„—@~@£ˆ„—M]^¢£™•ƒ—¨M”¨£ˆ„—`n…¢£™‰•‡ômk‰•¢£™ôkÔÁçâãÙÉÕÇm]^mm£–…‚ƒ„‰ƒmM”¨£ˆ„—`n…¢£™‰•‡ômk”¨£ˆ„—`n…¢£™‰•‡ôm]^™…£¤™•@”¨£ˆ„—`n…¢£™‰•‡ôm^Ğa\l×ÁÇÅ\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\Õ”…@@@@zmm£–¢ƒ‰‰m@@\Æ¤•ƒ£‰–•@zÃ–•¥…™£@•¤““`£…™”‰•£…„@ÅÂÃÄÉÃ@MÉÂÔ`ñğô÷]@¢£™‰•‡@£–@\ÁâÃÉÉ@MÉâÖøøõù`ñ]K\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a¥–‰„@mm£–¢ƒ‰‰mMƒˆ™@\–¤£¢ƒ‰‰¢£™k@ƒ–•¢£@ƒˆ™@\‰•…‚ƒ„‰ƒ¢£™]À{‰†„…†@ÖâóùğÄÂÇƒˆ™@\…¥“‰„ƒˆ™¢~‚ƒ„…†‡ˆ‰—˜™¢£¤¥¦§ÁÂÃÄÅÆÇÈÉØÙâãäåæçè^ƒˆ™@¥“‰„ƒˆ™¢­öô½^{…•„‰†@a\@ÖâóùğÄÂÇ@\a¢‰©…m£@™ƒ^¢‰©…m£@‰•m¢‰©…k@–¤£m¢‰©…^ÁãÈÄm£@\”¨£ˆ„—^”¨£ˆ„—@~@£ˆ„—M]^@@a\@‡…£@—–‰•£…™@£–@ÁãÈÄ@£ˆ™…„@¢£™¤ƒ£¤™…@\a–¤£m¢‰©…@~@‰•m¢‰©…@~@¢£™“…•M‰•…‚ƒ„‰ƒ¢£™]@N@ñ^@a\@—“¤¢@•¤““@‚¨£…@\a{‰†„…†@ÖâóùğÄÂÇ¢£™ƒ—¨M¥“‰‰ƒˆ™¢k…¥“‰„ƒˆ™¢]^mm…£–M¥“‰„ƒˆ™¢]^‰†@M¢£™ƒ¢—•M‰•…‚ƒ„‰ƒ¢£™k¥“‰„ƒˆ™¢]@L@M‰•m¢‰©…`ñ]]Â„â£™M]^{…•„‰†@a\@ÖâóùğÄÂÇ@\a™ƒ@~@‰ƒ–•¥M”¨£ˆ„—`nƒ„mÅ£–ÁkMƒˆ™@\\]@P‰•…‚ƒ„‰ƒ¢£™k@P‰•m¢‰©…k@P–¤£¢ƒ‰‰¢£™k@P–¤£m¢‰©…]^‰†@M™ƒ@~~@M¢‰©…m£]@`ñ]mm—•‰ƒmMÅ™™–™@†™–”@‰ƒ–•¥M]@‰•@mm£–¢ƒ‰‰mM]]^™…£¤™•^Ğa\l×ÁÇÅ\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\Õ”…@@@@zmm£–…‚ƒ„‰ƒm@\Æ¤•ƒ£‰–•@zÃ–•¥…™£@•¤““`£…™”‰•£…„@ÁâÃÉÉ@MÉâÖøøõù`ñ]@¢£™‰•‡@£–@\ÅÂÄÃÉÄ@MÉÂÔ`ñğô÷]K\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a¥–‰„@mm£–…‚ƒ„‰ƒmMƒˆ™@\–¤£…‚ƒ„‰ƒ¢£™k@ƒ–•¢£@ƒˆ™@\‰•¢ƒ‰‰¢£™]À{‰†„…†@ÖâóùğÄÂÇƒˆ™@\…¥“‰„ƒˆ™¢~‚ƒ„…†‡ˆ‰‘’“”•–—˜™¢£¤¥¦§¨©ÁÂÃÄÅÆÇÈÉÑÒÓÔÕÖ×ØÙâãäåæçèéñòóôõö÷øùğ^ƒˆ™@\¢ƒ‰‰¢£™^{…•„‰†@a\@ÖâóùğÄÂÇ@\a¢‰©…m£@™ƒ^¢‰©…m£@‰•m¢‰©…k@–¤£m¢‰©…^ÁãÈÄm£@\”¨£ˆ„—^”¨£ˆ„—@~@£ˆ„—M]^@@a\@‡…£@—–‰•£…™@£–@ÁãÈÄ@£ˆ™…„@¢£™¤ƒ£¤™…@\a–¤£m¢‰©…@~@‰•m¢‰©…@~@¢£™“…•M‰•¢ƒ‰‰¢£™]@N@ñ^@a\@—“¤¢@•¤““@‚¨£…@\a{‰†„…†@ÖâóùğÄÂÇ‰†@M¢£™ƒ¢—•M‰•¢ƒ‰‰¢£™k…¥“‰„ƒˆ™¢]@L@M‰•m¢‰©…`ñ]]Â„â£™M]^{…•„‰†@a\@ÖâóùğÄÂÇ@\a™ƒ@~@‰ƒ–•¥M”¨£ˆ„—`nƒ„mÁ£–ÅkMƒˆ™@\\]@P‰•¢ƒ‰‰¢£™k@P‰•m¢‰©…k@P–¤£…‚ƒ„‰ƒ¢£™k@P–¤£m¢‰©…]^‰†@M™ƒ@~~@M¢‰©…m£]@`ñ]mm—•‰ƒmMÅ™™–™@†™–”@‰ƒ–•¥M]@‰•@mm£–…‚ƒ„‰ƒmM]]^™…£¤™•^Ğa\l×ÁÇÅ\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\Õ”…@@@@zmm£–¢ƒ‰‰“…•m@@\Æ¤•ƒ£‰–•@zÃ–•¥…™£@•¤““`£…™”‰•£…„@ÅÂÃÄÉÃ@MÉÂÔ`ñğô÷]@¢£™‰•‡@£–@\ÁâÃÉÉ@MÉâÖøøõù`ñ]@¦‰£ˆ@“…•‡£ˆ\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a¥–‰„@mm£–¢ƒ‰‰“…•mMƒˆ™@\–¤£¢ƒ‰‰¢£™k@ƒ–•¢£@ƒˆ™@\‰•…‚ƒ„‰ƒ¢£™k‰•£@‰•¢‰©…]À{‰†„…†@ÖâóùğÄÂÇƒˆ™@\…¥“‰„ƒˆ™¢~‚ƒ„…†‡ˆ‰—˜™¢£¤¥¦§ÁÂÃÄÅÆÇÈÉØÙâãäåæçè^ƒˆ™@¥“‰„ƒˆ™¢­öô½^{…•„‰†@a\@ÖâóùğÄÂÇ@\a¢‰©…m£@™ƒ^¢‰©…m£@‰•m¢‰©…k@–¤£m¢‰©…^ÁãÈÄm£@\”¨£ˆ„—^”¨£ˆ„—@~@£ˆ„—M]^@@a\@‡…£@—–‰•£…™@£–@ÁãÈÄ@£ˆ™…„@¢£™¤ƒ£¤™…@\a–¤£m¢‰©…@~@‰•m¢‰©…@~@‰•¢‰©…^{‰†„…†@ÖâóùğÄÂÇ¢£™ƒ—¨M¥“‰„ƒˆ™¢k…¥“‰„ƒˆ™¢]^mm…£–M¥“‰„ƒˆ™¢]^‰†@M¢£™ƒ¢—•M‰•…‚ƒ„‰ƒ¢£™k¥“‰„ƒˆ™¢]@L@M‰•m¢‰©…`ñ]]Â„â£™M]^{…•„‰†@a\@ÖâóùğÄÂÇ@\a™ƒ@~@‰ƒ–•¥M”¨£ˆ„—`nƒ„mÅ£–ÁkMƒˆ™@\\]@P‰•…‚ƒ„‰ƒ¢£™k@P‰•m¢‰©…k@P–¤£¢ƒ‰‰¢£™k@P–¤£m¢‰©…]^‰†@M™ƒ@~~@M¢‰©…m£]@`ñ]mm—•‰ƒmMÅ™™–™@†™–”@‰ƒ–•¥M]@‰•@mm£–¢ƒ‰‰mM]]^™…£¤™•^Ğa\l×ÁÇÅ\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\Õ”…@@@@zÂ„â£™\Æ¤•ƒ£‰–•@zÙ…£¤™•@‰†@‚„@‰•—¤£@¢£™‰•‡@—¢¢…„\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a¥–‰„@Â„â£™M]À™…£¤™•^Ğa\l×ÁÇÅ\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\Õ”…@@@@z‰•‰£m£™•¢m\Æ¤•ƒ£‰–•@zÉ•‰£‰“‰©£‰–•@™–¤£‰•…@†–™@£ˆ…@£™•¢“£‰–•@ÁâÃÉÉ\“‰‚™™¨@™–¤£‰•…¢K\Õ–£…¢@zâ…£¢@¢££‰ƒ@‰ƒ–•¥@„…¢ƒ™‰—£–™@ƒ„mÅ£–Á@•„@ƒ„mÁ£–Å@†–™\“£…™@¤¢…K\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a¥–‰„@‰•‰£m£™•¢mM]ÀÁãÈÄm£@\”¨£ˆ„—^…‚¤††…™¢m£@@\”¨…‚¤††…™¢^‰•£…‚¤††…™¢m¢©^”¨£ˆ„—@~@£ˆ„—M]^@@a\@‡…£@—–‰•£…™@£–@ÁãÈÄ@£ˆ™…„@¢£™¤ƒ£¤™…@\a”¨£ˆ„—`nƒ„mÅ£–Á@~@‰ƒ–•¥m–—…•MÉâÖøøõù`ñk@ÉÂÔ`ñğô÷]^@‰†@M”¨£ˆ„—`nƒ„mÅ£–Á@~~@M‰ƒ–•¥m£]@`ñ]mm—•‰ƒmMÉƒ–•¥@–—…•@†‰“…„@†–™@ñğô÷à•]^@@@@”¨£ˆ„—`nƒ„mÁ£–Å@~@‰ƒ–•¥m–—…•MÉÂÔ`ñğô÷k@ÉâÖøøõù`ñ]^@‰†@M”¨£ˆ„—`nƒ„mÁ£–Å@~~@M‰ƒ–•¥m£]`ñ]mm—•‰ƒmMÉƒ–•¥@–—…•@†‰“…„@†–™@øøõùà•]^a\@``@Ç…£@¢—ƒ…@†–™@“–ƒ“@‚¤††…™¢@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\aa\@``@â…£@…¢£™‰•‡§m@—£™¢@‰•@ÁãÈÄ@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\a…‚¤††…™¢m¢©@~@¢‰©…–†M…‚¤††…™¢m£]^”¨…‚¤††…™¢@@~@M…‚¤††…™¢m£@\]@ƒ““–ƒMñk…‚¤††…™¢m¢©]^”¨£ˆ„—`n…¢£™‰•‡ñm@~@Mƒˆ™@\]PM”¨…‚¤††…™¢`n…¢£™‰•‡ñm‚¤††…™]^@”¨£ˆ„—`n…¢£™‰•‡òm@~@Mƒˆ™@\]PM”¨…‚¤††…™¢`n…¢£™‰•‡òm‚¤††…™]^@”¨£ˆ„—`n…¢£™‰•‡óm@~@Mƒˆ™@\]PM”¨…‚¤††…™¢`n…¢£™‰•‡óm‚¤††…™]^@”¨£ˆ„—`n…¢£™‰•‡ôm@~@Mƒˆ™@\]PM”¨…‚¤††…™¢`n…¢£™‰•‡ôm‚¤††…™]^@™…£¤™•^Ğa\l×ÁÇÅ\aa\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\Õ”…@@@@z£…™”m£™•¢m\Æ¤•ƒ£‰–•@zã…™”‰•£‰–•@™–¤£‰•…@†–™@£ˆ…@£™•¢“£‰–•@ÁâÃÉÉ\“‰‚™™¨@™–¤£‰•…¢K@ãˆ‰¢@™–¤£‰•…@™¤•¢@¦ˆ…•@£ˆ…@£ˆ™…„\‰¢@£…™”‰•£…„@£–@ƒ“…•@¤—@™…¢–¤™ƒ…¢@–‚£‰•…„@‚¨@£ˆ…\£…™”‰•£‰•‡@£ˆ™…„K\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\a¥–‰„@£…™”m£™•¢MÁãÈÄm£@\£ˆ„—£™]À‰ƒ–•¥m£@“–ƒ‰ƒ–•¥^ƒˆ™@\“–ƒ¢£™‰•‡^…‚¤††…™¢m£@\“–ƒm…‚¤††…™¢^a\@É†@KKKk@ƒ“…™@¢–@£ˆ£@¦…@„–•}£@„–@‰£@‡‰•\a‰†@MM“–ƒ‰ƒ–•¥@~@£ˆ„—£™`nƒ„mÅ£–Á]@Z~@M‰ƒ–•¥m£]@ğ]@À£ˆ„—£™`nƒ„mÅ£–Á@~@M‰ƒ–•¥m£]@ğ^‰ƒ–•¥mƒ“–¢…M“–ƒ‰ƒ–•¥]^@a\@ƒ“–¢…@‰ƒ–•¥@\aĞa\@É†@KKKk@ƒ“…™@¢–@£ˆ£@¦…@„–•}£@„–@‰£@‡‰•\a‰†@MM“–ƒ‰ƒ–•¥@~@£ˆ„—£™`nƒ„mÁ£–Å]@Z~@M‰ƒ–•¥m£]@ğ]@À£ˆ„—£™`nƒ„mÁ£–Å@~@M‰ƒ–•¥m£]@ğ^‰ƒ–•¥mƒ“–¢…M“–ƒ‰ƒ–•¥]^@a\@ƒ“–¢…@‰ƒ–•¥@\aĞa\@Æ™……@…‚¤††…™¢@™…@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\a‰†@MM“–ƒm…‚¤††…™¢@~@M…‚¤††…™¢m£@\]£ˆ„—£™`n…¢£™‰•‡ñm]@Z~@ÕäÓÓ]@À£ˆ„—£™`n…¢£™‰•‡ñm@~@ÕäÓÓ^†™……M“–ƒm…‚¤††…™¢]^Ğ™…£¤™•^Ğ
+/********************************************************************/
+/*																	*/
+/* Name		: 	trans_a.c 											*/	
+/*                                                                  */
+/* Copyright:   Licensed Materials - Property of IBM.               */
+/*              (C) Copyright IBM Corp. 1997.                       */
+/*              All rights reserved.                                */
+/* 																	*/
+/* Function :	Contains the followin ASCII-EBCDIC translation		*/
+/*			  	functions: 											*/
+/*					- __argvtoascii_a								*/
+/*					- __argvtoebcdic_a								*/
+/*					- __getAstring1_a								*/
+/*					- __getAstring2_a								*/
+/*					- __getEstring1_a								*/
+/*					- __getEstring2_a								*/
+/*					- __getEstring3_a								*/
+/*					- __getEstring4_a								*/
+/*					- __toascii_a									*/
+/*					- __toebcdic_a									*/
+/*																	*/
+/* Compile	:	GEN_PRAGMA_EXPORT - generate PRAGMA statements to	*/
+/* Options						export these entry points from the	*/
+/*								DLL									*/
+/*				GEN_FOR_NOTES	- generates code assuming that this	*/
+/*								will be running in NOTES			*/
+/*								environment (within LIBNOTES)		*/
+/*																	*/
+/********************************************************************/
+
+#include <stdlib.h>
+#include <iconv.h>
+#include "global_a.h"
+
+#ifdef GEN_PRAGMA_EXPORT
+#pragma export(__argvtoascii_a)
+#pragma export(__argvtoebcdic_a)
+#pragma export(__getAstring1_a)
+#pragma export(__getAstring2_a)
+#pragma export(__getEstring1_a)
+#pragma export(__getEstring2_a)
+#pragma export(__getEstring3_a)
+#pragma export(__getEstring4_a)
+#pragma export(__toascii_a)
+#pragma export(__toasciilen_a)
+#pragma export(__toebcdic_a)
+#endif
+
+	/********************************************************************/
+	/*                                                                  */
+	/* ebuffers area to hold buffers pointed to by AHD                  */
+	/*                                                                  */
+	/********************************************************************/
+	struct ebuffers{
+		/* Buffers pointed to by the estringx_a pointers in ATHD          */
+		char   estring1_buffer[MAXSTRING_a+1]; /* Warning this field must
+		                                          be first                */
+		char   estring2_buffer[MAXSTRING_a+1];
+		char   estring3_buffer[MAXSTRING_a+1];                          
+		char   estring4_buffer[MAXSTRING_a+1];
+		} ;
+	 typedef struct ebuffers ebuffers_t;
+
+void BadStr();
+
+/*%PAGE																*/
+/*********************************************************************
+*
+*	Name   	 :	__argvtoascii_a
+*	Function :	Converts EBCDIC argument strings to ASCII
+*
+*********************************************************************/
+int __argvtoascii_a(int argc, char *argv[])
+{
+	int i;
+	for (i=0; i < argc ; i++)   
+		__toascii_a(argv[i], (const char *) argv[i]);
+	return 0;
+}
+
+/*%PAGE																*/
+/*********************************************************************
+*
+*	Name   	 :	__argvtoebcdic
+*	Function :	Converts ASCII argument strings to EBCDIC
+*
+*********************************************************************/
+int __argvtoebcdic_a(int argc, char *argv[])
+{
+	int i;
+	for (i=0; i < argc ; i++)   
+		__toebcdic_a(argv[i], (const char *) argv[i]);
+	return 0;
+}
+
+/*%PAGE																*/
+/*********************************************************************
+*
+*	Name   	 :	__getAstring1_a
+*	Function :	Returns address of an ASCII string copy of the
+*				EBCDIC input string.
+*	Notes    : 	1)May only be called once per ASCII library routine	
+*				because the string is not malloc()ed.
+*				2) Multiple copies allows for limited multiple calls
+*
+*********************************************************************/
+char * __getAstring1_a(const char *einstr1)
+{
+	ATHD_t *myathdp;
+	myathdp = athdp();
+	strncpy(myathdp->estring1_a,einstr1,MAXSTRING_a);
+	__toascii_a(myathdp->estring1_a,myathdp->estring1_a);
+	return myathdp->estring1_a;
+}
+
+char * __getAstring2_a(const char *einstr2)
+{
+	ATHD_t *myathdp;
+	myathdp = athdp();
+	strncpy(myathdp->estring2_a,einstr2,MAXSTRING_a);
+	__toascii_a(myathdp->estring2_a,myathdp->estring2_a);
+	return myathdp->estring2_a;
+}
+
+/*%PAGE																*/
+/*********************************************************************
+*
+*	Name   	 :	__getEstring1_a
+*	Function :	Returns address of an EBCDIC string copy of the
+*				ASCII input string.
+*	Notes    : 	1) May only be called once per ASCII library routine	
+*				because the string is not malloc()ed.
+*				2) Multiple copies allows for limited multiple calls
+*
+*********************************************************************/
+char * __getEstring1_a(const char *ainstr1)
+{
+	ATHD_t *myathdp;
+	myathdp = athdp();
+	strncpy(myathdp->estring1_a,ainstr1,MAXSTRING_a);
+	__toebcdic_a(myathdp->estring1_a,myathdp->estring1_a);
+	return myathdp->estring1_a;
+}
+
+char * __getEstring2_a(const char *ainstr2)
+{
+	ATHD_t *myathdp;
+	myathdp = athdp();
+	strncpy(myathdp->estring2_a,ainstr2,MAXSTRING_a);
+	__toebcdic_a(myathdp->estring2_a,myathdp->estring2_a);
+	return myathdp->estring2_a;
+}
+
+char * __getEstring3_a(const char *ainstr3)
+{
+	ATHD_t *myathdp;
+	myathdp = athdp();
+	strncpy(myathdp->estring3_a,ainstr3,MAXSTRING_a);
+	__toebcdic_a(myathdp->estring3_a,myathdp->estring3_a);
+	return myathdp->estring3_a;
+}
+
+char * __getEstring4_a(const char *ainstr4)
+{
+	ATHD_t *myathdp;
+	myathdp = athdp();
+	strncpy(myathdp->estring4_a,ainstr4,MAXSTRING_a);
+	__toebcdic_a(myathdp->estring4_a,myathdp->estring4_a);
+	return myathdp->estring4_a;
+}
+
+/*%PAGE																*/
+/*********************************************************************
+*
+*	Name   	 :	__toascii_a  
+*	Function :	Convert null-terminated EBCDIC (IBM-1047) string to 
+*				ASCII (ISO8859-1).
+*
+*********************************************************************/
+void __toascii_a(char *outasciistr, const char *inebcdicstr)
+{
+#ifdef OS390DBG
+	char *evalidchars="bcdefghipqrstuvwxABCDEFGHIQRSTUVWXY";
+	char avalidchars[64];
+#endif /* OS390DBG */
+	size_t rc;
+	size_t in_size, out_size;
+	ATHD_t *myathdp;
+	myathdp = athdp();  /* get pointer to ATHD thread structure */
+	out_size = in_size = strlen(inebcdicstr) + 1; /* plus null byte */
+#ifdef OS390DBG
+	strcpy(avaliichars,evalidchars);
+	__etoa(avalidchars);
+	if (strcspn(inebcdicstr,avalidchars) < (in_size-1))
+		BadStr();
+#endif /* OS390DBG */
+	rc = iconv(myathdp->cd_EtoA,(char **) &inebcdicstr, &in_size, &outasciistr, &out_size);
+	if (rc == (size_t) -1)
+		__panic_a("Error from iconv() in __toascii_a()");
+	return;
+}
+
+/*%PAGE																*/
+/*********************************************************************
+*
+*	Name   	 :	__toebcdic_a 
+*	Function :	Convert null-terminated ASCII (ISO8859-1) string to 
+*			EBDCID (IBM-1047).
+*
+*********************************************************************/
+void __toebcdic_a(char *outebcdicstr, const char *inasciistr)
+{
+#ifdef OS390DBG
+	char *evalidchars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+	char *asciistr;
+#endif /* OS390DBG */
+	size_t rc;
+	size_t in_size, out_size;
+	ATHD_t *myathdp;
+	myathdp = athdp();  /* get pointer to ATHD thread structure */
+	out_size = in_size = strlen(inasciistr) + 1; /* plus null byte */
+#ifdef OS390DBG
+	if (strcspn(inasciistr,evalidchars) < (in_size-1))
+		BadStr();
+#endif /* OS390DBG */
+	rc = iconv(myathdp->cd_AtoE,(char **) &inasciistr, &in_size, &outebcdicstr, &out_size);
+	if (rc == (size_t) -1)
+		__panic_a("Error from iconv() in __toebcdic_a()");
+	return;
+}
+
+/*%PAGE																*/
+/*********************************************************************
+*
+*	Name   	 :	__toasciilen_a  
+*	Function :	Convert null-terminated EBCDIC (IBM-1047) string to 
+*				ASCII (ISO8859-1) with length
+*
+*********************************************************************/
+void __toasciilen_a(char *outasciistr, const char *inebcdicstr,int insize)
+{
+#ifdef OS390DBG
+	char *evalidchars="bcdefghipqrstuvwxABCDEFGHIQRSTUVWXY";
+	char avalidchars[64];
+#endif /* OS390DBG */
+	size_t rc;
+	size_t in_size, out_size;
+	ATHD_t *myathdp;
+	myathdp = athdp();  /* get pointer to ATHD thread structure */
+	out_size = in_size = insize;
+#ifdef OS390DBG
+	strcpy(avalidchars,evalidchars);
+	__etoa(avalidchars);
+	if (strcspn(inebcdicstr,avalidchars) < (in_size-1))
+		BadStr();
+#endif /* OS390DBG */
+	rc = iconv(myathdp->cd_EtoA,(char **) &inebcdicstr, &in_size, &outasciistr, &out_size);
+	if (rc == (size_t) -1)
+		__panic_a("Error from iconv() in __toascii_a()");
+	return;
+}
+
+/*%PAGE																*/
+/*********************************************************************
+*
+*	Name   	 :	BadStr
+*	Function :	Return if bad input string passed
+*
+*********************************************************************/
+void BadStr()
+{
+	return;
+}
+
+/*%PAGE																*/
+/*********************************************************************
+*
+*	Name   	 :	init_trans_a
+*	Function :	Initialization routine for the translation ASCII
+*				library routines.
+*	Notes	 :	Sets static iconv descriptor cd_EtoA and cd_AtoE for
+*				later use.
+*
+*********************************************************************/
+void init_trans_a()
+{
+	ATHD_t 		*myathdp;
+	ebuffers_t  *myebuffers;
+	int			ebuffers_sz;
+	myathdp = athdp();  /* get pointer to ATHD thread structure */
+	myathdp->cd_EtoA = iconv_open("ISO8859-1", "IBM-1047"); 
+	if (myathdp->cd_EtoA == (iconv_t) -1)
+		__panic_a("Iconv open failed for 1047\n");
+    myathdp->cd_AtoE = iconv_open("IBM-1047", "ISO8859-1"); 
+	if (myathdp->cd_AtoE == (iconv_t)-1)
+		__panic_a("Iconv open failed for 8859\n");
+
+	/* -- Get space for local buffers                             */
+	/* -- Set estringx_a ptrs in ATHD                             */
+	ebuffers_sz = sizeof(ebuffers_t);
+	myebuffers  = (ebuffers_t *) calloc(1,ebuffers_sz);
+
+	myathdp->estring1_a = (char *)&(myebuffers->estring1_buffer); 
+	myathdp->estring2_a = (char *)&(myebuffers->estring2_buffer); 
+	myathdp->estring3_a = (char *)&(myebuffers->estring3_buffer); 
+	myathdp->estring4_a = (char *)&(myebuffers->estring4_buffer); 
+
+	return;
+}
+
+/*%PAGE																*/
+/*********************************************************************
+*
+*	Name   	 :	term_trans_a
+*	Function :	Termination routine for the translation ASCII
+*				library routines. This routine runs when the thread
+*				is terminated to clean up resources obtained by the
+*				terminating thread.
+*
+*********************************************************************/
+void term_trans(ATHD_t *athdptr)
+{
+	iconv_t 	lociconv;
+	char 		*locstring;
+	ebuffers_t *loc_ebuffers;
+
+	/* If ..., clear so that we don't do it again					*/
+	if ((lociconv = athdptr->cd_EtoA) != (iconv_t) 0) {
+		athdptr->cd_EtoA = (iconv_t) 0;
+		iconv_close(lociconv); /* close iconv */
+	}
+	/* If ..., clear so that we don't do it again					*/
+	if ((lociconv = athdptr->cd_AtoE) != (iconv_t) 0) {
+		athdptr->cd_AtoE = (iconv_t) 0;
+		iconv_close(lociconv); /* close iconv */
+	}
+
+	/* Free ebuffers area                                          */
+	if ((loc_ebuffers = (ebuffers_t *)athdptr->estring1_a) != NULL) {
+		athdptr->estring1_a = NULL;
+		free(loc_ebuffers);
+	}
+	return;
+}
