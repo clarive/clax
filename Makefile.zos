@@ -3,12 +3,15 @@ PROGRAM=clax
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
 CFLAGS=-DMVS -Icontrib/mbedtls -D_ALL_SOURCE -D__STRING_CODE_SET__="ISO8859-1" -qlanglvl=extc99
-LIBS=contrib/mbedtls/*.o
+LIBS=contrib/mbedtls/*.o contrib/jsmn/*.o
 
-all: libascii mbedtls $(PROGRAM)
+all: libascii mbedtls jsmn $(PROGRAM)
 
 libascii:
 	$(MAKE) -C arch/zos/libascii
+
+jsmn:
+	$(MAKE) -C contrib/jsmn CFLAGS="-DJSMN_PARENT_LINKS"
 
 mbedtls:
 	$(MAKE) AR=../../arch/zos/bin/ar CC=c99 CFLAGS="-D_ALL_SOURCE -D__STRING_CODE_SET__=\"ISO8859-1\" -qlanglvl=extc99" WARNING_CFLAGS="" -C contrib/mbedtls
@@ -20,3 +23,4 @@ $(PROGRAM): $(OBJECTS)
 clean:
 	rm -f $(PROGRAM) $(OBJECTS)
 	$(MAKE) -C contrib/mbedtls clean
+	$(MAKE) -C contrib/jsmn clean

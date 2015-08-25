@@ -1,6 +1,10 @@
 #ifndef _U_H
 #define _U_H
 
+#ifdef MVS
+#include "../../arch/zos/libascii/_Ascii_a.h"
+#endif
+
 int u_tests;
 int u_tests_failed;
 int u_rv;
