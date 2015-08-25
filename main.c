@@ -31,8 +31,7 @@
 
 #define HTTP_RESPONSE \
     "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n" \
-    "<h2>mbed TLS Test Server</h2>\r\n" \
-    "<p>Successful connection using: %s</p>\r\n"
+    "Hello from clax!\r\n"
 
 #define DEBUG_LEVEL 0
 
@@ -192,30 +191,45 @@ int dev_random_entropy_poll( void *data, unsigned char *output,
 }
 
 void clax_loop() {
+    int toread = 0;
     int ret = 0, len = 0;
-    unsigned char buf[1024];
+    unsigned char req[1024];
+    unsigned char buf[256];
 
-    memset(buf, 0, sizeof(buf));
+    memset(req, 0, sizeof(req));
 
     clax_log("Reading request...");
     do {
-        ret = clax_recv(NULL, buf, sizeof(buf) - len - 1);
+        memset(buf, 0, sizeof(buf));
+        ret = clax_recv(NULL, buf, sizeof(buf));
+        buf[ret] = 0;
 
         if (ret < 0) {
             clax_log("failed!");
             abort();
         } else if (ret == 0) {
             break;
-        } else if (len >= sizeof(buf)) {
+        }
+
+        toread = ret > sizeof(req) - len ? sizeof(req) - len : ret;
+        if (toread == 0) {
             break;
         }
 
+        strncat(req, buf, toread);
         len += ret;
+
+        if (strncmp(req + len - 4, "\r\n\r\n", 4) == 0) {
+            break;
+        }
+        else if (strncmp(req + len - 2, "\n\n", 2) == 0) {
+            break;
+        }
     } while (1);
 
     clax_log("ok");
 
-    len = sprintf((char *)buf, HTTP_RESPONSE);
+    len = snprintf((char *)buf, sizeof(HTTP_RESPONSE), HTTP_RESPONSE);
 
     clax_log("Writing response...");
 
@@ -473,6 +487,8 @@ int main(int argc, char **argv)
         dup2(fileno(options._log_file), STDERR_FILENO);
     }
 
+    setbuf(stdout, NULL);
+
     clax_log("Option: no_ssl=%d", options.no_ssl);
     clax_log("Option: entropy_file=%s", options.entropy_file);
     clax_log("Option: log_file=%s", options.log_file);
@@ -482,4 +498,7 @@ int main(int argc, char **argv)
     } else {
         clax_loop_ssl();
     }
+
+    fflush(stdout);
+    fclose(stdout);
 }
