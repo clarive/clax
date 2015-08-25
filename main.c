@@ -29,6 +29,8 @@
 #include "mbedtls/debug.h"
 #include "mbedtls/ssl_cache.h"
 
+#include "clax_http.h"
+
 #define HTTP_RESPONSE \
     "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n" \
     "Hello from clax!\r\n"
@@ -36,6 +38,8 @@
 #define DEBUG_LEVEL 0
 
 #define DEV_RANDOM_THRESHOLD        32
+
+clax_http_message_t message;
 
 void clax_log_(const char *file, int line, const char *func_, char *fmt, ...)
 {
@@ -191,39 +195,35 @@ int dev_random_entropy_poll( void *data, unsigned char *output,
 }
 
 void clax_loop() {
-    int toread = 0;
-    int ret = 0, len = 0;
-    unsigned char req[1024];
+    int ret = 0;
+    int len = 0;
     unsigned char buf[256];
 
-    memset(req, 0, sizeof(req));
+    clax_http_init();
 
     clax_log("Reading request...");
     do {
         memset(buf, 0, sizeof(buf));
         ret = clax_recv(NULL, buf, sizeof(buf));
-        buf[ret] = 0;
 
         if (ret < 0) {
             clax_log("failed!");
             abort();
         } else if (ret == 0) {
+            clax_log("EOF");
             break;
         }
 
-        toread = ret > sizeof(req) - len ? sizeof(req) - len : ret;
-        if (toread == 0) {
-            break;
-        }
+        ret = clax_http_parse(&message, buf, ret);
 
-        strncat(req, buf, toread);
-        len += ret;
-
-        if (strncmp(req + len - 4, "\r\n\r\n", 4) == 0) {
-            break;
+        if (ret < 0) {
+            clax_log("http parsing error!");
+            abort();
         }
-        else if (strncmp(req + len - 2, "\n\n", 2) == 0) {
+        else if (ret == 1) {
             break;
+        } else if (ret == 0) {
+            clax_log("waiting for more data...");
         }
     } while (1);
 

@@ -1,17 +1,20 @@
 PROGRAM=test
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
-CFLAGS=-I../contrib/mbedtls -D_ALL_SOURCE
+CFLAGS=-I../ -I../contrib -I../contrib/mbedtls -D_ALL_SOURCE
 LFLAGS=
-LIBS=../contrib/mbedtls/*.o
+LIBS=../clax_http.o ../contrib/mbedtls/*.o ../contrib/http_parser/*.o
 
-all: mbedtls $(PROGRAM)
+all: mbedtls http_parser $(PROGRAM)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS) -o $(PROGRAM)
 
 mbedtls:
 	$(MAKE) -C ../contrib/mbedtls
+
+http_parser:
+	$(MAKE) -C ../contrib/http_parser package
 
 check: $(PROGRAM)
 	./test
