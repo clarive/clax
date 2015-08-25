@@ -40,6 +40,7 @@
 #define DEV_RANDOM_THRESHOLD        32
 
 clax_http_message_t message;
+clax_http_response_t response;
 
 void clax_log_(const char *file, int line, const char *func_, char *fmt, ...)
 {
@@ -229,9 +230,22 @@ void clax_loop() {
 
     clax_log("ok");
 
-    len = snprintf((char *)buf, sizeof(HTTP_RESPONSE), HTTP_RESPONSE);
+    clax_log("Dispatching response...");
+
+    clax_dispatch(&message, &response);
 
     clax_log("Writing response...");
+
+    if (response.status_code == 200) {
+        clax_send(NULL, "200 OK\r\n", 6 + 2);
+    }
+    else if (response.status_code == 404) {
+        clax_send(NULL, "404 Not Found\r\n", 13 + 2);
+    }
+
+    clax_send(NULL, "Content-Type: application/json\r\n", 30 + 2);
+    clax_send(NULL, "\r\n", 2);
+    clax_send(NULL, response.body, response.body_len);
 
     ret = clax_send(NULL, buf, len);
 
