@@ -378,6 +378,8 @@ void clax_loop_ssl()
 
     clax_log("ok" );
 
+    clax_http_init();
+
     /*
      * 6. Read the HTTP Request
      */
@@ -408,8 +410,16 @@ void clax_loop_ssl()
         len = ret;
         clax_log("%d bytes read\n\n%s", len, (char *) buf );
 
-        if ( ret > 0 )
+        ret = clax_http_parse(&message, buf, ret);
+
+        if (ret < 0) {
+            clax_log("error parsing http");
+            abort();
+        } else if (ret == 0) {
+            clax_log("waiting for more data...");
+        } else {
             break;
+        }
     } while ( 1 );
 
     /*
