@@ -11,7 +11,7 @@ $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS) -o $(PROGRAM)
 
 mbedtls:
-	$(MAKE) -C contrib/mbedtls
+	$(MAKE) -C contrib/mbedtls CFLAGS="-DWINDOWS=1"
 
 clean:
 	rm -f $(PROGRAM) $(OBJECTS)
