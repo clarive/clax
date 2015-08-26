@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
     RUN_TEST(clax_dispatch_sets_404_on_unknown_path);
 
     RUN_TEST(clax_command_runs_command);
+    RUN_TEST(clax_command_runs_command_vaargs);
 
     DONE_TESTING;
 }
