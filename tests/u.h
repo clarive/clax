@@ -14,12 +14,12 @@ int u_rv;
     if (code) {                             \
         u_rv = 1;                           \
                                             \
-        printf("ok %d\n", u_tests + u_local_tests + 1);     \
+        printf("ok %d\n", u_tests + u_local_tests);     \
     }                                       \
     else {                                  \
         u_rv = 0;                           \
         u_tests_failed++;                   \
-        printf("not ok %d\n", u_tests + u_local_tests + 1); \
+        printf("not ok %d\n", u_tests + u_local_tests); \
     }
 
 #define ASSERT_EQ(got, exp)             \
