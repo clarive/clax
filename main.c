@@ -275,7 +275,7 @@ int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, siz
 
     clax_log("Writing response...");
 
-    char *status_message = clax_http_status_message(response.status_code);
+    const char *status_message = clax_http_status_message(response.status_code);
 
     send_cb(ctx, "HTTP/1.1 ", 9);
     send_cb(ctx, status_message, strlen(status_message));
