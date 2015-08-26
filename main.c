@@ -252,9 +252,6 @@ int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, siz
         if (ret < 0) {
             clax_log("Reading failed!");
             return -1;
-        } else if (ret == 0) {
-            clax_log("EOF");
-            break;
         }
 
         ret = clax_http_parse(&request, buf, ret);
