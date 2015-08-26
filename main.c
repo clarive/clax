@@ -15,6 +15,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
+#include <errno.h>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -142,7 +143,7 @@ void clax_parse_options(opt *options, int argc, char **argv)
 int clax_recv(void *ctx,  unsigned char *buf, size_t len)
 {
     int ret;
-    int fd = 0;
+    int fd = fileno(stdin);
 
     ret = (int)read(fd, buf, len);
 
@@ -154,11 +155,43 @@ int clax_recv(void *ctx,  unsigned char *buf, size_t len)
 int clax_send( void *ctx, const unsigned char *buf, size_t len )
 {
     int ret;
-    int fd = 1;
+    int fd = fileno(stdout);
 
     ret = (int)write(fd, buf, len);
 
     clax_log("send (%d)=%d from %d", fd, ret, len);
+
+    return ret;
+}
+
+int clax_recv_ssl(void *ctx, unsigned char *buf, size_t len)
+{
+    int ret;
+    mbedtls_ssl_context *ssl = ctx;
+
+    ret = mbedtls_ssl_read(ssl, buf, len);
+
+    if ( ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE )
+        return EAGAIN;
+
+    clax_log("recv (ssl)=%d from %d", ret, len);
+
+    return ret;
+}
+
+int clax_send_ssl( void *ctx, const unsigned char *buf, size_t len )
+{
+    int ret;
+    mbedtls_ssl_context *ssl = ctx;
+
+    while ((ret = mbedtls_ssl_write(ssl, buf, len)) <= 0 ) {
+        if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE) {
+            clax_log("failed\n  ! mbedtls_ssl_write returned %d", ret );
+            return ret;
+        }
+    }
+
+    clax_log("send (ssl)=%d from %d", ret, len);
 
     return ret;
 }
@@ -195,21 +228,30 @@ int dev_random_entropy_poll( void *data, unsigned char *output,
     return( 0 );
 }
 
-void clax_loop() {
+int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, size_t len),
+        int (*recv_cb)(void *ctx, unsigned char *buf, size_t len)
+        ) {
     int ret = 0;
     int len = 0;
-    unsigned char buf[256];
+    unsigned char buf[1024];
 
     clax_http_init();
 
-    clax_log("Reading request...");
+    clax_log("Reading & parsing request...");
     do {
         memset(buf, 0, sizeof(buf));
-        ret = clax_recv(NULL, buf, sizeof(buf));
+        ret = recv_cb(ctx, buf, sizeof(buf));
+
+        clax_log("ret=%d", ret);
+
+        if (ret == EAGAIN) {
+            clax_log("EAGAIN");
+            continue;
+        }
 
         if (ret < 0) {
-            clax_log("failed!");
-            abort();
+            clax_log("Reading failed!");
+            return -1;
         } else if (ret == 0) {
             clax_log("EOF");
             break;
@@ -218,13 +260,13 @@ void clax_loop() {
         ret = clax_http_parse(&request, buf, ret);
 
         if (ret < 0) {
-            clax_log("http parsing error!");
-            abort();
+            clax_log("Parsing failed!");
+            return -1;
         }
         else if (ret == 1) {
             break;
         } else if (ret == 0) {
-            clax_log("waiting for more data...");
+            clax_log("Waiting for more data...");
         }
     } while (1);
 
@@ -237,24 +279,24 @@ void clax_loop() {
     clax_log("Writing response...");
 
     if (response.status_code == 200) {
-        clax_send(NULL, "200 OK\r\n", 6 + 2);
+        send_cb(ctx, "HTTP/1.1 200 OK\r\n", 6 + 2);
     }
     else if (response.status_code == 404) {
-        clax_send(NULL, "404 Not Found\r\n", 13 + 2);
+        send_cb(ctx, "HTTP/1.1 404 Not Found\r\n", 13 + 2);
     }
 
-    clax_send(NULL, "Content-Type: application/json\r\n", 30 + 2);
-    clax_send(NULL, "\r\n", 2);
-    clax_send(NULL, response.body, response.body_len);
-
-    ret = clax_send(NULL, buf, len);
+    send_cb(ctx, "Content-Type: application/json\r\n", 30 + 2);
+    send_cb(ctx, "\r\n", 2);
+    send_cb(ctx, response.body, response.body_len);
 
     if (ret < 0) {
         clax_log("failed!");
-        abort();
+        return -1;
     }
 
     clax_log("ok");
+
+    return 1;
 }
 
 void clax_loop_ssl()
@@ -392,67 +434,7 @@ void clax_loop_ssl()
 
     clax_log("ok" );
 
-    clax_http_init();
-
-    /*
-     * 6. Read the HTTP Request
-     */
-    clax_log("  < Read from client:" );
-
-    do {
-        len = sizeof( buf ) - 1;
-        memset( buf, 0, sizeof( buf ) );
-        ret = mbedtls_ssl_read( &ssl, buf, len );
-
-        if ( ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE )
-            continue;
-
-        if ( ret <= 0 ) {
-            switch( ret ) {
-            case MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY:
-                clax_log("connection was closed gracefully\n" );
-                break;
-
-            default:
-                clax_log("mbedtls_ssl_read returned -0x%x\n", -ret );
-                break;
-            }
-
-            break;
-        }
-
-        len = ret;
-        clax_log("%d bytes read\n\n%s", len, (char *) buf );
-
-        ret = clax_http_parse(&request, buf, ret);
-
-        if (ret < 0) {
-            clax_log("error parsing http");
-            abort();
-        } else if (ret == 0) {
-            clax_log("waiting for more data...");
-        } else {
-            break;
-        }
-    } while ( 1 );
-
-    /*
-     * 7. Write the 200 Response
-     */
-    clax_log("  > Write to client:" );
-
-    len = sprintf( (char *) buf, HTTP_RESPONSE,
-                   mbedtls_ssl_get_ciphersuite( &ssl ) );
-
-    while ( ( ret = mbedtls_ssl_write( &ssl, buf, len ) ) <= 0 ) {
-        if ( ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE ) {
-            clax_log("failed\n  ! mbedtls_ssl_write returned %d", ret );
-            goto exit;
-        }
-    }
-
-    len = ret;
-    clax_log("%d bytes written\n\n%s\n", len, (char *) buf );
+    clax_loop(&ssl, clax_send_ssl, clax_recv_ssl);
 
     clax_log("Closing the connection..." );
 
@@ -518,7 +500,7 @@ int main(int argc, char **argv)
     clax_log("Option: log_file=%s", options.log_file);
 
     if (options.no_ssl) {
-        clax_loop();
+        clax_loop(NULL, clax_send, clax_recv);
     } else {
         clax_loop_ssl();
     }
