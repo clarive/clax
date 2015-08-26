@@ -15,7 +15,7 @@ int message_complete_cb(http_parser *p)
 
 int request_url_cb(http_parser *p, const char *buf, size_t len)
 {
-    clax_http_message_t *message = p->data;
+    clax_http_request_t *request = p->data;
     struct http_parser_url u;
     int rv;
 
@@ -26,11 +26,11 @@ int request_url_cb(http_parser *p, const char *buf, size_t len)
     int path_from = u.field_data[3].off;
     int path_len = u.field_data[3].len;
 
-    strncpy(message->url, buf, len);
-    message->url[len] = 0;
+    strncpy(request->url, buf, len);
+    request->url[len] = 0;
 
-    strncpy(message->path_info, buf + path_from, path_len);
-    message->path_info[path_len] = 0;
+    strncpy(request->path_info, buf + path_from, path_len);
+    request->path_info[path_len] = 0;
 
     return 0;
 }
@@ -55,11 +55,11 @@ void clax_http_init()
     http_parser_init(&parser, HTTP_REQUEST);
 }
 
-int clax_http_parse(clax_http_message_t *message, const char *buf, size_t len)
+int clax_http_parse(clax_http_request_t *request, const char *buf, size_t len)
 {
     size_t nparsed;
 
-    parser.data = message;
+    parser.data = request;
     nparsed = http_parser_execute(&parser, &settings, buf, len);
 
     if (nparsed != len) {
@@ -67,7 +67,7 @@ int clax_http_parse(clax_http_message_t *message, const char *buf, size_t len)
     }
 
     if (clax_http_complete) {
-        message->method = parser.method;
+        request->method = parser.method;
         return 1;
     }
 

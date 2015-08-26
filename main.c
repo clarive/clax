@@ -39,7 +39,7 @@
 
 #define DEV_RANDOM_THRESHOLD        32
 
-clax_http_message_t message;
+clax_http_request_t request;
 clax_http_response_t response;
 
 void clax_log_(const char *file, int line, const char *func_, char *fmt, ...)
@@ -215,7 +215,7 @@ void clax_loop() {
             break;
         }
 
-        ret = clax_http_parse(&message, buf, ret);
+        ret = clax_http_parse(&request, buf, ret);
 
         if (ret < 0) {
             clax_log("http parsing error!");
@@ -232,7 +232,7 @@ void clax_loop() {
 
     clax_log("Dispatching response...");
 
-    clax_dispatch(&message, &response);
+    clax_dispatch(&request, &response);
 
     clax_log("Writing response...");
 
@@ -424,7 +424,7 @@ void clax_loop_ssl()
         len = ret;
         clax_log("%d bytes read\n\n%s", len, (char *) buf );
 
-        ret = clax_http_parse(&message, buf, ret);
+        ret = clax_http_parse(&request, buf, ret);
 
         if (ret < 0) {
             clax_log("error parsing http");

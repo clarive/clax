@@ -1,7 +1,7 @@
 #include <string.h>
 #include "clax_http.h"
 
-int clax_dispatch(clax_http_message_t *req, clax_http_response_t *res)
+int clax_dispatch(clax_http_request_t *req, clax_http_response_t *res)
 {
     char *path_info = req->path_info;
 

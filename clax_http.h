@@ -11,7 +11,7 @@ typedef struct {
   enum http_method method;
   char url[MAX_ELEMENT_SIZE];
   char path_info[MAX_ELEMENT_SIZE];
-} clax_http_message_t;
+} clax_http_request_t;
 
 typedef struct {
   unsigned int status_code;
@@ -20,6 +20,6 @@ typedef struct {
 } clax_http_response_t;
 
 void clax_http_init();
-int clax_http_parse(clax_http_message_t *message, const char *buf, size_t len);
+int clax_http_parse(clax_http_request_t *request, const char *buf, size_t len);
 
 #endif
