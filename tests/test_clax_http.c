@@ -60,19 +60,19 @@ TEST_START(clax_http_parse_saves_request)
 
     clax_http_parse(&request, "GET /there?foo=bar HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n", 14 + 2 + 15 + 2 + 17 + 4);
     ASSERT(request.method == HTTP_GET)
-    ASSERT(strcmp(request.url, "/there?foo=bar") == 0)
-    ASSERT(strcmp(request.path_info, "/there") == 0)
+    ASSERT_STR_EQ(request.url, "/there?foo=bar")
+    ASSERT_STR_EQ(request.path_info, "/there")
 }
 TEST_END
 
 TEST_START(clax_http_status_message_returns_message)
 {
-    ASSERT(strcmp(clax_http_status_message(200), "OK") == 0)
+    ASSERT_STR_EQ(clax_http_status_message(200), "OK")
 }
 TEST_END
 
 TEST_START(clax_http_status_message_returns_unknown_message)
 {
-    ASSERT(strcmp(clax_http_status_message(999), "Unknown") == 0)
+    ASSERT_STR_EQ(clax_http_status_message(999), "Unknown")
 }
 TEST_END

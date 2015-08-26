@@ -13,5 +13,7 @@ int main(int argc, char *argv[])
     RUN_TEST(clax_http_status_message_returns_message);
     RUN_TEST(clax_http_status_message_returns_unknown_message);
 
+    RUN_TEST(clax_dispatch_sets_404_on_unknown_path);
+
     DONE_TESTING;
 }

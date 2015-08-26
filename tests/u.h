@@ -22,6 +22,24 @@ int u_rv;
         printf("not ok %d\n", u_tests + u_local_tests + 1); \
     }
 
+#define ASSERT_EQ(got, exp)             \
+    ASSERT(got == exp)                  \
+                                        \
+    if (!u_rv) {                        \
+        printf("# " #got ":\n");        \
+        printf("#   got: '%d'\n", got);  \
+        printf("#   exp: '%d'\n", exp);  \
+    }
+
+#define ASSERT_STR_EQ(got, exp)             \
+    ASSERT(strcmp(got, exp) == 0)           \
+                                            \
+    if (!u_rv) {                            \
+        printf("# " #got ":\n");            \
+        printf("#   got: '%s'\n", got);      \
+        printf("#   exp: '%s'\n", exp);      \
+    }
+
 #define TEST_START(name)                    \
     void name() {                           \
         int u_local_tests = 0;              \
