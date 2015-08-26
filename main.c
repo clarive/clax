@@ -275,14 +275,15 @@ int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, siz
 
     clax_log("Writing response...");
 
-    if (response.status_code == 200) {
-        send_cb(ctx, "HTTP/1.1 200 OK\r\n", 6 + 2);
-    }
-    else if (response.status_code == 404) {
-        send_cb(ctx, "HTTP/1.1 404 Not Found\r\n", 13 + 2);
-    }
+    char *status_message = clax_http_status_message(response.status_code);
 
-    send_cb(ctx, "Content-Type: application/json\r\n", 30 + 2);
+    send_cb(ctx, "HTTP/1.1 ", 9);
+    send_cb(ctx, status_message, strlen(status_message));
+    send_cb(ctx, "\r\n", 2);
+
+    send_cb(ctx, "Content-Type: ", 14);
+    send_cb(ctx, response.content_type, strlen(response.content_type));
+    send_cb(ctx, "\r\n", 2);
     send_cb(ctx, "\r\n", 2);
     send_cb(ctx, response.body, response.body_len);
 

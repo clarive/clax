@@ -10,5 +10,8 @@ int main(int argc, char *argv[])
     RUN_TEST(clax_http_parse_returns_ok);
     RUN_TEST(clax_http_parse_saves_request);
 
+    RUN_TEST(clax_http_status_message_returns_message);
+    RUN_TEST(clax_http_status_message_returns_unknown_message);
+
     DONE_TESTING;
 }

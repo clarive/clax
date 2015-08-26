@@ -7,12 +7,14 @@ int clax_dispatch(clax_http_request_t *req, clax_http_response_t *res)
 
     if (strncmp(path_info, "/ping", 5) == 0) {
         res->status_code = 200;
+        res->content_type = "application/json";
         memcpy(res->body, "{\"message\":\"pong\"}", 20);
         res->body_len = 20;
 
         return 1;
     }
     else {
+        res->content_type = "text/plain";
         res->status_code = 404;
         memcpy(res->body, "Not found", 9);
         res->body_len = 9;

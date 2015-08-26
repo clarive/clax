@@ -64,3 +64,15 @@ TEST_START(clax_http_parse_saves_request)
     ASSERT(strcmp(request.path_info, "/there") == 0)
 }
 TEST_END
+
+TEST_START(clax_http_status_message_returns_message)
+{
+    ASSERT(strcmp(clax_http_status_message(200), "OK") == 0)
+}
+TEST_END
+
+TEST_START(clax_http_status_message_returns_unknown_message)
+{
+    ASSERT(strcmp(clax_http_status_message(999), "Unknown") == 0)
+}
+TEST_END

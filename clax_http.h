@@ -15,6 +15,7 @@ typedef struct {
 
 typedef struct {
   unsigned int status_code;
+  char *content_type;
   char body[MAX_ELEMENT_SIZE];
   size_t body_len;
 } clax_http_response_t;
