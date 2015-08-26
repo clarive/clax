@@ -10,19 +10,19 @@ struct clax_http_status_message {
     int code;
     const char *message;
 };
+struct clax_http_status_message clax_http_messages[] = {
+    {200, "OK"},
+    {404, "Not Found"}
+};
 
-char *clax_http_status_message(int code)
+const char *clax_http_status_message(int code)
 {
     int i;
-    struct clax_http_status_message messages[] = {
-        {200, "OK"},
-        {404, "Not Found"}
-    };
-    size_t len = sizeof messages / sizeof messages[0];
+    size_t len = sizeof clax_http_messages / sizeof clax_http_messages[0];
 
     for (i = 0; i < len; i++) {
-        if (messages[i].code == code) {
-            return messages[i].message;
+        if (clax_http_messages[i].code == code) {
+            return clax_http_messages[i].message;
         }
     }
 
