@@ -228,6 +228,27 @@ int dev_random_entropy_poll( void *data, unsigned char *output,
     return( 0 );
 }
 
+void clax_chunked(char *buf, size_t len, va_list a_list)
+{
+    char obuf[255];
+    int olen;
+    int (*send_cb)(void *ctx, const unsigned char *buf, size_t len);
+    void *ctx;
+
+    send_cb = va_arg(a_list, void *);
+    ctx = va_arg(a_list, void *);
+
+    if (len) {
+        olen = sprintf(obuf, "%x\r\n", len);
+        send_cb(ctx, obuf, olen);
+        send_cb(ctx, buf, len);
+        send_cb(ctx, "\r\n", 2);
+    }
+    else {
+        send_cb(ctx, "0\r\n\r\n", 5);
+    }
+}
+
 int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, size_t len),
         int (*recv_cb)(void *ctx, unsigned char *buf, size_t len)
         ) {
@@ -281,11 +302,25 @@ int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, siz
     send_cb(ctx, status_message, strlen(status_message));
     send_cb(ctx, "\r\n", 2);
 
-    send_cb(ctx, "Content-Type: ", 14);
-    send_cb(ctx, response.content_type, strlen(response.content_type));
-    send_cb(ctx, "\r\n", 2);
-    send_cb(ctx, "\r\n", 2);
-    send_cb(ctx, response.body, response.body_len);
+    if (response.content_type) {
+        send_cb(ctx, "Content-Type: ", 14);
+        send_cb(ctx, response.content_type, strlen(response.content_type));
+        send_cb(ctx, "\r\n", 2);
+        send_cb(ctx, "\r\n", 2);
+    }
+
+    if (response.transfer_encoding) {
+        send_cb(ctx, "Transfer-Encoding: ", 19);
+        send_cb(ctx, response.transfer_encoding, strlen(response.transfer_encoding));
+        send_cb(ctx, "\r\n", 2);
+        send_cb(ctx, "\r\n", 2);
+    }
+
+    if (response.body_len) {
+        send_cb(ctx, response.body, response.body_len);
+    } else if (response.body_cb) {
+        response.body_cb(clax_chunked, send_cb, ctx);
+    }
 
     if (ret < 0) {
         clax_log("failed!");

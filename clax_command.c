@@ -7,7 +7,6 @@ int clax_command(char *command, int (*chunk_cb)(char *buf, size_t len, va_list a
     char buf[1024];
     size_t ret;
     va_list a_list;
-    va_start(a_list, chunk_cb);
 
     fp = popen(command, "r");
     if (fp == NULL) {
@@ -15,11 +14,15 @@ int clax_command(char *command, int (*chunk_cb)(char *buf, size_t len, va_list a
     }
 
     while ((ret = fread(buf, 1, sizeof(buf), fp)) > 0) {
+        va_start(a_list, chunk_cb);
+
         chunk_cb(buf, ret, a_list);
+
+        va_end(a_list);
     }
 
+    va_start(a_list, chunk_cb);
     chunk_cb(NULL, 0, a_list);
-
     va_end(a_list);
 
     pclose(fp);
