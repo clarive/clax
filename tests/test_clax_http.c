@@ -106,6 +106,65 @@ TEST_START(clax_http_parse_parses_form_body)
 }
 TEST_END
 
+TEST_START(clax_http_parse_parses_form_body_with_decoding)
+{
+    char *p;
+    clax_http_request_t request;
+    memset(&request, 0, sizeof(clax_http_request_t));
+
+    clax_http_init();
+
+    _parse(&request, "POST / HTTP/1.1\r\n");
+    _parse(&request, "Host: localhost\r\n");
+    _parse(&request, "Content-Type: application/x-www-form-urlencoded\r\n");
+    _parse(&request, "Content-Length: 32\r\n");
+    _parse(&request, "\r\n");
+    _parse(&request, "f%20o=b%2Fr+baz%");
+
+    ASSERT_EQ(request.params_num, 1)
+    ASSERT_STR_EQ(request.params[0].key, "f o")
+    ASSERT_STR_EQ(request.params[0].val, "b/r baz%")
+}
+TEST_END
+
+TEST_START(clax_http_url_decode_decodes_string_inplace)
+{
+    char buf[1024];
+
+    strcpy(buf, "hello");
+    clax_http_url_decode(buf);
+    ASSERT_STR_EQ(buf, "hello")
+
+    strcpy(buf, "f%20o");
+    clax_http_url_decode(buf);
+    ASSERT_STR_EQ(buf, "f o")
+
+    strcpy(buf, "f+o");
+    clax_http_url_decode(buf);
+    ASSERT_STR_EQ(buf, "f o")
+
+    strcpy(buf, "fo%");
+    clax_http_url_decode(buf);
+    ASSERT_STR_EQ(buf, "fo%")
+
+    strcpy(buf, "fo%2");
+    clax_http_url_decode(buf);
+    ASSERT_STR_EQ(buf, "fo%2")
+
+    strcpy(buf, "fo%20");
+    clax_http_url_decode(buf);
+    ASSERT_STR_EQ(buf, "fo ")
+
+    strcpy(buf, "fo%20%20");
+    clax_http_url_decode(buf);
+    ASSERT_STR_EQ(buf, "fo  ")
+
+    strcpy(buf, "fo%20%20bar");
+    clax_http_url_decode(buf);
+    ASSERT_STR_EQ(buf, "fo  bar")
+}
+TEST_END
+
 TEST_START(clax_http_status_message_returns_message)
 {
     ASSERT_STR_EQ(clax_http_status_message(200), "OK")

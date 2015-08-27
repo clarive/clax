@@ -107,6 +107,9 @@ void save_param(clax_http_request_t *req, const char *key, size_t key_len, const
             strncpy(req->params[req->params_num].key, key, MIN(key_len, MAX_ELEMENT_SIZE));
             strncpy(req->params[req->params_num].val, val, MIN(val_len, MAX_ELEMENT_SIZE));
 
+            clax_http_url_decode(req->params[req->params_num].key);
+            clax_http_url_decode(req->params[req->params_num].val);
+
             req->params_num++;
         }
     }
@@ -121,8 +124,6 @@ int body_cb(http_parser *p, const char *buf, size_t len)
         for (i = 0; i < req->headers_num; i++) {
             if (strcmp(req->headers[i].key, "Content-Type") == 0) {
                 if (strcmp(req->headers[i].val, "application/x-www-form-urlencoded") == 0) {
-                    printf("FORM!\n");
-
                     const char *key = NULL;
                     size_t key_len = 0;
                     const char *val = NULL;
@@ -167,6 +168,35 @@ int body_cb(http_parser *p, const char *buf, size_t len)
     }
 
     return 0;
+}
+
+void clax_http_url_decode(char *str)
+{
+    int code;
+    char buf[3];
+
+    char *p = str;
+    while (*p++) {
+        if (*p == '+') {
+            *p = ' ';
+        }
+        else if (*p == '%' && *(p + 1) && *(p + 2)) {
+            buf[0] = *(p + 1);
+            buf[1] = *(p + 2);
+            buf[2] = 0;
+
+            sscanf(buf, "%x", &code);
+
+            *p = code;
+
+            if (*(p + 3)) {
+                strcpy(p + 1, p + 3);
+            }
+            else {
+                *(p + 1) = 0;
+            }
+        }
+    }
 }
 
 static http_parser_settings settings =
