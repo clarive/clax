@@ -3,6 +3,13 @@
 #include "http_parser/http_parser.h"
 #include "clax_http.h"
 
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+
+enum {
+    PARAM_MODE_KEY,
+    PARAM_MODE_VAL
+};
+
 static http_parser parser;
 static int clax_http_complete = 0;
 
@@ -36,6 +43,36 @@ int message_complete_cb(http_parser *p)
     return 0;
 }
 
+int header_field_cb(http_parser *p, const char *buf, size_t len)
+{
+    size_t toread = MIN(MAX_ELEMENT_SIZE - 1, len);
+    clax_http_request_t *req = p->data;
+
+    if (req->headers_num < MAX_HEADERS) {
+        clax_http_request_t *req = p->data;
+
+        strncpy(req->headers[req->headers_num].key, buf, len);
+    }
+
+    return 0;
+}
+
+int header_value_cb(http_parser *p, const char *buf, size_t len)
+{
+    size_t toread = MIN(MAX_ELEMENT_SIZE - 1, len);
+    clax_http_request_t *req = p->data;
+
+    if (req->headers_num < MAX_HEADERS) {
+        clax_http_request_t *req = p->data;
+
+        strncpy(req->headers[req->headers_num].val, buf, len);
+
+        req->headers_num++;
+    }
+
+    return 0;
+}
+
 int request_url_cb(http_parser *p, const char *buf, size_t len)
 {
     clax_http_request_t *request = p->data;
@@ -58,13 +95,87 @@ int request_url_cb(http_parser *p, const char *buf, size_t len)
     return 0;
 }
 
+void save_param(clax_http_request_t *req, const char *key, size_t key_len, const char *val, size_t val_len)
+{
+    if (key_len || val_len) {
+        if (req->params_num < MAX_PARAMS) {
+            if (key_len == 0)
+                key = "";
+            if (val_len == 0)
+                val = "";
+
+            strncpy(req->params[req->params_num].key, key, MIN(key_len, MAX_ELEMENT_SIZE));
+            strncpy(req->params[req->params_num].val, val, MIN(val_len, MAX_ELEMENT_SIZE));
+
+            req->params_num++;
+        }
+    }
+}
+
+int body_cb(http_parser *p, const char *buf, size_t len)
+{
+    clax_http_request_t *req = p->data;
+
+    if (req->headers_num > 0) {
+        int i;
+        for (i = 0; i < req->headers_num; i++) {
+            if (strcmp(req->headers[i].key, "Content-Type") == 0) {
+                if (strcmp(req->headers[i].val, "application/x-www-form-urlencoded") == 0) {
+                    printf("FORM!\n");
+
+                    const char *key = NULL;
+                    size_t key_len = 0;
+                    const char *val = NULL;
+                    size_t val_len = 0;
+                    char mode = PARAM_MODE_KEY;
+
+                    int j;
+                    for (j = 0; j < len; j++) {
+                        if (buf[j] == '&' || buf[j] == ';') {
+                            mode = PARAM_MODE_KEY;
+
+                            save_param(req, key, key_len, val, val_len);
+
+                            key = NULL;
+                            key_len = 0;
+                            val = NULL;
+                            val_len = 0;
+                        }
+                        else if (buf[j] == '=') {
+                            mode = PARAM_MODE_VAL;
+                        }
+                        else if (mode == PARAM_MODE_KEY) {
+                            if (key == NULL)
+                                key = buf + j;
+
+                            key_len++;
+                        }
+                        else if (mode == PARAM_MODE_VAL) {
+                            if (val == NULL)
+                                val = buf + j;
+
+                            val_len++;
+                        }
+                    }
+
+                    save_param(req, key, key_len, val, val_len);
+
+                    break;
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
 static http_parser_settings settings =
   {//.on_message_begin = message_begin_cb
-  /*,.on_header_field = header_field_cb*/
-  /*,.on_header_value = header_value_cb*/
-  .on_url = request_url_cb
+  .on_header_field = header_field_cb
+  ,.on_header_value = header_value_cb
+  ,.on_url = request_url_cb
   /*,.on_status = response_status_cb*/
-  /*,.on_body = body_cb*/
+  ,.on_body = body_cb
   /*,.on_headers_complete = headers_complete_cb*/
   ,.on_message_complete = message_complete_cb
   /*,.on_chunk_header = chunk_header_cb*/
@@ -90,6 +201,7 @@ int clax_http_parse(clax_http_request_t *request, const char *buf, size_t len)
     }
 
     if (clax_http_complete) {
+        request->is_complete = 1;
         request->method = parser.method;
         return 1;
     }

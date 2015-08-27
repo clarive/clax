@@ -20,6 +20,7 @@ int u_rv;
         u_rv = 0;                           \
         u_tests_failed++;                   \
         printf("not ok %d\n", u_tests + u_local_tests); \
+        printf("# %s:%d\n", __FILE__, __LINE__); \
     }
 
 #define ASSERT_EQ(got, exp)             \
@@ -27,8 +28,8 @@ int u_rv;
                                         \
     if (!u_rv) {                        \
         printf("# " #got ":\n");        \
-        printf("#   got: '%d'\n", got);  \
-        printf("#   exp: '%d'\n", exp);  \
+        printf("#   got: %d\n", got);  \
+        printf("#   exp: %d\n", exp);  \
     }
 
 #define ASSERT_STR_EQ(got, exp)             \
