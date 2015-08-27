@@ -1,11 +1,24 @@
 #include <string.h>
 #include <stdarg.h>
 #include "clax_http.h"
+#include "clax_log.h"
 #include "clax_command.h"
 
-void clax_command_cb(int (*chunk_cb)(char *buf, size_t len, va_list a_list), va_list a_list)
+void clax_command_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
 {
-    clax_command("date", chunk_cb, a_list);
+    char *command = ctx;
+    va_list a_list;
+
+    va_start(a_list, chunk_cb);
+
+    if (command && *command && strlen(command)) {
+        clax_command(command, chunk_cb, a_list);
+    }
+    else {
+        chunk_cb(NULL, 0, a_list);
+    }
+
+    va_end(a_list);
 }
 
 void clax_dispatch(clax_http_request_t *req, clax_http_response_t *res)
@@ -24,10 +37,18 @@ void clax_dispatch(clax_http_request_t *req, clax_http_response_t *res)
         res->status_code = 200;
         res->transfer_encoding = "chunked";
 
-        /*clax_command("tail -f /var/log/messages", res->body_cb);*/
-
-        /*res->body_cb_ctx;*/
+        res->body_cb_ctx = "";
         res->body_cb = clax_command_cb;
+
+        if (req->params_num) {
+            int i;
+            for (i = 0; i < req->params_num; i++) {
+                if (strcmp(req->params[i].key, "command") == 0) {
+                    res->body_cb_ctx = req->params[i].val;
+                    break;
+                }
+            }
+        }
     }
     else {
         res->content_type = "text/plain";

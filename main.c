@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <errno.h>
+#include <assert.h>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -31,6 +32,7 @@
 #include "mbedtls/ssl_cache.h"
 
 #include "clax_http.h"
+#include "clax_log.h"
 
 #define HTTP_RESPONSE \
     "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n" \
@@ -42,37 +44,6 @@
 
 clax_http_request_t request;
 clax_http_response_t response;
-
-void clax_log_(const char *file, int line, const char *func_, char *fmt, ...)
-{
-    int size;
-    char *cp;
-    va_list args;
-    char func[1024];
-
-    strcpy(func, func_);
-
-#ifdef MVS
-    char func_a[1024];
-    __toascii_a((char * )func_a, func);
-    strcpy(func, func_a);
-#endif
-
-    va_start(args, fmt);
-    size = vsnprintf(NULL, 0, fmt, args) + 1;
-    va_end(args);
-
-    va_start(args, fmt);
-    cp = (char *)calloc(size, sizeof(char));
-    if (cp != NULL && vsnprintf(cp, size, fmt, args) > 0) {
-        fprintf(stderr, "%s:%d:%s(): %s\n", file, line, func, cp);
-
-    }
-    va_end(args);
-    free(cp);
-}
-
-#define clax_log(...) clax_log_(__FILE__, __LINE__, __func__, __VA_ARGS__)
 
 typedef struct {
     char entropy_file[255];
@@ -228,15 +199,26 @@ int dev_random_entropy_poll( void *data, unsigned char *output,
     return( 0 );
 }
 
-void clax_chunked(char *buf, size_t len, va_list a_list)
+int clax_chunked(char *buf, size_t len, va_list a_list_)
 {
     char obuf[255];
     int olen;
     int (*send_cb)(void *ctx, const unsigned char *buf, size_t len);
     void *ctx;
+    va_list a_list;
 
+    va_copy(a_list, a_list_);
+
+    /*clax_log("CHUNK %s", __LINE__);*/
     send_cb = va_arg(a_list, void *);
+    /*clax_log("CHUNK %s", __LINE__);*/
+    /*assert(send_cb);*/
+    /*clax_log("CHUNK %s", __LINE__);*/
+
     ctx = va_arg(a_list, void *);
+    /*clax_log("CHUNK %s", __LINE__);*/
+    /*assert(ctx);*/
+    /*clax_log("CHUNK %s", __LINE__);*/
 
     if (len) {
         olen = sprintf(obuf, "%x\r\n", len);
@@ -257,6 +239,8 @@ int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, siz
     unsigned char buf[1024];
 
     clax_http_init();
+    memset(&request, 0, sizeof(clax_http_request_t));
+    memset(&response, 0, sizeof(clax_http_response_t));
 
     clax_log("Reading & parsing request...");
     do {
@@ -319,7 +303,7 @@ int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, siz
     if (response.body_len) {
         send_cb(ctx, response.body, response.body_len);
     } else if (response.body_cb) {
-        response.body_cb(clax_chunked, send_cb, ctx);
+        response.body_cb(response.body_cb_ctx, clax_chunked, send_cb, ctx);
     }
 
     if (ret < 0) {

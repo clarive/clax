@@ -13,6 +13,8 @@ typedef struct {
     char val[MAX_ELEMENT_SIZE];
 } clax_http_kv_t;
 
+typedef int (*clax_http_chunk_cb_t)(char *buf, size_t len, va_list a_list);
+
 typedef struct {
   enum http_method method;
   char url[MAX_ELEMENT_SIZE];
@@ -30,10 +32,13 @@ typedef struct {
   char *transfer_encoding;
   char body[MAX_ELEMENT_SIZE];
   size_t body_len;
-  void (*body_cb)();
+  void (*body_cb)(void *ctx, clax_http_chunk_cb_t chunk_cb, ...);
+  void *body_cb_ctx;
 } clax_http_response_t;
 
 void clax_http_init();
 int clax_http_parse(clax_http_request_t *request, const char *buf, size_t len);
+const char *clax_http_status_message(int code);
+void clax_http_url_decode(char *str);
 
 #endif

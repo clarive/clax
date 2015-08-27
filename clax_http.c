@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "http_parser/http_parser.h"
+#include "clax_log.h"
 #include "clax_http.h"
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))

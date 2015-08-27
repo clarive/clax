@@ -1,6 +1,8 @@
 #ifndef CLAX_COMMAND_H
 #define CLAX_COMMAND_H
 
-int clax_command(char *command, int (*chunk_cb)(char *buf, size_t len, va_list a_list), ...);
+#include "clax_http.h"
+
+int clax_command(char *command, clax_http_chunk_cb_t chunk_cb, va_list a_list);
 
 #endif
