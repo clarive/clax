@@ -57,7 +57,7 @@ int u_rv;
     }
 
 #define RUN_TEST(name)                      \
-    name()
+    name();
 
 #define DONE_TESTING                                             \
     printf("1..%d\n", u_tests);                                  \

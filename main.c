@@ -16,7 +16,6 @@
 #include <unistd.h>
 #include <signal.h>
 #include <errno.h>
-#include <assert.h>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -209,16 +208,9 @@ int clax_chunked(char *buf, size_t len, va_list a_list_)
 
     va_copy(a_list, a_list_);
 
-    /*clax_log("CHUNK %s", __LINE__);*/
     send_cb = va_arg(a_list, void *);
-    /*clax_log("CHUNK %s", __LINE__);*/
-    /*assert(send_cb);*/
-    /*clax_log("CHUNK %s", __LINE__);*/
 
     ctx = va_arg(a_list, void *);
-    /*clax_log("CHUNK %s", __LINE__);*/
-    /*assert(ctx);*/
-    /*clax_log("CHUNK %s", __LINE__);*/
 
     if (len) {
         olen = sprintf(obuf, "%x\r\n", len);

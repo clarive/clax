@@ -21,9 +21,5 @@ int clax_command(char *command, clax_http_chunk_cb_t chunk_cb, va_list a_list_)
         chunk_cb(buf, ret, a_list);
     }
 
-    chunk_cb(NULL, 0, a_list);
-
-    pclose(fp);
-
-    return 0;
+    return pclose(fp) / 256;
 }

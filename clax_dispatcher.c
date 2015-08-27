@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 #include "clax_http.h"
@@ -12,11 +13,18 @@ void clax_command_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
     va_start(a_list, chunk_cb);
 
     if (command && *command && strlen(command)) {
-        clax_command(command, chunk_cb, a_list);
+        char buf[255];
+
+        snprintf(buf, sizeof(buf), "-- output\n");
+        chunk_cb(buf, strlen(buf), a_list);
+
+        int ret = clax_command(command, chunk_cb, a_list);
+
+        snprintf(buf, sizeof(buf), "-- exit\n %d", ret);
+        chunk_cb(buf, strlen(buf), a_list);
     }
-    else {
-        chunk_cb(NULL, 0, a_list);
-    }
+
+    chunk_cb(NULL, 0, a_list);
 
     va_end(a_list);
 }

@@ -50,6 +50,14 @@ TEST_START(clax_command_runs_command)
 }
 TEST_END
 
+TEST_START(clax_command_runs_command_with_error)
+{
+    int ret = _clax_command("unknown-command 2>&1 > /dev/null", command_cb);
+
+    ASSERT(ret != 0)
+}
+TEST_END
+
 TEST_START(clax_command_runs_command_vaargs)
 {
     _clax_command("echo 'bar'", command_vaargs_cb, "context");
