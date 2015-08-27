@@ -15,12 +15,9 @@ void clax_command_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
     if (command && *command && strlen(command)) {
         char buf[255];
 
-        snprintf(buf, sizeof(buf), "-- output\n");
-        chunk_cb(buf, strlen(buf), a_list);
-
         int ret = clax_command(command, chunk_cb, a_list);
 
-        snprintf(buf, sizeof(buf), "-- exit\n %d", ret);
+        snprintf(buf, sizeof(buf), "--\nexit=%d", ret);
         chunk_cb(buf, strlen(buf), a_list);
     }
 
