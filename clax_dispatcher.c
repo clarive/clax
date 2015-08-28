@@ -39,20 +39,26 @@ void clax_dispatch(clax_http_request_t *req, clax_http_response_t *res)
         res->body_len = 20;
     }
     else if (req->method == HTTP_POST && strcmp(path_info, "/command") == 0) {
-        res->status_code = 200;
-        res->transfer_encoding = "chunked";
-
-        res->body_cb_ctx = "";
-        res->body_cb = clax_command_cb;
-
         if (req->params_num) {
             int i;
             for (i = 0; i < req->params_num; i++) {
                 if (strcmp(req->params[i].key, "command") == 0) {
+                    res->status_code = 200;
+                    res->transfer_encoding = "chunked";
+
                     res->body_cb_ctx = req->params[i].val;
+                    res->body_cb = clax_command_cb;
+
                     break;
                 }
             }
+        }
+
+        if (!res->status_code) {
+            res->status_code = 400;
+            res->content_type = "text/plain";
+            memcpy(res->body, "Invalid params", 14);
+            res->body_len = 14;
         }
     }
     else {

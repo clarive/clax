@@ -250,6 +250,9 @@ int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, siz
             clax_log("Reading failed!");
             return -1;
         }
+        /*else if (ret == 0) {*/
+            /*abort();*/
+        /*}*/
 
         ret = clax_http_parse(&request, buf, ret);
 
@@ -282,19 +285,24 @@ int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, siz
         send_cb(ctx, "Content-Type: ", 14);
         send_cb(ctx, response.content_type, strlen(response.content_type));
         send_cb(ctx, "\r\n", 2);
-        send_cb(ctx, "\r\n", 2);
     }
 
     if (response.transfer_encoding) {
         send_cb(ctx, "Transfer-Encoding: ", 19);
         send_cb(ctx, response.transfer_encoding, strlen(response.transfer_encoding));
         send_cb(ctx, "\r\n", 2);
-        send_cb(ctx, "\r\n", 2);
     }
 
     if (response.body_len) {
+        char buf[255];
+
+        send_cb(ctx, "Content-Length: ", 16);
+        sprintf(buf, "%d\r\n\r\n", response.body_len);
+        send_cb(ctx, buf, strlen(buf));
+
         send_cb(ctx, response.body, response.body_len);
     } else if (response.body_cb) {
+        send_cb(ctx, "\r\n", 2);
         response.body_cb(response.body_cb_ctx, clax_chunked, send_cb, ctx);
     }
 

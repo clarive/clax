@@ -20,6 +20,7 @@ struct clax_http_status_message {
 };
 struct clax_http_status_message clax_http_messages[] = {
     {200, "OK"},
+    {400, "Bad Request"},
     {404, "Not Found"}
 };
 
