@@ -134,7 +134,7 @@ int body_cb(http_parser *p, const char *buf, size_t len)
 
                     int j;
                     for (j = 0; j < len; j++) {
-                        if (buf[j] == '&' || buf[j] == ';') {
+                        if (buf[j] == '&') {
                             mode = PARAM_MODE_KEY;
 
                             save_param(req, key, key_len, val, val_len);
@@ -192,7 +192,7 @@ void clax_http_url_decode(char *str)
             *p = code;
 
             if (*(p + 3)) {
-                strcpy(p + 1, p + 3);
+                memmove(p + 1, p + 3, strlen(p + 3) + 1);
             }
             else {
                 *(p + 1) = 0;

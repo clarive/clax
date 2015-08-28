@@ -92,7 +92,7 @@ TEST_START(clax_http_parse_parses_form_body)
     _parse(&request, "Content-Type: application/x-www-form-urlencoded\r\n");
     _parse(&request, "Content-Length: 32\r\n");
     _parse(&request, "\r\n");
-    _parse(&request, "&&&&&foo&foo=&&&foo=bar;=bar&&&&");
+    _parse(&request, "&&&&&foo&foo=&&&foo=bar&=bar&&&&");
 
     ASSERT_EQ(request.params_num, 4)
     ASSERT_STR_EQ(request.params[0].key, "foo")
@@ -162,6 +162,10 @@ TEST_START(clax_http_url_decode_decodes_string_inplace)
     strcpy(buf, "fo%20%20bar");
     clax_http_url_decode(buf);
     ASSERT_STR_EQ(buf, "fo  bar")
+
+    strcpy(buf, "while%20true%3B%20do%20echo%20foo%3B%20done");
+    clax_http_url_decode(buf);
+    ASSERT_STR_EQ(buf, "while true; do echo foo; done")
 }
 TEST_END
 
