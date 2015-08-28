@@ -9,6 +9,7 @@ void clax_command_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
 {
     char *command = ctx;
     va_list a_list;
+    int ret;
 
     va_start(a_list, chunk_cb);
 
@@ -18,12 +19,17 @@ void clax_command_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
         int ret = clax_command(command, chunk_cb, a_list);
 
         snprintf(buf, sizeof(buf), "--\nexit=%d", ret);
-        chunk_cb(buf, strlen(buf), a_list);
+        ret = chunk_cb(buf, strlen(buf), a_list);
+
+        if (ret < 0) goto exit;
     }
 
-    chunk_cb(NULL, 0, a_list);
+    ret = chunk_cb(NULL, 0, a_list);
 
+exit:
     va_end(a_list);
+
+    return;
 }
 
 void clax_dispatch(clax_http_request_t *req, clax_http_response_t *res)

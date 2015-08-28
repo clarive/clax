@@ -18,6 +18,21 @@ void clax_command_timeout()
     alarm_fired = 1;
 }
 
+void clax_kill_kid(popen2_t *kid)
+{
+    int ret;
+
+    clax_log("Killing pgroup=%d", -kid->pid);
+    ret = kill(-kid->pid, SIGTERM);
+    if (ret != 0)
+        clax_log("Killing pgroup failed");
+
+    clax_log("Killing pid=%d", kid->pid);
+    ret = kill(kid->pid, SIGTERM);
+    if (ret != 0)
+        kill(kid->pid, SIGKILL);
+}
+
 int clax_command(char *command, clax_http_chunk_cb_t chunk_cb, va_list a_list_)
 {
     char buf[1024];
@@ -58,15 +73,7 @@ int clax_command(char *command, clax_http_chunk_cb_t chunk_cb, va_list a_list_)
             int kill_ret;
             clax_log("Command timeout reached=%d", timeout);
 
-            clax_log("Killing pgroup=%d", -kid.pid);
-            kill_ret = kill(-kid.pid, SIGTERM);
-            if (kill_ret != 0)
-                clax_log("Killing pgroup failed");
-
-            clax_log("Killing pid=%d", kid.pid);
-            kill(kid.pid, SIGTERM);
-            if (kill_ret != 0)
-                kill(kid.pid, SIGKILL);
+            clax_kill_kid(&kid);
 
             break;
         }
@@ -88,7 +95,12 @@ int clax_command(char *command, clax_http_chunk_cb_t chunk_cb, va_list a_list_)
             break;
         }
 
-        chunk_cb(buf, ret, a_list);
+        ret = chunk_cb(buf, ret, a_list);
+        if (ret < 0) {
+            clax_log("Returning chunk failed. Client must be disconnected. Exiting");
+            clax_kill_kid(&kid);
+            break;
+        }
     };
 
     ret = pclose2(&kid);

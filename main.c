@@ -155,7 +155,7 @@ int clax_recv_ssl(void *ctx, unsigned char *buf, size_t len)
 
     ret = mbedtls_ssl_read(ssl, buf, len);
 
-    if ( ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE )
+    if (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE)
         return EAGAIN;
 
     if (ret == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY || ret == MBEDTLS_ERR_NET_CONN_RESET) {
@@ -223,6 +223,7 @@ int clax_chunked(char *buf, size_t len, va_list a_list_)
     int (*send_cb)(void *ctx, const unsigned char *buf, size_t len);
     void *ctx;
     va_list a_list;
+    int ret;
 
     va_copy(a_list, a_list_);
 
@@ -232,13 +233,19 @@ int clax_chunked(char *buf, size_t len, va_list a_list_)
 
     if (len) {
         olen = sprintf(obuf, "%x\r\n", len);
-        send_cb(ctx, obuf, olen);
-        send_cb(ctx, buf, len);
-        send_cb(ctx, "\r\n", 2);
+        ret = send_cb(ctx, obuf, olen);
+        if (ret < 0) return -1;
+        ret = send_cb(ctx, buf, len);
+        if (ret < 0) return -1;
+        ret = send_cb(ctx, "\r\n", 2);
+        if (ret < 0) return -1;
     }
     else {
-        send_cb(ctx, "0\r\n\r\n", 5);
+        ret = send_cb(ctx, "0\r\n\r\n", 5);
+        if (ret < 0) return -1;
     }
+
+    return 0;
 }
 
 int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, size_t len),
@@ -293,9 +300,12 @@ int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, siz
 
     const char *status_message = clax_http_status_message(response.status_code);
 
-    send_cb(ctx, "HTTP/1.1 ", 9);
-    send_cb(ctx, status_message, strlen(status_message));
-    send_cb(ctx, "\r\n", 2);
+    ret = send_cb(ctx, "HTTP/1.1 ", 9);
+    if (ret < 0) goto exit;
+    ret = send_cb(ctx, status_message, strlen(status_message));
+    if (ret < 0) goto exit;
+    ret = send_cb(ctx, "\r\n", 2);
+    if (ret < 0) goto exit;
 
     if (response.content_type) {
         send_cb(ctx, "Content-Type: ", 14);
@@ -322,6 +332,7 @@ int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, siz
         response.body_cb(response.body_cb_ctx, clax_chunked, send_cb, ctx);
     }
 
+exit:
     if (ret < 0) {
         clax_log("failed!");
         return -1;
@@ -491,7 +502,7 @@ exit:
     if ( ret != 0 ) {
         char error_buf[100];
         mbedtls_strerror( ret, error_buf, 100 );
-        clax_log("Last error was: %d - %s\n\n", ret, error_buf );
+        clax_log("Last error was: %d - %s", ret, error_buf );
     }
 #endif
 
