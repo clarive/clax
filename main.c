@@ -26,6 +26,7 @@
 #include "mbedtls/certs.h"
 #include "mbedtls/x509.h"
 #include "mbedtls/ssl.h"
+#include "mbedtls/net.h"
 #include "mbedtls/error.h"
 #include "mbedtls/debug.h"
 #include "mbedtls/ssl_cache.h"
@@ -130,7 +131,7 @@ int clax_recv(void *ctx,  unsigned char *buf, size_t len)
 
     ret = (int)read(fd, buf, len);
 
-    clax_log("recv (%d)=%d from %d", fd, ret, len);
+    /*clax_log("recv (%d)=%d from %d", fd, ret, len);*/
 
     return ret;
 }
@@ -142,7 +143,7 @@ int clax_send( void *ctx, const unsigned char *buf, size_t len )
 
     ret = (int)write(fd, buf, len);
 
-    clax_log("send (%d)=%d from %d", fd, ret, len);
+    /*clax_log("send (%d)=%d from %d", fd, ret, len);*/
 
     return ret;
 }
@@ -157,7 +158,11 @@ int clax_recv_ssl(void *ctx, unsigned char *buf, size_t len)
     if ( ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE )
         return EAGAIN;
 
-    clax_log("recv (ssl)=%d from %d", ret, len);
+    if (ret == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY || ret == MBEDTLS_ERR_NET_CONN_RESET) {
+        return 0;
+    }
+
+    /*clax_log("recv (ssl)=%d from %d", ret, len);*/
 
     return ret;
 }
@@ -174,7 +179,7 @@ int clax_send_ssl( void *ctx, const unsigned char *buf, size_t len )
         }
     }
 
-    clax_log("send (ssl)=%d from %d", ret, len);
+    /*clax_log("send (ssl)=%d from %d", ret, len);*/
 
     return ret;
 }
@@ -252,10 +257,7 @@ int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, siz
         memset(buf, 0, sizeof(buf));
         ret = recv_cb(ctx, buf, sizeof(buf));
 
-        clax_log("ret=%d", ret);
-
         if (ret == EAGAIN) {
-            clax_log("EAGAIN");
             continue;
         }
 
@@ -263,9 +265,10 @@ int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, siz
             clax_log("Reading failed!");
             return -1;
         }
-        /*else if (ret == 0) {*/
+        else if (ret == 0) {
+            clax_log("Connection closed");
             /*abort();*/
-        /*}*/
+        }
 
         ret = clax_http_parse(&request, buf, ret);
 
@@ -282,7 +285,7 @@ int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, siz
 
     clax_log("ok");
 
-    clax_log("Dispatching response...");
+    clax_log("Dispatching request...");
 
     clax_dispatch(&request, &response);
 

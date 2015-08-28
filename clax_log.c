@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <time.h>
 
 void clax_log_(const char *file, int line, const char *func_, char *fmt, ...)
 {
@@ -9,6 +10,8 @@ void clax_log_(const char *file, int line, const char *func_, char *fmt, ...)
     char *cp;
     va_list args;
     char func[1024];
+    time_t epoch;
+    struct tm *timeinfo;
 
     strcpy(func, func_);
 
@@ -22,10 +25,16 @@ void clax_log_(const char *file, int line, const char *func_, char *fmt, ...)
     size = vsnprintf(NULL, 0, fmt, args) + 1;
     va_end(args);
 
+    time(&epoch);
+    timeinfo = localtime(&epoch);
+
     va_start(args, fmt);
     cp = (char *)calloc(size, sizeof(char));
     if (cp != NULL && vsnprintf(cp, size, fmt, args) > 0) {
-        fprintf(stderr, "%d:%s:%d:%s(): %s\n", getpid(), file, line, func, cp);
+        char timestr[255];
+        strftime(timestr, sizeof(timestr), "%Y-%m-%d %T", timeinfo);
+
+        fprintf(stderr, "%s:%d:%s:%d:%s(): %s\n", timestr, getpid(), file, line, func, cp);
 
     }
     va_end(args);

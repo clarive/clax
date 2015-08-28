@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
+
 #include "popen2.h"
 
 #define READ 0
@@ -22,6 +23,8 @@ int popen2(const char *cmdline, popen2_t *child)
         return -1;
 
     if (pid == 0) {
+        setpgid(0, 0);
+
         close(pipe_stdin[WRITE]);
         dup2(pipe_stdin[READ], READ);
 
