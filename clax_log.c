@@ -25,7 +25,7 @@ void clax_log_(const char *file, int line, const char *func_, char *fmt, ...)
     va_start(args, fmt);
     cp = (char *)calloc(size, sizeof(char));
     if (cp != NULL && vsnprintf(cp, size, fmt, args) > 0) {
-        fprintf(stderr, "%s:%d:%s(): %s\n", file, line, func, cp);
+        fprintf(stderr, "%d:%s:%d:%s(): %s\n", getpid(), file, line, func, cp);
 
     }
     va_end(args);

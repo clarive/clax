@@ -68,13 +68,26 @@ void usage()
     abort();
 }
 
-void abort()
+void _exit(int code)
 {
     if (options._log_file) {
+        clax_log("Closing log file '%s'", options.log_file);
         fclose(options._log_file);
     }
 
-    exit(255);
+    clax_log("Exit=%d", code);
+
+    exit(code);
+}
+
+void abort()
+{
+    _exit(255);
+}
+
+void term(int dummy)
+{
+    abort();
 }
 
 void clax_parse_options(opt *options, int argc, char **argv)
@@ -488,16 +501,11 @@ exit:
     mbedtls_entropy_free( &entropy );
 }
 
-void _exit(int dummy)
-{
-    abort();
-}
-
 int main(int argc, char **argv)
 {
     memset(&options, 0, sizeof(opt));
 
-    signal(SIGINT, _exit);
+    signal(SIGINT, term);
 
     clax_parse_options(&options, argc, argv);
 
@@ -524,4 +532,6 @@ int main(int argc, char **argv)
 
     fflush(stdout);
     fclose(stdout);
+
+    _exit(0);
 }
