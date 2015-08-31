@@ -26,14 +26,14 @@ int command_vaargs_cb(char *buf, size_t len, va_list a_list)
     }
 }
 
-int _clax_command(char *command, clax_http_chunk_cb_t chunk_cb, ...)
+int _clax_command(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, ...)
 {
     int ret;
     va_list a_list;
 
     va_start(a_list, chunk_cb);
 
-    ret = clax_command(command, chunk_cb, a_list);
+    ret = clax_command(ctx, chunk_cb, a_list);
 
     va_end(a_list);
 
@@ -42,7 +42,9 @@ int _clax_command(char *command, clax_http_chunk_cb_t chunk_cb, ...)
 
 TEST_START(clax_command_runs_command)
 {
-    int ret = _clax_command("echo 'bar'", command_cb);
+    command_ctx_t ctx = {.command="echo 'bar'"};
+
+    int ret = _clax_command(&ctx, command_cb);
 
     ASSERT_EQ(ret, 0)
     ASSERT_EQ(output_len, 4)
@@ -52,7 +54,9 @@ TEST_END
 
 TEST_START(clax_command_runs_command_with_error)
 {
-    int ret = _clax_command("unknown-command 2>&1 > /dev/null", command_cb);
+    command_ctx_t ctx = {.command="unknown-command 2>&1 > /dev/null"};
+
+    int ret = _clax_command(&ctx, command_cb);
 
     ASSERT(ret != 0)
 }
@@ -60,7 +64,9 @@ TEST_END
 
 TEST_START(clax_command_runs_command_vaargs)
 {
-    _clax_command("echo 'bar'", command_vaargs_cb, "context");
+    command_ctx_t ctx = {.command="echo 'bar'"};
+
+    _clax_command(&ctx, command_vaargs_cb, "context");
 
     ASSERT_STR_EQ(context, "context");
 }

@@ -8,6 +8,7 @@
 #include "popen2.h"
 #include "clax_log.h"
 #include "clax_http.h"
+#include "clax_command.h"
 
 volatile int alarm_fired = 0;
 
@@ -33,13 +34,15 @@ void clax_kill_kid(popen2_t *kid)
         kill(kid->pid, SIGKILL);
 }
 
-int clax_command(char *command, clax_http_chunk_cb_t chunk_cb, va_list a_list_)
+int clax_command(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list a_list_)
 {
     char buf[1024];
     int ret;
     popen2_t kid;
     va_list a_list;
-    int timeout = 5;
+
+    char *command = ctx->command;
+    int timeout = ctx->timeout;
 
     va_copy(a_list, a_list_);
 
