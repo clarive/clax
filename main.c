@@ -216,6 +216,9 @@ int dev_random_entropy_poll( void *data, unsigned char *output,
     return( 0 );
 }
 
+#define TRY if ((
+#define GOTO ) < 0) {goto error;}
+
 int clax_chunked(char *buf, size_t len, va_list a_list_)
 {
     char obuf[255];
@@ -223,7 +226,6 @@ int clax_chunked(char *buf, size_t len, va_list a_list_)
     int (*send_cb)(void *ctx, const unsigned char *buf, size_t len);
     void *ctx;
     va_list a_list;
-    int ret;
 
     va_copy(a_list, a_list_);
 
@@ -233,19 +235,18 @@ int clax_chunked(char *buf, size_t len, va_list a_list_)
 
     if (len) {
         olen = sprintf(obuf, "%x\r\n", len);
-        ret = send_cb(ctx, obuf, olen);
-        if (ret < 0) return -1;
-        ret = send_cb(ctx, buf, len);
-        if (ret < 0) return -1;
-        ret = send_cb(ctx, "\r\n", 2);
-        if (ret < 0) return -1;
+        TRY send_cb(ctx, obuf, olen) GOTO
+        TRY send_cb(ctx, buf, len) GOTO
+        TRY send_cb(ctx, "\r\n", 2) GOTO
     }
     else {
-        ret = send_cb(ctx, "0\r\n\r\n", 5);
-        if (ret < 0) return -1;
+        TRY send_cb(ctx, "0\r\n\r\n", 5) GOTO
     }
 
     return 0;
+
+error:
+    return -1;
 }
 
 int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, size_t len),
@@ -300,47 +301,41 @@ int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, siz
 
     const char *status_message = clax_http_status_message(response.status_code);
 
-    ret = send_cb(ctx, "HTTP/1.1 ", 9);
-    if (ret < 0) goto exit;
-    ret = send_cb(ctx, status_message, strlen(status_message));
-    if (ret < 0) goto exit;
-    ret = send_cb(ctx, "\r\n", 2);
-    if (ret < 0) goto exit;
+    TRY send_cb(ctx, "HTTP/1.1 ", 9) GOTO
+    TRY send_cb(ctx, status_message, strlen(status_message)) GOTO
+    TRY send_cb(ctx, "\r\n", 2) GOTO
 
     if (response.content_type) {
-        send_cb(ctx, "Content-Type: ", 14);
-        send_cb(ctx, response.content_type, strlen(response.content_type));
-        send_cb(ctx, "\r\n", 2);
+        TRY send_cb(ctx, "Content-Type: ", 14) GOTO;
+        TRY send_cb(ctx, response.content_type, strlen(response.content_type)) GOTO;
+        TRY send_cb(ctx, "\r\n", 2) GOTO;
     }
 
     if (response.transfer_encoding) {
-        send_cb(ctx, "Transfer-Encoding: ", 19);
-        send_cb(ctx, response.transfer_encoding, strlen(response.transfer_encoding));
-        send_cb(ctx, "\r\n", 2);
+        TRY send_cb(ctx, "Transfer-Encoding: ", 19) GOTO;
+        TRY send_cb(ctx, response.transfer_encoding, strlen(response.transfer_encoding)) GOTO;
+        TRY send_cb(ctx, "\r\n", 2) GOTO;
     }
 
     if (response.body_len) {
         char buf[255];
 
-        send_cb(ctx, "Content-Length: ", 16);
+        TRY send_cb(ctx, "Content-Length: ", 16) GOTO;
         sprintf(buf, "%d\r\n\r\n", response.body_len);
-        send_cb(ctx, buf, strlen(buf));
+        TRY send_cb(ctx, buf, strlen(buf)) GOTO;
 
-        send_cb(ctx, response.body, response.body_len);
+        TRY send_cb(ctx, response.body, response.body_len) GOTO;
     } else if (response.body_cb) {
-        send_cb(ctx, "\r\n", 2);
+        TRY send_cb(ctx, "\r\n", 2) GOTO;
         response.body_cb(response.body_cb_ctx, clax_chunked, send_cb, ctx);
     }
 
-exit:
-    if (ret < 0) {
-        clax_log("failed!");
-        return -1;
-    }
-
-    clax_log("ok");
-
     return 1;
+
+error:
+    clax_log("failed!");
+
+    return -1;
 }
 
 void clax_loop_ssl()
