@@ -55,6 +55,9 @@ typedef struct {
 
 opt options;
 
+typedef int (*recv_cb_t)(void *ctx, unsigned char *buf, size_t len);
+typedef int (*send_cb_t)(void *ctx, const unsigned char *buf, size_t len);
+
 void usage()
 {
     fprintf(stderr,
@@ -223,7 +226,7 @@ int clax_chunked(char *buf, size_t len, va_list a_list_)
 {
     char obuf[255];
     int olen;
-    int (*send_cb)(void *ctx, const unsigned char *buf, size_t len);
+    send_cb_t send_cb;
     void *ctx;
     va_list a_list;
 
@@ -249,18 +252,12 @@ error:
     return -1;
 }
 
-int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, size_t len),
-        int (*recv_cb)(void *ctx, unsigned char *buf, size_t len)
-        ) {
+int clax_loop_read_parse(void *ctx, recv_cb_t recv_cb, clax_http_request_t *request)
+{
     int ret = 0;
     int len = 0;
     unsigned char buf[1024];
 
-    clax_http_init();
-    memset(&request, 0, sizeof(clax_http_request_t));
-    memset(&response, 0, sizeof(clax_http_response_t));
-
-    clax_log("Reading & parsing request...");
     do {
         memset(buf, 0, sizeof(buf));
         ret = recv_cb(ctx, buf, sizeof(buf));
@@ -278,7 +275,7 @@ int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, siz
             /*abort();*/
         }
 
-        ret = clax_http_parse(&request, buf, ret);
+        ret = clax_http_parse(request, buf, ret);
 
         if (ret < 0) {
             clax_log("Parsing failed!");
@@ -291,44 +288,70 @@ int clax_loop(void *ctx, int (*send_cb)(void *ctx, const unsigned char *buf, siz
         }
     } while (1);
 
-    clax_log("ok");
+    return 0;
+}
 
-    clax_log("Dispatching request...");
+int clax_loop_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t *response)
+{
+    int ret = 0;
+    int len = 0;
+    unsigned char buf[1024];
 
-    clax_dispatch(&request, &response);
-
-    clax_log("Writing response...");
-
-    const char *status_message = clax_http_status_message(response.status_code);
+    const char *status_message = clax_http_status_message(response->status_code);
 
     TRY send_cb(ctx, "HTTP/1.1 ", 9) GOTO
     TRY send_cb(ctx, status_message, strlen(status_message)) GOTO
     TRY send_cb(ctx, "\r\n", 2) GOTO
 
-    if (response.content_type) {
+    if (response->content_type) {
         TRY send_cb(ctx, "Content-Type: ", 14) GOTO;
-        TRY send_cb(ctx, response.content_type, strlen(response.content_type)) GOTO;
+        TRY send_cb(ctx, response->content_type, strlen(response->content_type)) GOTO;
         TRY send_cb(ctx, "\r\n", 2) GOTO;
     }
 
-    if (response.transfer_encoding) {
+    if (response->transfer_encoding) {
         TRY send_cb(ctx, "Transfer-Encoding: ", 19) GOTO;
-        TRY send_cb(ctx, response.transfer_encoding, strlen(response.transfer_encoding)) GOTO;
+        TRY send_cb(ctx, response->transfer_encoding, strlen(response->transfer_encoding)) GOTO;
         TRY send_cb(ctx, "\r\n", 2) GOTO;
     }
 
-    if (response.body_len) {
+    if (response->body_len) {
         char buf[255];
 
         TRY send_cb(ctx, "Content-Length: ", 16) GOTO;
-        sprintf(buf, "%d\r\n\r\n", response.body_len);
+        sprintf(buf, "%d\r\n\r\n", response->body_len);
         TRY send_cb(ctx, buf, strlen(buf)) GOTO;
 
-        TRY send_cb(ctx, response.body, response.body_len) GOTO;
-    } else if (response.body_cb) {
+        TRY send_cb(ctx, response->body, response->body_len) GOTO;
+    } else if (response->body_cb) {
         TRY send_cb(ctx, "\r\n", 2) GOTO;
-        response.body_cb(response.body_cb_ctx, clax_chunked, send_cb, ctx);
+
+        /* TODO: error handling */
+        response->body_cb(response->body_cb_ctx, clax_chunked, send_cb, ctx);
     }
+
+    return 0;
+
+error:
+    return -1;
+}
+
+int clax_loop(void *ctx, send_cb_t send_cb, recv_cb_t recv_cb) {
+    clax_http_init();
+    memset(&request, 0, sizeof(clax_http_request_t));
+    memset(&response, 0, sizeof(clax_http_response_t));
+
+    clax_log("Reading & parsing request...");
+    TRY clax_loop_read_parse(ctx, recv_cb, &request) GOTO;
+    clax_log("ok");
+
+    clax_log("Dispatching request...");
+    clax_dispatch(&request, &response);
+    clax_log("ok");
+
+    clax_log("Writing response...");
+    TRY clax_loop_write_response(ctx, send_cb, &response) GOTO;
+    clax_log("ok");
 
     return 1;
 
