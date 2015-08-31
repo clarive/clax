@@ -299,7 +299,7 @@ int clax_loop_read_parse(void *ctx, recv_cb_t recv_cb, clax_http_request_t *requ
         }
         else if (ret == 0) {
             clax_log("Connection closed");
-            /*abort();*/
+            return -1;
         }
 
         ret = clax_http_parse(request, buf, ret);
