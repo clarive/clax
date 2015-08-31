@@ -97,9 +97,7 @@ int clax_command(char *command, clax_http_chunk_cb_t chunk_cb, va_list a_list_)
 
         ret = chunk_cb(buf, ret, a_list);
         if (ret < 0) {
-            clax_log("Returning chunk failed. Client must be disconnected. Exiting");
-            clax_kill_kid(&kid);
-            break;
+            clax_log("Returning chunk failed. Client must be disconnected");
         }
     };
 
