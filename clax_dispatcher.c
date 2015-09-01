@@ -79,7 +79,7 @@ void clax_dispatch(clax_http_request_t *req, clax_http_response_t *res)
         }
     }
     else if (req->method == HTTP_POST && strcmp(path_info, "/upload") == 0) {
-        if (req->multipart_boundary) {
+        if (strlen(req->multipart_boundary)) {
             int i;
             for (i = 0; i < req->multiparts_num; i++) {
                 clax_http_multipart_t *multipart = &req->multiparts[i];
@@ -96,31 +96,24 @@ void clax_dispatch(clax_http_request_t *req, clax_http_response_t *res)
                     const char *name = clax_http_extract_kv(kv, "name", &name_len);
                     const char *filename = clax_http_extract_kv(kv, "filename", &filename_len);
 
-                    if (name && strncmp(name, "file", name_len) == 0 && filename) {
+                    if (name && (strncmp(name, "file", name_len) == 0) && filename) {
                         char path_to_file[1024] = "/tmp/";
                         strncat(path_to_file, filename, MIN(sizeof(path_to_file), filename_len));
 
-                        FILE *fh;
+                        int ret = clax_dispatcher_write_file(path_to_file, multipart->part, multipart->part_len);
 
-                        fh = fopen(path_to_file, "w");
-
-                        if (fh == NULL) {
+                        if (ret < 0) {
                             res->status_code = 500;
                             res->content_type = "application/json";
                             memcpy(res->body, "{\"message\":\"System error\"}", 26);
                             res->body_len = 26;
-
-                            break;
                         }
-
-                        fwrite(multipart->part, 1, multipart->part_len, fh);
-
-                        fclose(fh);
-
-                        res->status_code = 200;
-                        res->content_type = "application/json";
-                        memcpy(res->body, "{\"status\":\"ok\"}", 15);
-                        res->body_len = 15;
+                        else {
+                            res->status_code = 200;
+                            res->content_type = "application/json";
+                            memcpy(res->body, "{\"status\":\"ok\"}", 15);
+                            res->body_len = 15;
+                        }
 
                         break;
                     }
@@ -141,4 +134,21 @@ void clax_dispatch(clax_http_request_t *req, clax_http_response_t *res)
         memcpy(res->body, "Not found", 9);
         res->body_len = 9;
     }
+}
+
+int clax_dispatcher_write_file(char *fname, char *buf, size_t len)
+{
+    FILE *fh;
+
+    fh = fopen(fname, "w");
+
+    if (fh == NULL) {
+        return -1;
+    }
+
+    fwrite(buf, 1, len, fh);
+
+    fclose(fh);
+
+    return 0;
 }

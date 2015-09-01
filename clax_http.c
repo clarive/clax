@@ -5,7 +5,6 @@
 #include <stdarg.h>
 
 #include "http_parser/http_parser.h"
-#include "multipart_parser.h"
 #include "clax_http.h"
 #include "clax_log.h"
 #include "clax_http.h"
@@ -56,6 +55,15 @@ int headers_complete_cb(http_parser *p)
 
     req->method = p->method;
     req->headers_done = 1;
+
+    const char *content_type = clax_http_header_get(req->headers, req->headers_num, "Content-Type");
+    if (content_type && strncmp(content_type, "multipart/form-data; boundary=", 30) == 0) {
+        size_t boundary_len = strlen(content_type) - 30;
+        size_t tocopy = MIN(sizeof_struct_member(clax_http_request_t, multipart_boundary) - 2, boundary_len);
+
+        strcpy(req->multipart_boundary, "--");
+        strncpy(req->multipart_boundary + 2, content_type + 30, tocopy);
+    }
 
     return 0;
 }
@@ -243,8 +251,6 @@ int on_part_data_end(multipart_parser* p)
 {
     clax_http_request_t *request = multipart_parser_get_data(p);
 
-    clax_log("data end");
-
     if (request->multiparts_num < MAX_MULTIPARTS) {
         request->multiparts_num++;
     }
@@ -252,51 +258,51 @@ int on_part_data_end(multipart_parser* p)
     return 0;
 }
 
-int clax_http_parse_multipart(clax_http_request_t *req)
+int on_body_end(multipart_parser* p)
 {
-    size_t ret;
-    size_t nparsed;
+    clax_http_request_t *req = multipart_parser_get_data(p);
 
-    multipart_parser_settings callbacks;
-    memset(&callbacks, 0, sizeof(multipart_parser_settings));
+    clax_log("Done multipart parsing");
+    multipart_parser_free(req->multipart_parser);
 
-    callbacks.on_header_field = on_multipart_header_name;
-    callbacks.on_header_value = on_multipart_header_value;
-    callbacks.on_part_data = on_part_data;
-    callbacks.on_part_data_end = on_part_data_end;
-
-    multipart_parser* parser = multipart_parser_init(req->multipart_boundary, &callbacks);
-    multipart_parser_set_data(parser, req);
-
-    nparsed = multipart_parser_execute(parser, req->body, req->body_len);
-
-    if (nparsed == req->body_len) {
-        ret = 0;
-    }
-    else {
-        ret = -1;
-    }
-
-    multipart_parser_free(parser);
-
-    return ret;
+    return 0;
 }
 
 int clax_http_body(http_parser *p, const char *buf, size_t len)
 {
     clax_http_request_t *req = p->data;
 
-    clax_log("Reading body (%d)...", len);
+    if (strlen(req->multipart_boundary)) {
+        if (!req->multipart_parser) {
+            clax_log("Init multipart parser");
 
-    if (!req->body) {
-        req->body = (char *)malloc(sizeof(char) * len);
-        memcpy((void *)req->body, (const void*)buf, len);
-        req->body_len = len;
-    }
-    else {
-        req->body = (char *)realloc((void *)req->body, sizeof(char) * req->body_len + len);
-        memcpy((void *)req->body + req->body_len, (const void*)buf, len);
-        req->body_len += len;
+            req->multipart_callbacks.on_header_field = on_multipart_header_name;
+            req->multipart_callbacks.on_header_value = on_multipart_header_value;
+            req->multipart_callbacks.on_part_data = on_part_data;
+            req->multipart_callbacks.on_part_data_end = on_part_data_end;
+            req->multipart_callbacks.on_body_end = on_body_end;
+
+            req->multipart_parser = multipart_parser_init(req->multipart_boundary, &req->multipart_callbacks);
+            multipart_parser_set_data(req->multipart_parser, req);
+        }
+
+        size_t nparsed = multipart_parser_execute(req->multipart_parser, buf, len);
+
+        if (nparsed != len) {
+            clax_log("Multipart failed!");
+            return -1;
+        }
+    } else {
+        if (!req->body) {
+            req->body = (char *)malloc(sizeof(char) * len);
+            memcpy((void *)req->body, (const void*)buf, len);
+            req->body_len = len;
+        }
+        else {
+            req->body = (char *)realloc((void *)req->body, sizeof(char) * req->body_len + len);
+            memcpy((void *)req->body + req->body_len, (const void*)buf, len);
+            req->body_len += len;
+        }
     }
 
     return 0;
@@ -363,19 +369,8 @@ int clax_http_parse(http_parser *parser, clax_http_request_t *request, const cha
     if (request->message_done) {
         const char *content_type = clax_http_header_get(request->headers, request->headers_num, "Content-Type");
 
-        if (content_type) {
-            if (strcmp(content_type, "application/x-www-form-urlencoded") == 0) {
-                clax_http_parse_form(request, buf, len);
-            }
-            else if (strncmp(content_type, "multipart/form-data; boundary=", 30) == 0) {
-                size_t boundary_len = strlen(content_type) - 30;
-                size_t tocopy = MIN(sizeof_struct_member(clax_http_request_t, multipart_boundary) - 2, boundary_len);
-
-                strcpy(request->multipart_boundary, "--");
-                strncpy(request->multipart_boundary + 2, content_type + 30, tocopy);
-
-                clax_http_parse_multipart(request);
-            }
+        if (content_type && strcmp(content_type, "application/x-www-form-urlencoded") == 0) {
+            clax_http_parse_form(request, buf, len);
         }
 
         return 1;
@@ -447,7 +442,6 @@ int clax_http_read_parse(void *ctx, recv_cb_t recv_cb, http_parser *parser, clax
             clax_log("Request parsing done");
             break;
         } else if (ret == 0) {
-            clax_log("Waiting for more data...");
         }
     } while (1);
 

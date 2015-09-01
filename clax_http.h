@@ -8,6 +8,7 @@
 #define MAX_CHUNKS 16
 
 #include "http_parser/http_parser.h"
+#include "multipart_parser.h"
 
 typedef struct {
     char key[MAX_ELEMENT_SIZE];
@@ -39,6 +40,8 @@ typedef struct {
   clax_http_kv_t params[MAX_PARAMS];
   size_t params_num;
 
+  multipart_parser *multipart_parser;
+  multipart_parser_settings multipart_callbacks;
   char multipart_boundary[70];
   clax_http_multipart_t multiparts[MAX_MULTIPARTS];
   size_t multiparts_num;
