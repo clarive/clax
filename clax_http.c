@@ -225,6 +225,20 @@ int on_multipart_header_value(multipart_parser* p, const char *buf, size_t len)
     return 0;
 }
 
+void append_str(char **str, size_t *olen, const char *buf, size_t len)
+{
+    if (!*str) {
+        *str = (char *)malloc(sizeof(char) * len);
+        memcpy((void *)*str, (const void*)buf, len);
+        *olen = len;
+    }
+    else {
+        *str = (char *)realloc((void *)*str, sizeof(char) * *olen + len);
+        memcpy((void *)*str + *olen, (const void*)buf, len);
+        *olen += len;
+    }
+}
+
 int on_part_data(multipart_parser* p, const char *buf, size_t len)
 {
     clax_http_request_t *request = multipart_parser_get_data(p);
@@ -232,16 +246,7 @@ int on_part_data(multipart_parser* p, const char *buf, size_t len)
     if (request->multiparts_num < MAX_MULTIPARTS) {
         clax_http_multipart_t *multipart = &request->multiparts[request->multiparts_num];
 
-        if (!multipart->part) {
-            multipart->part = (char *)malloc(sizeof(char) * len);
-            memcpy((void *)multipart->part, (const void*)buf, len);
-            multipart->part_len = len;
-        }
-        else {
-            multipart->part = (char *)realloc((void *)multipart->part, sizeof(char) * multipart->part_len + len);
-            memcpy((void *)multipart->part + multipart->part_len, (const void*)buf, len);
-            multipart->part_len += len;
-        }
+        append_str(&multipart->part, &multipart->part_len, buf, len);
     }
 
     return 0;
@@ -293,16 +298,7 @@ int clax_http_body(http_parser *p, const char *buf, size_t len)
             return -1;
         }
     } else {
-        if (!req->body) {
-            req->body = (char *)malloc(sizeof(char) * len);
-            memcpy((void *)req->body, (const void*)buf, len);
-            req->body_len = len;
-        }
-        else {
-            req->body = (char *)realloc((void *)req->body, sizeof(char) * req->body_len + len);
-            memcpy((void *)req->body + req->body_len, (const void*)buf, len);
-            req->body_len += len;
-        }
+        append_str(&req->body, &req->body_len, buf, len);
     }
 
     return 0;
@@ -533,6 +529,13 @@ int clax_http_dispatch(void *ctx, send_cb_t send_cb, recv_cb_t recv_cb) {
     clax_log("Writing response...");
     TRY clax_http_write_response(ctx, send_cb, &response) GOTO;
     clax_log("ok");
+
+    if (request.multiparts_num) {
+        int i;
+        for (i = 0; i < request.multiparts_num; i++) {
+            free((void *)request.multiparts[i].part);
+        }
+    }
 
     free((void *)request.body);
 
