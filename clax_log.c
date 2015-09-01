@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <unistd.h>
 #include <time.h>
 
 void clax_log_(const char *file, int line, const char *func_, char *fmt, ...)

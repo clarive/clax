@@ -5,6 +5,10 @@
 #include "../../arch/zos/libascii/_Ascii_a.h"
 #endif
 
+#define COLOR_GREEN "\e[0;32m"
+#define COLOR_RED "\e[0;31m"
+#define COLOR_OFF "\e[0m"
+
 int u_tests;
 int u_tests_failed;
 int u_rv;
@@ -19,7 +23,7 @@ int u_rv;
     else {                                  \
         u_rv = 0;                           \
         u_tests_failed++;                   \
-        printf("not ok %d\n", u_tests + u_local_tests); \
+        printf(COLOR_RED "not ok %d\n" COLOR_OFF, u_tests + u_local_tests); \
         printf("# %s:%d\n", __FILE__, __LINE__); \
     }
 
@@ -33,12 +37,33 @@ int u_rv;
     }
 
 #define ASSERT_STR_EQ(got, exp)             \
-    ASSERT(strcmp(got, exp) == 0)           \
+    if (got != NULL) {                      \
+        ASSERT(strcmp(got, exp) == 0)       \
                                             \
-    if (!u_rv) {                            \
+        if (!u_rv) {                        \
+            printf("# " #got ":\n");        \
+            printf("#   got: '%s'\n", got); \
+            printf("#   exp: '%s'\n", exp); \
+        }                                   \
+    } else {                                \
+        u_local_tests++;                        \
+        u_tests_failed++; \
+                            \
+        printf(COLOR_RED "not ok %d\n" COLOR_OFF, u_tests + u_local_tests); \
+        printf("# %s:%d\n", __FILE__, __LINE__); \
+                                                    \
         printf("# " #got ":\n");            \
-        printf("#   got: '%s'\n", got);      \
-        printf("#   exp: '%s'\n", exp);      \
+        printf("#   got: NULL\n", got);     \
+        printf("#   exp: '%s'\n", exp);     \
+    }
+
+#define ASSERT_STRN_EQ(got, exp, len)         \
+    ASSERT(strncmp(got, exp, len) == 0)       \
+                                              \
+    if (!u_rv) {                              \
+        printf("# " #got ":\n");              \
+        printf("#   got: '%.*s'\n", len, got);\
+        printf("#   exp: '%s'\n", exp);       \
     }
 
 #define TEST_START(name)                    \
@@ -63,12 +88,12 @@ int u_rv;
     printf("1..%d\n", u_tests);                                  \
                                                                  \
     if (u_tests_failed) {                                        \
-        printf("FAILED tests\n");                                \
-        printf("Failed %d/%d tests\n", u_tests_failed, u_tests); \
+        printf(COLOR_RED "FAILED tests\n" COLOR_OFF);                                \
+        printf(COLOR_RED "Failed %d/%d tests\n" COLOR_OFF, u_tests_failed, u_tests); \
                                                                  \
         exit(255);                                               \
     } else {                                                     \
-        printf("SUCCESS\n");                                     \
+        printf(COLOR_GREEN "SUCCESS\n" COLOR_OFF);                                     \
     }                                                            \
                                                                  \
     exit(0);

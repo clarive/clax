@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+
 #include "clax_http.h"
 #include "clax_log.h"
 #include "clax_command.h"
-
-#define sizeof_struct_member(type, member) sizeof(((type *)0)->member)
+#include "clax_util.h"
 
 command_ctx_t command_ctx;
 
@@ -42,8 +42,6 @@ void clax_dispatch(clax_http_request_t *req, clax_http_response_t *res)
 {
     char *path_info = req->path_info;
 
-    memset(res, 0, sizeof(clax_http_response_t));
-
     if (strcmp(path_info, "/ping") == 0) {
         res->status_code = 200;
         res->content_type = "application/json";
@@ -66,7 +64,6 @@ void clax_dispatch(clax_http_request_t *req, clax_http_response_t *res)
                 }
                 else if (strcmp(key, "timeout") == 0) {
                     command_ctx.timeout = atoi(req->params[i].val);
-                    clax_log("TIMEOUT=%d", command_ctx.timeout);
                 }
             }
         }
@@ -78,6 +75,63 @@ void clax_dispatch(clax_http_request_t *req, clax_http_response_t *res)
             res->status_code = 400;
             res->content_type = "text/plain";
             memcpy(res->body, "Invalid params", 14);
+            res->body_len = 14;
+        }
+    }
+    else if (req->method == HTTP_POST && strcmp(path_info, "/upload") == 0) {
+        if (req->multipart_boundary) {
+            int i;
+            for (i = 0; i < req->multiparts_num; i++) {
+                clax_http_multipart_t *multipart = &req->multiparts[i];
+
+                const char *content_disposition = clax_http_header_get(multipart->headers, multipart->headers_num, "Content-Disposition");
+                if (!content_disposition)
+                    continue;
+
+                if (strncmp(content_disposition, "form-data; ", 11) == 0) {
+                    const char *kv = content_disposition + 11;
+                    size_t name_len;
+                    size_t filename_len;
+
+                    const char *name = clax_http_extract_kv(kv, "name", &name_len);
+                    const char *filename = clax_http_extract_kv(kv, "filename", &filename_len);
+
+                    if (name && strncmp(name, "file", name_len) == 0 && filename) {
+                        char path_to_file[1024] = "/tmp/";
+                        strncat(path_to_file, filename, MIN(sizeof(path_to_file), filename_len));
+
+                        FILE *fh;
+
+                        fh = fopen(path_to_file, "w");
+
+                        if (fh == NULL) {
+                            res->status_code = 500;
+                            res->content_type = "application/json";
+                            memcpy(res->body, "{\"message\":\"System error\"}", 26);
+                            res->body_len = 26;
+
+                            break;
+                        }
+
+                        fwrite(multipart->part, 1, multipart->part_len, fh);
+
+                        fclose(fh);
+
+                        res->status_code = 200;
+                        res->content_type = "application/json";
+                        memcpy(res->body, "{\"status\":\"ok\"}", 15);
+                        res->body_len = 15;
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!res->status_code) {
+            res->status_code = 400;
+            res->content_type = "text/plain";
+            memcpy(res->body, "Bad request", 14);
             res->body_len = 14;
         }
     }

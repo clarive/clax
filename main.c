@@ -34,16 +34,9 @@
 #include "clax_http.h"
 #include "clax_log.h"
 
-#define HTTP_RESPONSE \
-    "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n" \
-    "Hello from clax!\r\n"
-
 #define DEBUG_LEVEL 0
 
 #define DEV_RANDOM_THRESHOLD        32
-
-clax_http_request_t request;
-clax_http_response_t response;
 
 typedef struct {
     char entropy_file[255];
@@ -53,14 +46,11 @@ typedef struct {
     char cert_file[255];
     char key_file[255];
 
-    /* private */
+    /* Private */
     FILE *_log_file;
 } opt;
 
 opt options;
-
-typedef int (*recv_cb_t)(void *ctx, unsigned char *buf, size_t len);
-typedef int (*send_cb_t)(void *ctx, const unsigned char *buf, size_t len);
 
 void usage()
 {
@@ -173,7 +163,7 @@ int clax_send(void *ctx, const unsigned char *buf, size_t len)
 
     ret = (int)write(fd, buf, len);
 
-    /*clax_log("send (%d)=%d from %d", fd, ret, len);*/
+    clax_log("send (%d)=%d from %d", fd, ret, len);
 
     return ret;
 }
@@ -244,148 +234,6 @@ int dev_random_entropy_poll(void *data, unsigned char *output,
     *olen = len;
 
     return 0;
-}
-
-#define TRY if ((
-#define GOTO ) < 0) {goto error;}
-
-int clax_chunked(char *buf, size_t len, va_list a_list_)
-{
-    char obuf[255];
-    int olen;
-    send_cb_t send_cb;
-    void *ctx;
-    va_list a_list;
-
-    va_copy(a_list, a_list_);
-
-    send_cb = va_arg(a_list, void *);
-
-    ctx = va_arg(a_list, void *);
-
-    if (len) {
-        olen = sprintf(obuf, "%x\r\n", len);
-        TRY send_cb(ctx, obuf, olen) GOTO
-        TRY send_cb(ctx, buf, len) GOTO
-        TRY send_cb(ctx, "\r\n", 2) GOTO
-    }
-    else {
-        TRY send_cb(ctx, "0\r\n\r\n", 5) GOTO
-    }
-
-    return 0;
-
-error:
-    return -1;
-}
-
-int clax_loop_read_parse(void *ctx, recv_cb_t recv_cb, clax_http_request_t *request)
-{
-    int ret = 0;
-    int len = 0;
-    unsigned char buf[1024];
-
-    do {
-        memset(buf, 0, sizeof(buf));
-        ret = recv_cb(ctx, buf, sizeof(buf));
-
-        if (ret == EAGAIN) {
-            continue;
-        }
-
-        if (ret < 0) {
-            clax_log("Reading failed!");
-            return -1;
-        }
-        else if (ret == 0) {
-            clax_log("Connection closed");
-            return -1;
-        }
-
-        ret = clax_http_parse(request, buf, ret);
-
-        if (ret < 0) {
-            clax_log("Parsing failed!");
-            return -1;
-        }
-        else if (ret == 1) {
-            break;
-        } else if (ret == 0) {
-            clax_log("Waiting for more data...");
-        }
-    } while (1);
-
-    return 0;
-}
-
-int clax_loop_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t *response)
-{
-    int ret = 0;
-    int len = 0;
-    unsigned char buf[1024];
-
-    const char *status_message = clax_http_status_message(response->status_code);
-
-    TRY send_cb(ctx, "HTTP/1.1 ", 9) GOTO
-    TRY send_cb(ctx, status_message, strlen(status_message)) GOTO
-    TRY send_cb(ctx, "\r\n", 2) GOTO
-
-    if (response->content_type) {
-        TRY send_cb(ctx, "Content-Type: ", 14) GOTO;
-        TRY send_cb(ctx, response->content_type, strlen(response->content_type)) GOTO;
-        TRY send_cb(ctx, "\r\n", 2) GOTO;
-    }
-
-    if (response->transfer_encoding) {
-        TRY send_cb(ctx, "Transfer-Encoding: ", 19) GOTO;
-        TRY send_cb(ctx, response->transfer_encoding, strlen(response->transfer_encoding)) GOTO;
-        TRY send_cb(ctx, "\r\n", 2) GOTO;
-    }
-
-    if (response->body_len) {
-        char buf[255];
-
-        TRY send_cb(ctx, "Content-Length: ", 16) GOTO;
-        sprintf(buf, "%d\r\n\r\n", response->body_len);
-        TRY send_cb(ctx, buf, strlen(buf)) GOTO;
-
-        TRY send_cb(ctx, response->body, response->body_len) GOTO;
-    } else if (response->body_cb) {
-        TRY send_cb(ctx, "\r\n", 2) GOTO;
-
-        /* TODO: error handling */
-        response->body_cb(response->body_cb_ctx, clax_chunked, send_cb, ctx);
-    }
-
-    return 0;
-
-error:
-    return -1;
-}
-
-int clax_loop(void *ctx, send_cb_t send_cb, recv_cb_t recv_cb) {
-    clax_http_init();
-    memset(&request, 0, sizeof(clax_http_request_t));
-    memset(&response, 0, sizeof(clax_http_response_t));
-
-    clax_log("Reading & parsing request...");
-    TRY clax_loop_read_parse(ctx, recv_cb, &request) GOTO;
-    clax_log("ok");
-
-    clax_log("Dispatching request...");
-    clax_dispatch(&request, &response);
-    clax_log("ok");
-
-    clax_log("Writing response...");
-    TRY clax_loop_write_response(ctx, send_cb, &response) GOTO;
-    clax_log("ok");
-
-    return 1;
-
-error:
-    clax_log("failed!");
-
-    return -1;
 }
 
 void clax_loop_ssl()
@@ -513,7 +361,7 @@ void clax_loop_ssl()
 
     clax_log("ok");
 
-    clax_loop(&ssl, clax_send_ssl, clax_recv_ssl);
+    clax_http_dispatch(&ssl, clax_send_ssl, clax_recv_ssl);
 
     clax_log("Closing the connection...");
 
@@ -574,7 +422,7 @@ int main(int argc, char **argv)
     clax_log("Option: log_file=%s", options.log_file);
 
     if (options.no_ssl) {
-        clax_loop(NULL, clax_send, clax_recv);
+        clax_http_dispatch(NULL, clax_send, clax_recv);
     } else {
         clax_loop_ssl();
     }

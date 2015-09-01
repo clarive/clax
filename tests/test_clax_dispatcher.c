@@ -8,6 +8,8 @@ TEST_START(clax_dispatch_sets_404_on_unknown_path)
     clax_http_request_t request;
     clax_http_response_t response;
 
+    memset(&response, 0, sizeof(clax_http_response_t));
+
     strcpy(request.path_info, "/unknown-path");
 
     clax_dispatch(&request, &response);
