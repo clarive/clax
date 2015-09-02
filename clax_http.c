@@ -418,7 +418,7 @@ int clax_http_parse(http_parser *parser, clax_http_request_t *request, const cha
         const char *content_type = clax_http_header_get(request->headers, request->headers_num, "Content-Type");
 
         if (content_type && strcmp(content_type, "application/x-www-form-urlencoded") == 0) {
-            clax_http_parse_form(request, buf, len);
+            clax_http_parse_form(request, request->body, request->body_len);
         }
 
         return 1;
