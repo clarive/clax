@@ -100,7 +100,15 @@ void clax_dispatch(clax_http_request_t *req, clax_http_response_t *res)
                         char path_to_file[1024] = "/tmp/";
                         strncat(path_to_file, filename, MIN(sizeof(path_to_file), filename_len));
 
-                        int ret = clax_dispatcher_write_file(path_to_file, multipart->part, multipart->part_len);
+                        int ret;
+                        if (multipart->part_fpath) {
+                            clax_log("Renaming file");
+                            ret = rename(multipart->part_fpath, path_to_file);
+                        }
+                        else {
+                            clax_log("Saving file");
+                            ret = clax_dispatcher_write_file(path_to_file, multipart->part, multipart->part_len);
+                        }
 
                         if (ret < 0) {
                             res->status_code = 500;

@@ -246,7 +246,43 @@ int on_part_data(multipart_parser* p, const char *buf, size_t len)
     if (request->multiparts_num < MAX_MULTIPARTS) {
         clax_http_multipart_t *multipart = &request->multiparts[request->multiparts_num];
 
-        append_str(&multipart->part, &multipart->part_len, buf, len);
+        if (multipart->part_len + len > 1024 * 1024) {
+            char *fpath = "/tmp/clax_temp";
+            if (!multipart->part_fh) {
+                clax_log("Part is too big, saving to file");
+
+                multipart->part_fh = fopen(fpath, "wb");
+
+                if (multipart->part_fh < 0) {
+                    clax_log("Creating file '%s' failed", fpath);
+                    return -1;
+                }
+
+                multipart->part_fpath = fpath;
+
+                if (multipart->part_len) {
+                    size_t wcount = fwrite(multipart->part, 1, multipart->part_len, multipart->part_fh);
+                    if (wcount != multipart->part_len) {
+                        clax_log("Error writing to file");
+                        return -1;
+                    }
+
+                    free(multipart->part);
+                    multipart->part = NULL;
+                }
+            }
+
+            size_t wcount = fwrite(buf, 1, len, multipart->part_fh);
+            if (wcount != len) {
+                clax_log("Error writing to file");
+                return -1;
+            }
+
+            multipart->part_len += len;
+        }
+        else {
+            append_str(&multipart->part, &multipart->part_len, buf, len);
+        }
     }
 
     return 0;
@@ -257,6 +293,13 @@ int on_part_data_end(multipart_parser* p)
     clax_http_request_t *request = multipart_parser_get_data(p);
 
     if (request->multiparts_num < MAX_MULTIPARTS) {
+        clax_http_multipart_t *multipart = &request->multiparts[request->multiparts_num];
+
+        if (multipart->part_fh) {
+            clax_log("Closing part file");
+            fclose(multipart->part_fh);
+        }
+
         request->multiparts_num++;
     }
 

@@ -19,6 +19,8 @@ typedef struct {
   clax_http_kv_t headers[MAX_HEADERS];
   size_t headers_num;
   char *part;
+  FILE *part_fh;
+  char *part_fpath;
   size_t part_len;
 } clax_http_multipart_t;
 
