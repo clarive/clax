@@ -30,6 +30,7 @@
 #endif
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 #include <unistd.h>
@@ -59,6 +60,8 @@
 
 #define DEV_RANDOM_THRESHOLD        32
 
+extern char *optarg;
+extern int opterr;
 opt options;
 
 clax_ctx_t clax_ctx;

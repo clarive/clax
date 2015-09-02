@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include "popen2.h"
 #include "clax_log.h"

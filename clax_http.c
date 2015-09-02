@@ -20,11 +20,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <unistd.h>
 
 #include "http_parser/http_parser.h"
+#include "multipart_parser.h"
 #include "clax.h"
 #include "clax_dispatcher.h"
 #include "clax_http.h"
@@ -254,7 +256,7 @@ void append_str(unsigned char **str, size_t *olen, const char *buf, size_t len)
     }
     else {
         *str = (unsigned char *)realloc((void *)*str, sizeof(char) * *olen + len);
-        memcpy((void *)*str + *olen, (const void*)buf, len);
+        memcpy((void *)(*str + *olen), (const void*)buf, len);
         *olen += len;
     }
 }
@@ -281,7 +283,7 @@ int on_part_data(multipart_parser* p, const char *buf, size_t len)
 
                 multipart->part_fh = fopen(fpath, "wb");
 
-                if (multipart->part_fh < 0) {
+                if (multipart->part_fh == NULL) {
                     clax_log("Creating file '%s' failed", fpath);
                     return -1;
                 }
@@ -390,7 +392,7 @@ void clax_http_url_decode(char *str)
             buf[1] = *(p + 2);
             buf[2] = 0;
 
-            sscanf(buf, "%x", &code);
+            sscanf(buf, "%x", (unsigned int *)&code);
 
             *p = code;
 
