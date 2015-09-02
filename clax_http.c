@@ -458,7 +458,10 @@ int clax_http_chunked(char *buf, size_t len, va_list a_list_)
 
     va_copy(a_list, a_list_);
 
-    send_cb = va_arg(a_list, void *);
+    /* This is a nasty hack to fix this warning (sorry):
+     * ISO C forbids assignment between function pointer and ‘void *’
+     */
+    *(void **)(&send_cb) = va_arg(a_list, void *);
 
     ctx = va_arg(a_list, void *);
 
