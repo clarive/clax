@@ -204,7 +204,7 @@ int clax_send(void *ctx, const unsigned char *buf, size_t len)
 
     ret = (int)write(fd, buf, len);
 
-    clax_log("send (%d)=%d from %d", fd, ret, len);
+    /*clax_log("send (%d)=%d from %d", fd, ret, len);*/
 
     return ret;
 }
@@ -449,7 +449,7 @@ int main(int argc, char **argv)
     clax_ctx.options = &options;
 
     if (options.log_file[0]) {
-        options._log_file = fopen(options.log_file, "w");
+        options._log_file = fopen(options.log_file, "a");
         if (options._log_file == NULL) {
             abort();
         }
