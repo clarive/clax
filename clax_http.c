@@ -5,6 +5,7 @@
 #include <stdarg.h>
 
 #include "http_parser/http_parser.h"
+#include "clax.h"
 #include "clax_http.h"
 #include "clax_log.h"
 #include "clax_http.h"
@@ -247,9 +248,17 @@ int on_part_data(multipart_parser* p, const char *buf, size_t len)
         clax_http_multipart_t *multipart = &request->multiparts[request->multiparts_num];
 
         if (multipart->part_len + len > 1024 * 1024) {
-            char *fpath = "/tmp/clax_temp";
             if (!multipart->part_fh) {
-                clax_log("Part is too big, saving to file");
+                int fd;
+                char *template = ".fileXXXXXX";
+                char fpath[1024] = {0};
+                strncat(fpath, request->clax_ctx->options->root, sizeof(fpath) - strlen(template));
+                strcat(fpath, template);
+                fd = mkstemp(fpath);
+                if (fd < 0) return -1;
+                close(fd);
+
+                clax_log("Part is too big, saving to file '%s'", fpath);
 
                 multipart->part_fh = fopen(fpath, "wb");
 
@@ -258,7 +267,7 @@ int on_part_data(multipart_parser* p, const char *buf, size_t len)
                     return -1;
                 }
 
-                multipart->part_fpath = fpath;
+                strcpy(multipart->part_fpath, fpath);
 
                 if (multipart->part_len) {
                     size_t wcount = fwrite(multipart->part, 1, multipart->part_len, multipart->part_fh);
@@ -536,7 +545,7 @@ error:
     return -1;
 }
 
-int clax_http_dispatch(void *ctx, send_cb_t send_cb, recv_cb_t recv_cb) {
+int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_cb, void *ctx) {
     http_parser parser;
     clax_http_request_t request;
     clax_http_response_t response;
@@ -545,6 +554,8 @@ int clax_http_dispatch(void *ctx, send_cb_t send_cb, recv_cb_t recv_cb) {
 
     memset(&request, 0, sizeof(clax_http_request_t));
     memset(&response, 0, sizeof(clax_http_response_t));
+
+    request.clax_ctx = clax_ctx;
 
     clax_log("Reading & parsing request...");
     TRY clax_http_read_parse(ctx, recv_cb, &parser, &request) GOTO;
@@ -566,7 +577,7 @@ int clax_http_dispatch(void *ctx, send_cb_t send_cb, recv_cb_t recv_cb) {
     }
 
     clax_log("Dispatching request...");
-    clax_dispatch(&request, &response);
+    clax_dispatch(clax_ctx, &request, &response);
     clax_log("ok");
 
     clax_log("Writing response...");

@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <errno.h>
+#include <dirent.h>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -31,6 +32,7 @@
 #include "mbedtls/debug.h"
 #include "mbedtls/ssl_cache.h"
 
+#include "clax.h"
 #include "clax_http.h"
 #include "clax_log.h"
 
@@ -38,19 +40,9 @@
 
 #define DEV_RANDOM_THRESHOLD        32
 
-typedef struct {
-    char entropy_file[255];
-    char log_file[255];
-
-    char no_ssl;
-    char cert_file[255];
-    char key_file[255];
-
-    /* Private */
-    FILE *_log_file;
-} opt;
-
 opt options;
+
+clax_ctx_t clax_ctx;
 
 void usage()
 {
@@ -59,6 +51,7 @@ void usage()
             "Options:\n\n"
             "   common\n"
             "   ------\n"
+            "   -r <root>          home directory\n"
             "   -l <log_file>      path to log file\n"
             "\n"
             "   ssl\n"
@@ -107,10 +100,14 @@ void clax_parse_options(opt *options, int argc, char **argv)
 #endif
 
     opterr = 0;
-    while ((c = getopt(argc, argv, "hnl:e:t:p:")) != -1) {
+    while ((c = getopt(argc, argv, "hnl:e:t:p:r:")) != -1) {
         switch (c) {
         case 'l':
             strncpy(options->log_file, optarg, sizeof(options->log_file));
+            break;
+        case 'r':
+            /* -1 for the / if its needed */
+            strncpy(options->root, optarg, sizeof(options->root) - 1);
             break;
         case 'n':
             options->no_ssl = 1;
@@ -133,9 +130,31 @@ void clax_parse_options(opt *options, int argc, char **argv)
 
     if (!options->no_ssl) {
         if (!strlen(options->cert_file) || !strlen(options->key_file)) {
-            fprintf(stderr,
-                    "Error: cert_file and key_file are required\n\n"
-                   );
+            fprintf(stderr, "Error: cert_file and key_file are required\n\n");
+
+            usage();
+        }
+    }
+
+    if (!strlen(options->root)) {
+        fprintf(stderr, "Error: root is required\n\n");
+
+        usage();
+    } else {
+        DIR* dir = opendir(options->root);
+        if (dir) {
+            closedir(dir);
+
+            char last = options->root[strlen(options->root) - 1];
+            if (last != '/') {
+                strcat(options->root, "/");
+            }
+        } else if (ENOENT == errno) {
+            fprintf(stderr, "Error: provided root directory does not exist\n\n");
+
+            usage();
+        } else {
+            fprintf(stderr, "Error: cannot open provided root directory\n\n");
 
             usage();
         }
@@ -361,7 +380,7 @@ void clax_loop_ssl()
 
     clax_log("ok");
 
-    clax_http_dispatch(&ssl, clax_send_ssl, clax_recv_ssl);
+    clax_http_dispatch(&clax_ctx, clax_send_ssl, clax_recv_ssl, &ssl);
 
     clax_log("Closing the connection...");
 
@@ -401,10 +420,12 @@ exit:
 int main(int argc, char **argv)
 {
     memset(&options, 0, sizeof(opt));
+    memset(&clax_ctx, 0, sizeof(clax_ctx_t));
 
     signal(SIGINT, term);
 
     clax_parse_options(&options, argc, argv);
+    clax_ctx.options = &options;
 
     if (options.log_file[0]) {
         options._log_file = fopen(options.log_file, "w");
@@ -417,12 +438,13 @@ int main(int argc, char **argv)
 
     setbuf(stdout, NULL);
 
-    clax_log("Option: no_ssl=%d", options.no_ssl);
+    clax_log("Option: root=%s", options.root);
     clax_log("Option: entropy_file=%s", options.entropy_file);
     clax_log("Option: log_file=%s", options.log_file);
+    clax_log("Option: no_ssl=%d", options.no_ssl);
 
     if (options.no_ssl) {
-        clax_http_dispatch(NULL, clax_send, clax_recv);
+        clax_http_dispatch(&clax_ctx, clax_send, clax_recv, NULL);
     } else {
         clax_loop_ssl();
     }

@@ -9,6 +9,7 @@
 
 #include "http_parser/http_parser.h"
 #include "multipart_parser.h"
+#include "clax.h"
 
 typedef struct {
     char key[MAX_ELEMENT_SIZE];
@@ -20,7 +21,7 @@ typedef struct {
   size_t headers_num;
   char *part;
   FILE *part_fh;
-  char *part_fpath;
+  char part_fpath[1024];
   size_t part_len;
 } clax_http_multipart_t;
 
@@ -53,6 +54,8 @@ typedef struct {
   char message_done;
   char is_complete;
   char continue_expected;
+
+  clax_ctx_t *clax_ctx;
 } clax_http_request_t;
 
 typedef struct {
@@ -70,7 +73,7 @@ typedef int (*send_cb_t)(void *ctx, const unsigned char *buf, size_t len);
 
 /* Public */
 
-int clax_http_dispatch(void *ctx, send_cb_t send_cb, recv_cb_t recv_cb);
+int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_cb, void *ctx);
 const char *clax_http_extract_kv(const char *str, const char *key, size_t *len);
 const char *clax_http_header_get(clax_http_kv_t *headers, size_t size, char *name);
 

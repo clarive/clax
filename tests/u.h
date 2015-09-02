@@ -7,6 +7,7 @@
 
 #define COLOR_GREEN "\e[0;32m"
 #define COLOR_RED "\e[0;31m"
+#define COLOR_YELLOW "\e[0;33m"
 #define COLOR_OFF "\e[0m"
 
 int u_tests;
@@ -74,7 +75,7 @@ int u_rv;
 
 #define TEST_END                            \
         if (!u_local_tests) {               \
-            printf("# no tests\n");         \
+            printf(COLOR_YELLOW "# no tests\n" COLOR_OFF);         \
         }                                   \
         else {                              \
             u_tests += u_local_tests;       \

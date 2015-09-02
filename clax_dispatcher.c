@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "clax.h"
 #include "clax_http.h"
 #include "clax_log.h"
 #include "clax_command.h"
@@ -38,7 +39,7 @@ exit:
     return;
 }
 
-void clax_dispatch(clax_http_request_t *req, clax_http_response_t *res)
+void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     char *path_info = req->path_info;
 
@@ -88,8 +89,9 @@ void clax_dispatch(clax_http_request_t *req, clax_http_response_t *res)
                 if (!content_disposition)
                     continue;
 
-                if (strncmp(content_disposition, "form-data; ", 11) == 0) {
-                    const char *kv = content_disposition + 11;
+                char prefix[] = "form-data; ";
+                if (strncmp(content_disposition, prefix, strlen(prefix)) == 0) {
+                    const char *kv = content_disposition + strlen(prefix);
                     size_t name_len;
                     size_t filename_len;
 
@@ -97,16 +99,17 @@ void clax_dispatch(clax_http_request_t *req, clax_http_response_t *res)
                     const char *filename = clax_http_extract_kv(kv, "filename", &filename_len);
 
                     if (name && (strncmp(name, "file", name_len) == 0) && filename) {
-                        char path_to_file[1024] = "/tmp/";
-                        strncat(path_to_file, filename, MIN(sizeof(path_to_file), filename_len));
+                        char path_to_file[1024] = {0};
+                        strncpy(path_to_file, clax_ctx->options->root, sizeof(path_to_file));
+                        strncat(path_to_file, filename, MIN(sizeof(path_to_file) - strlen(path_to_file), filename_len));
 
                         int ret;
-                        if (multipart->part_fpath) {
-                            clax_log("Renaming file");
+                        if (multipart->part_fpath && strlen(multipart->part_fpath)) {
+                            clax_log("Renaming to file '%s' -> '%s'", multipart->part_fpath, path_to_file);
                             ret = rename(multipart->part_fpath, path_to_file);
                         }
                         else {
-                            clax_log("Saving file");
+                            clax_log("Saving to file '%s'", path_to_file);
                             ret = clax_dispatcher_write_file(path_to_file, multipart->part, multipart->part_len);
                         }
 

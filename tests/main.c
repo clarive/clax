@@ -20,6 +20,8 @@ int main(int argc, char *argv[])
     RUN_TEST(clax_http_status_message_returns_unknown_message)
 
     RUN_TEST(clax_dispatch_sets_404_on_unknown_path)
+    RUN_TEST(clax_dispatch_saves_upload_string_to_file)
+    RUN_TEST(clax_dispatch_saves_upload_file_to_file)
 
     RUN_TEST(clax_command_runs_command)
     RUN_TEST(clax_command_runs_command_vaargs)
