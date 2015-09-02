@@ -22,9 +22,11 @@
 #include <string.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <unistd.h>
 
 #include "http_parser/http_parser.h"
 #include "clax.h"
+#include "clax_dispatcher.h"
 #include "clax_http.h"
 #include "clax_log.h"
 #include "clax_http.h"
@@ -90,7 +92,6 @@ int headers_complete_cb(http_parser *p)
 
 int header_field_cb(http_parser *p, const char *buf, size_t len)
 {
-    size_t toread = MIN(MAX_ELEMENT_SIZE - 1, len);
     clax_http_request_t *req = p->data;
 
     if (req->headers_num < MAX_HEADERS) {
@@ -104,7 +105,6 @@ int header_field_cb(http_parser *p, const char *buf, size_t len)
 
 int header_value_cb(http_parser *p, const char *buf, size_t len)
 {
-    size_t toread = MIN(MAX_ELEMENT_SIZE - 1, len);
     clax_http_request_t *req = p->data;
 
     if (req->headers_num < MAX_HEADERS) {
@@ -245,15 +245,15 @@ int on_multipart_header_value(multipart_parser* p, const char *buf, size_t len)
     return 0;
 }
 
-void append_str(char **str, size_t *olen, const char *buf, size_t len)
+void append_str(unsigned char **str, size_t *olen, const char *buf, size_t len)
 {
     if (!*str) {
-        *str = (char *)malloc(sizeof(char) * len);
+        *str = (unsigned char *)malloc(sizeof(char) * len);
         memcpy((void *)*str, (const void*)buf, len);
         *olen = len;
     }
     else {
-        *str = (char *)realloc((void *)*str, sizeof(char) * *olen + len);
+        *str = (unsigned char *)realloc((void *)*str, sizeof(char) * *olen + len);
         memcpy((void *)*str + *olen, (const void*)buf, len);
         *olen += len;
     }
@@ -269,7 +269,7 @@ int on_part_data(multipart_parser* p, const char *buf, size_t len)
         if (multipart->part_len + len > 1024 * 1024) {
             if (!multipart->part_fh) {
                 int fd;
-                char *template = ".fileXXXXXX";
+                const char *template = ".fileXXXXXX";
                 char fpath[1024] = {0};
                 strncat(fpath, request->clax_ctx->options->root, sizeof(fpath) - strlen(template));
                 strcat(fpath, template);
@@ -437,7 +437,7 @@ int clax_http_parse(http_parser *parser, clax_http_request_t *request, const cha
         const char *content_type = clax_http_header_get(request->headers, request->headers_num, "Content-Type");
 
         if (content_type && strcmp(content_type, "application/x-www-form-urlencoded") == 0) {
-            clax_http_parse_form(request, request->body, request->body_len);
+            clax_http_parse_form(request, (char *)request->body, request->body_len);
         }
 
         return 1;
@@ -461,13 +461,13 @@ int clax_http_chunked(char *buf, size_t len, va_list a_list_)
     ctx = va_arg(a_list, void *);
 
     if (len) {
-        olen = sprintf(obuf, "%x\r\n", len);
-        TRY send_cb(ctx, obuf, olen) GOTO
-        TRY send_cb(ctx, buf, len) GOTO
-        TRY send_cb(ctx, "\r\n", 2) GOTO
+        olen = sprintf(obuf, "%x\r\n", (int)len);
+        TRY send_cb(ctx, (const unsigned char *)obuf, olen) GOTO
+        TRY send_cb(ctx, (const unsigned char *)buf, len) GOTO
+        TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO
     }
     else {
-        TRY send_cb(ctx, "0\r\n\r\n", 5) GOTO
+        TRY send_cb(ctx, (const unsigned char *)"0\r\n\r\n", 5) GOTO
     }
 
     return 0;
@@ -479,7 +479,6 @@ error:
 int clax_http_read_parse(void *ctx, recv_cb_t recv_cb, http_parser *parser, clax_http_request_t *request)
 {
     int ret = 0;
-    int len = 0;
     unsigned char buf[1024];
 
     do {
@@ -499,7 +498,7 @@ int clax_http_read_parse(void *ctx, recv_cb_t recv_cb, http_parser *parser, clax
             return -1;
         }
 
-        ret = clax_http_parse(parser, request, buf, ret);
+        ret = clax_http_parse(parser, request, (char *)buf, ret);
 
         if (ret < 0) {
             clax_log("Parsing failed!");
@@ -517,45 +516,43 @@ int clax_http_read_parse(void *ctx, recv_cb_t recv_cb, http_parser *parser, clax
 
 int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t *response)
 {
-    int ret = 0;
-    int len = 0;
-    unsigned char buf[1024];
+    char buf[1024];
 
     const char *status_message = clax_http_status_message(response->status_code);
 
-    TRY send_cb(ctx, "HTTP/1.1 ", 9) GOTO
+    TRY send_cb(ctx, (const unsigned char *)"HTTP/1.1 ", 9) GOTO
     sprintf(buf, "%d ", response->status_code);
-    TRY send_cb(ctx, buf, strlen(buf)) GOTO
-    TRY send_cb(ctx, status_message, strlen(status_message)) GOTO
-    TRY send_cb(ctx, "\r\n", 2) GOTO
+    TRY send_cb(ctx, (const unsigned char *)buf, strlen(buf)) GOTO
+    TRY send_cb(ctx, (const unsigned char *)status_message, strlen(status_message)) GOTO
+    TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO
 
     if (response->content_type) {
-        TRY send_cb(ctx, "Content-Type: ", 14) GOTO;
-        TRY send_cb(ctx, response->content_type, strlen(response->content_type)) GOTO;
-        TRY send_cb(ctx, "\r\n", 2) GOTO;
+        TRY send_cb(ctx, (const unsigned char *)"Content-Type: ", 14) GOTO;
+        TRY send_cb(ctx, (const unsigned char *)response->content_type, strlen(response->content_type)) GOTO;
+        TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO;
     }
 
     if (response->transfer_encoding) {
-        TRY send_cb(ctx, "Transfer-Encoding: ", 19) GOTO;
-        TRY send_cb(ctx, response->transfer_encoding, strlen(response->transfer_encoding)) GOTO;
-        TRY send_cb(ctx, "\r\n", 2) GOTO;
+        TRY send_cb(ctx, (const unsigned char *)"Transfer-Encoding: ", 19) GOTO;
+        TRY send_cb(ctx, (const unsigned char *)response->transfer_encoding, strlen(response->transfer_encoding)) GOTO;
+        TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO;
     }
 
     if (response->body_len) {
         char buf[255];
 
-        TRY send_cb(ctx, "Content-Length: ", 16) GOTO;
-        sprintf(buf, "%d\r\n\r\n", response->body_len);
-        TRY send_cb(ctx, buf, strlen(buf)) GOTO;
+        TRY send_cb(ctx, (const unsigned char *)"Content-Length: ", 16) GOTO;
+        sprintf(buf, "%d\r\n\r\n", (int)response->body_len);
+        TRY send_cb(ctx, (const unsigned char *)buf, strlen(buf)) GOTO;
 
         TRY send_cb(ctx, response->body, response->body_len) GOTO;
     } else if (response->body_cb) {
-        TRY send_cb(ctx, "\r\n", 2) GOTO;
+        TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO;
 
         /* TODO: error handling */
         response->body_cb(response->body_cb_ctx, clax_http_chunked, send_cb, ctx);
     } else {
-        TRY send_cb(ctx, "\r\n", 2) GOTO;
+        TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO;
     }
 
     return 0;

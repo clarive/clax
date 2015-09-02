@@ -23,6 +23,7 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "popen2.h"
 #include "clax_log.h"
@@ -92,7 +93,6 @@ int clax_command(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list a_li
             break;
 
         if (alarm_fired) {
-            int kill_ret;
             clax_log("Command timeout reached=%d", timeout);
 
             clax_kill_kid(&kid);

@@ -276,8 +276,7 @@ int dev_random_entropy_poll(void *data, unsigned char *output,
 
 void clax_loop_ssl()
 {
-    int ret, len;
-    unsigned char buf[1024];
+    int ret;
     const char *pers = "clax_server";
 
     mbedtls_entropy_context entropy;
@@ -318,7 +317,7 @@ void clax_loop_ssl()
         /*goto exit;*/
     /*}*/
 
-    ret =  mbedtls_pk_parse_keyfile(&pkey, (const unsigned char *) options.key_file, NULL);
+    ret =  mbedtls_pk_parse_keyfile(&pkey, (const char *) options.key_file, NULL);
     if (ret != 0) {
         clax_log("failed\n  !  mbedtls_pk_parse_key returned %d", ret);
         goto exit;

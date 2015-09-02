@@ -38,7 +38,7 @@ typedef struct {
 typedef struct {
   clax_http_kv_t headers[MAX_HEADERS];
   size_t headers_num;
-  char *part;
+  unsigned char *part;
   FILE *part_fh;
   char part_fpath[1024];
   size_t part_len;
@@ -56,7 +56,7 @@ typedef struct {
 
   size_t content_length;
 
-  const char *body;
+  unsigned char *body;
   size_t body_len;
 
   clax_http_kv_t params[MAX_PARAMS];
@@ -81,7 +81,7 @@ typedef struct {
   unsigned int status_code;
   char *content_type;
   char *transfer_encoding;
-  char body[MAX_ELEMENT_SIZE];
+  unsigned char body[MAX_ELEMENT_SIZE];
   size_t body_len;
   void (*body_cb)(void *ctx, clax_http_chunk_cb_t chunk_cb, ...);
   void *body_cb_ctx;

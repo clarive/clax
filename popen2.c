@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include "popen2.h"
 
@@ -50,7 +52,7 @@ int popen2(const char *cmdline, popen2_t *child)
         close(pipe_stdout[READ]);
         dup2(pipe_stdout[WRITE], WRITE);
 
-        execl("/bin/sh", "sh", "-c", cmdline, 0);
+        execl("/bin/sh", "sh", "-c", cmdline, NULL);
         exit(99);
     }
 

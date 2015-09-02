@@ -1,7 +1,7 @@
 PROGRAM=clax
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
-CFLAGS=-Icontrib/mbedtls -Icontrib/multipart-parser-c -Icontrib/jsmn -Icontrib -D_ALL_SOURCE
+CFLAGS=-Wall -Icontrib/mbedtls -Icontrib/multipart-parser-c -Icontrib/jsmn -Icontrib -D_ALL_SOURCE
 LFLAGS=
 LIBS=contrib/mbedtls/*.o contrib/jsmn/*.o contrib/http_parser/*.o contrib/multipart-parser-c/*.o
 

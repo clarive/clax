@@ -29,11 +29,27 @@
 
 command_ctx_t command_ctx;
 
+int clax_dispatcher_write_file(char *fname, unsigned char *buf, size_t len)
+{
+    FILE *fh;
+
+    fh = fopen(fname, "wb");
+
+    if (fh == NULL) {
+        return -1;
+    }
+
+    fwrite(buf, 1, len, fh);
+
+    fclose(fh);
+
+    return 0;
+}
+
 void clax_command_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
 {
     command_ctx_t *command_ctx = ctx;
     va_list a_list;
-    int ret;
 
     char *command = command_ctx->command;
 
@@ -50,7 +66,8 @@ void clax_command_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
         if (ret < 0) goto exit;
     }
 
-    ret = chunk_cb(NULL, 0, a_list);
+    /* TODO error handling */
+    chunk_cb(NULL, 0, a_list);
 
 exit:
     va_end(a_list);
@@ -164,21 +181,4 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
         memcpy(res->body, "Not found", 9);
         res->body_len = 9;
     }
-}
-
-int clax_dispatcher_write_file(char *fname, char *buf, size_t len)
-{
-    FILE *fh;
-
-    fh = fopen(fname, "w");
-
-    if (fh == NULL) {
-        return -1;
-    }
-
-    fwrite(buf, 1, len, fh);
-
-    fclose(fh);
-
-    return 0;
 }
