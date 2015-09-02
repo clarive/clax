@@ -89,7 +89,7 @@ TEST_START(clax_http_parse_returns_ok_chunks)
     rv = _parse(&parser, &request, "hello");
     ASSERT_EQ(request.headers_done, 1);
     ASSERT_EQ(request.message_done, 1);
-    ASSERT_EQ(request.body_len, 5);
+    ASSERT_EQ((int)request.body_len, 5);
     ASSERT_EQ(rv, 1)
 }
 TEST_END
@@ -134,7 +134,7 @@ TEST_START(clax_http_parse_saves_request)
     ASSERT(request.method == HTTP_GET)
     ASSERT_STR_EQ(request.url, "/there?foo=bar")
     ASSERT_STR_EQ(request.path_info, "/there")
-    ASSERT_EQ(request.headers_num, 2)
+    ASSERT_EQ((int)request.headers_num, 2)
     ASSERT_STR_EQ(request.headers[0].key, "Host")
     ASSERT_STR_EQ(request.headers[0].val, "localhost")
     ASSERT_STR_EQ(request.headers[1].key, "Connection")
@@ -146,7 +146,6 @@ TEST_START(clax_http_parse_saves_body)
 {
     http_parser parser;
     clax_http_request_t request;
-    char *p;
 
     _init_parser_and_request(&parser, &request);
 
@@ -156,8 +155,8 @@ TEST_START(clax_http_parse_saves_body)
     _parse(&parser, &request, "\r\n");
     _parse(&parser, &request, "&&&&&foo&foo=&&&foo=bar&=bar&&&&");
 
-    ASSERT_EQ(request.body_len, 32)
-    ASSERT_STR_EQ(request.body, "&&&&&foo&foo=&&&foo=bar&=bar&&&&");
+    ASSERT_EQ((int)request.body_len, 32)
+    ASSERT_STR_EQ((char *)request.body, "&&&&&foo&foo=&&&foo=bar&=bar&&&&");
 }
 TEST_END
 
@@ -165,7 +164,6 @@ TEST_START(clax_http_parse_parses_form_body)
 {
     http_parser parser;
     clax_http_request_t request;
-    char *p;
 
     _init_parser_and_request(&parser, &request);
 
@@ -176,7 +174,7 @@ TEST_START(clax_http_parse_parses_form_body)
     _parse(&parser, &request, "\r\n");
     _parse(&parser, &request, "&&&&&foo&foo=&&&foo=bar&=bar&&&&");
 
-    ASSERT_EQ(request.params_num, 4)
+    ASSERT_EQ((int)request.params_num, 4)
     ASSERT_STR_EQ(request.params[0].key, "foo")
     ASSERT_STR_EQ(request.params[0].val, "")
     ASSERT_STR_EQ(request.params[1].key, "foo")
@@ -192,7 +190,6 @@ TEST_START(clax_http_parse_parses_form_body_with_decoding)
 {
     http_parser parser;
     clax_http_request_t request;
-    char *p;
 
     _init_parser_and_request(&parser, &request);
 
@@ -203,7 +200,7 @@ TEST_START(clax_http_parse_parses_form_body_with_decoding)
     _parse(&parser, &request, "\r\n");
     _parse(&parser, &request, "f%20o=b%2Fr+baz%");
 
-    ASSERT_EQ(request.params_num, 1)
+    ASSERT_EQ((int)request.params_num, 1)
     ASSERT_STR_EQ(request.params[0].key, "f o")
     ASSERT_STR_EQ(request.params[0].val, "b/r baz%")
 }
@@ -213,7 +210,6 @@ TEST_START(clax_http_parse_parses_multipart_body)
 {
     http_parser parser;
     clax_http_request_t request;
-    char *p;
 
     _init_parser_and_request(&parser, &request);
 
@@ -244,29 +240,29 @@ TEST_START(clax_http_parse_parses_multipart_body)
     ASSERT_EQ(request.message_done, 1);
 
     ASSERT_STR_EQ(request.multipart_boundary, "--------------------------7ca8ddb13928aa86");
-    ASSERT_EQ(request.multiparts_num, 3);
-    ASSERT_EQ(request.multiparts[0].headers_num, 2);
+    ASSERT_EQ((int)request.multiparts_num, 3);
+    ASSERT_EQ((int)request.multiparts[0].headers_num, 2);
 
     ASSERT_STR_EQ(request.multiparts[0].headers[0].key, "Content-Disposition");
     ASSERT_STR_EQ(request.multiparts[0].headers[0].val, "form-data; name=\"datafile1\"; filename=\"r.gif\"");
     ASSERT_STR_EQ(request.multiparts[0].headers[1].key, "Content-Type");
     ASSERT_STR_EQ(request.multiparts[0].headers[1].val, "image/gif");
-    ASSERT_EQ(request.multiparts[0].part_len, 6);
-    ASSERT_STR_EQ(request.multiparts[0].part, "foobar");
+    ASSERT_EQ((int)request.multiparts[0].part_len, 6);
+    ASSERT_STR_EQ((char *)request.multiparts[0].part, "foobar");
 
     ASSERT_STR_EQ(request.multiparts[1].headers[0].key, "Content-Disposition");
     ASSERT_STR_EQ(request.multiparts[1].headers[0].val, "form-data; name=\"datafile2\"; filename=\"g.gif\"");
     ASSERT_STR_EQ(request.multiparts[1].headers[1].key, "Content-Type");
     ASSERT_STR_EQ(request.multiparts[1].headers[1].val, "image/gif");
-    ASSERT_EQ(request.multiparts[1].part_len, 6);
-    ASSERT_STR_EQ(request.multiparts[1].part, "barbaz");
+    ASSERT_EQ((int)request.multiparts[1].part_len, 6);
+    ASSERT_STR_EQ((char *)request.multiparts[1].part, "barbaz");
 
     ASSERT_STR_EQ(request.multiparts[2].headers[0].key, "Content-Disposition");
     ASSERT_STR_EQ(request.multiparts[2].headers[0].val, "form-data; name=\"datafile3\"; filename=\"b.gif\"");
     ASSERT_STR_EQ(request.multiparts[2].headers[1].key, "Content-Type");
     ASSERT_STR_EQ(request.multiparts[2].headers[1].val, "image/gif");
-    ASSERT_EQ(request.multiparts[2].part_len, 3);
-    ASSERT_STR_EQ(request.multiparts[2].part, "end");
+    ASSERT_EQ((int)request.multiparts[2].part_len, 3);
+    ASSERT_STR_EQ((char *)request.multiparts[2].part, "end");
 }
 TEST_END
 
@@ -330,15 +326,15 @@ TEST_START(clax_http_extract_kv_extracts_val)
     size_t len;
 
     val = clax_http_extract_kv("name=\"upload\"; filename=\"file.zip\"", "name", &len);
-    ASSERT_STRN_EQ(val, "upload", len);
-    ASSERT_EQ(len, 6);
+    ASSERT_STRN_EQ(val, "upload", (int)len);
+    ASSERT_EQ((int)len, 6);
 
     val = clax_http_extract_kv("name=\"upload\"; filename=\"file.zip\"", "filename", &len);
-    ASSERT_STRN_EQ(val, "file.zip", len);
-    ASSERT_EQ(len, 8);
+    ASSERT_STRN_EQ(val, "file.zip", (int)len);
+    ASSERT_EQ((int)len, 8);
 
     val = clax_http_extract_kv("name=\"upload\"; filename=\"file.zip\"", "something", &len);
     ASSERT(val == NULL);
-    ASSERT_EQ(len, 0);
+    ASSERT_EQ((int)len, 0);
 }
 TEST_END

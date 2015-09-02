@@ -35,6 +35,8 @@ int command_cb(char *buf, size_t len, va_list a_list)
     else {
         output[output_len] = 0;
     }
+
+    return 0;
 }
 
 char *context = "";
@@ -43,6 +45,8 @@ int command_vaargs_cb(char *buf, size_t len, va_list a_list)
     if (len) {
         context = va_arg(a_list, char *);
     }
+
+    return 0;
 }
 
 int _clax_command(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, ...)
@@ -66,7 +70,7 @@ TEST_START(clax_command_runs_command)
     int ret = _clax_command(&ctx, command_cb);
 
     ASSERT_EQ(ret, 0)
-    ASSERT_EQ(output_len, 4)
+    ASSERT_EQ((int)output_len, 4)
     ASSERT_STR_EQ(output, "bar\n");
 }
 TEST_END

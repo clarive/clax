@@ -24,10 +24,10 @@
 #include "../../arch/zos/libascii/_Ascii_a.h"
 #endif
 
-#define COLOR_GREEN "\e[0;32m"
-#define COLOR_RED "\e[0;31m"
-#define COLOR_YELLOW "\e[0;33m"
-#define COLOR_OFF "\e[0m"
+#define COLOR_GREEN "\x1b[0;32m"
+#define COLOR_RED "\x1b[0;31m"
+#define COLOR_YELLOW "\x1b[0;33m"
+#define COLOR_OFF "\x1b[0m"
 
 int u_tests;
 int u_tests_failed;
@@ -73,7 +73,7 @@ int u_rv;
         printf("# %s:%d\n", __FILE__, __LINE__); \
                                                     \
         printf("# " #got ":\n");            \
-        printf("#   got: NULL\n", got);     \
+        printf("#   got: NULL\n");     \
         printf("#   exp: '%s'\n", exp);     \
     }
 

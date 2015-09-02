@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include "u.h"
 
+#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
+
 int main(int argc, char *argv[])
 {
     RUN_TEST(clax_http_parse_returns_0_when_need_more)

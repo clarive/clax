@@ -19,6 +19,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+
 #include "clax.h"
 #include "clax_dispatcher.h"
 #include "u.h"
@@ -36,7 +38,7 @@ TEST_START(clax_dispatch_sets_404_on_unknown_path)
 
     ASSERT_EQ(response.status_code, 404)
     ASSERT_STR_EQ(response.content_type, "text/plain")
-    ASSERT_STR_EQ(response.body, "Not found")
+    ASSERT_STR_EQ((char *)response.body, "Not found")
 }
 TEST_END
 
@@ -69,7 +71,7 @@ TEST_START(clax_dispatch_saves_upload_string_to_file)
 
     char template[] = "/tmp/tmpdir.XXXXXX";
     char *tmp_dirname = mkdtemp(template);
-    mkdir(tmp_dirname);
+    mkdir(tmp_dirname, 0755);
 
     strcpy(options.root, tmp_dirname);
     strcat(options.root, "/");
@@ -82,7 +84,7 @@ TEST_START(clax_dispatch_saves_upload_string_to_file)
     request.multiparts[0].headers_num = 1;
     strcpy(request.multiparts[0].headers[0].key, "Content-Disposition");
     strcpy(request.multiparts[0].headers[0].val, "form-data; name=\"file\"; filename=\"foobar\"");
-    request.multiparts[0].part = "foobar";
+    request.multiparts[0].part = (unsigned char *)"foobar";
     request.multiparts[0].part_len = 6;
 
     clax_dispatch(&clax_ctx, &request, &response);
@@ -94,7 +96,7 @@ TEST_START(clax_dispatch_saves_upload_string_to_file)
     strcat(fpath, "foobar");
     char content[255];
     size_t ret = slurp_file(fpath, content, sizeof(content));
-    ASSERT_EQ(ret, 6);
+    ASSERT_EQ((int)ret, 6);
     ASSERT_STR_EQ(content, "foobar");
 
     unlink(fpath);
@@ -116,7 +118,7 @@ TEST_START(clax_dispatch_saves_upload_file_to_file)
 
     char template[] = "/tmp/tmpdir.XXXXXX";
     char *tmp_dirname = mkdtemp(template);
-    mkdir(tmp_dirname);
+    mkdir(tmp_dirname, 0777);
 
     strcpy(options.root, tmp_dirname);
     strcat(options.root, "/");
@@ -133,7 +135,7 @@ TEST_START(clax_dispatch_saves_upload_file_to_file)
     char tpath[255] = {0};
     strcpy(tpath, options.root);
     strcat(tpath, ".upload.file");
-    clax_dispatcher_write_file(tpath, "hello", 5);
+    clax_dispatcher_write_file(tpath, (const unsigned char *)"hello", 5);
 
     strcpy(request.multiparts[0].part_fpath, tpath);
     request.multiparts[0].part_len = 5;
@@ -147,7 +149,7 @@ TEST_START(clax_dispatch_saves_upload_file_to_file)
     strcat(fpath, "foobar");
     char content[255] = {0};
     size_t ret = slurp_file(fpath, content, sizeof(content));
-    ASSERT_EQ(ret, 5);
+    ASSERT_EQ((int)ret, 5);
     ASSERT_STR_EQ(content, "hello");
 
     unlink(fpath);
