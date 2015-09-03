@@ -176,3 +176,27 @@ TEST_START(clax_kv_list_iter_kv)
     clax_kv_list_free(&list);
 }
 TEST_END
+
+TEST_START(clax_kv_list_sets_new_val)
+{
+    clax_kv_list_t list;
+
+    clax_kv_list_init(&list);
+
+    clax_kv_list_set(&list, "foo", "bar");
+    ASSERT_STR_EQ(clax_kv_list_find(&list, "foo"), "bar");
+
+    clax_kv_list_set(&list, "foo", "baz");
+    ASSERT_STR_EQ(clax_kv_list_find(&list, "foo"), "baz");
+
+    clax_kv_list_free(&list);
+}
+TEST_END
+
+TEST_START(clax_buf2str_allocates_str_from_buffer)
+{
+    char *p = clax_buf2str("foo", 3);
+
+    ASSERT_EQ(strlen(p), 3);
+}
+TEST_END

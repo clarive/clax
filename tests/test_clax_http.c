@@ -147,11 +147,8 @@ TEST_START(clax_http_parse_saves_request)
     ASSERT_STR_EQ(request.url, "/there?foo=bar")
     ASSERT_STR_EQ(request.path_info, "/there")
 
-    ASSERT_EQ((int)request.headers_num, 2)
-    ASSERT_STR_EQ(request.headers[0].key, "Host")
-    ASSERT_STR_EQ(request.headers[0].val, "localhost")
-    ASSERT_STR_EQ(request.headers[1].key, "Connection")
-    ASSERT_STR_EQ(request.headers[1].val, "close")
+    ASSERT_STR_EQ(clax_kv_list_find(&request.headers, "Host"), "localhost");
+    ASSERT_STR_EQ(clax_kv_list_find(&request.headers, "Connection"), "close");
 
     clax_http_request_free(&request);
 }

@@ -59,6 +59,9 @@ int main(int argc, char *argv[])
     RUN_TEST(clax_kv_list_finds_kv)
     RUN_TEST(clax_kv_list_at_kv)
     RUN_TEST(clax_kv_list_iter_kv)
+    RUN_TEST(clax_kv_list_sets_new_val)
+
+    RUN_TEST(clax_buf2str_allocates_str_from_buffer)
 
     DONE_TESTING
 }

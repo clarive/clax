@@ -80,7 +80,7 @@ int headers_complete_cb(http_parser *p)
     req->method = p->method;
     req->headers_done = 1;
 
-    const char *content_type = clax_http_header_get(req->headers, req->headers_num, "Content-Type");
+    const char *content_type = clax_kv_list_find(&req->headers, "Content-Type");
     if (content_type && strncmp(content_type, "multipart/form-data; boundary=", 30) == 0) {
         size_t boundary_len = strlen(content_type) - 30;
         size_t tocopy = MIN(sizeof_struct_member(clax_http_request_t, multipart_boundary) - 2, boundary_len);
@@ -96,11 +96,11 @@ int header_field_cb(http_parser *p, const char *buf, size_t len)
 {
     clax_http_request_t *req = p->data;
 
-    if (req->headers_num < MAX_HEADERS) {
-        clax_http_request_t *req = p->data;
+    char *key = clax_buf2str((const unsigned char *)buf, len);
 
-        strncpy(req->headers[req->headers_num].key, buf, len);
-    }
+    clax_kv_list_push(&req->headers, key, "");
+
+    free(key);
 
     return 0;
 }
@@ -109,23 +109,21 @@ int header_value_cb(http_parser *p, const char *buf, size_t len)
 {
     clax_http_request_t *req = p->data;
 
-    if (req->headers_num < MAX_HEADERS) {
-        clax_http_request_t *req = p->data;
+    clax_kv_list_item_t *item = clax_kv_list_at(&req->headers, req->headers.size - 1);
 
-        char *key = req->headers[req->headers_num].key;
-        char *val = req->headers[req->headers_num].val;
+    char *key = item->key;
+    char *val = clax_buf2str((const unsigned char *)buf, len);
 
-        strncpy(val, buf, len);
+    clax_kv_list_set(&req->headers, key, val);
 
-        if (strcmp(key, "Content-Length") == 0) {
-            req->content_length = atoi(val);
-        }
-        else if (strcmp(key, "Expect") == 0 && strcmp(val, "100-continue") == 0) {
-            req->continue_expected = 1;
-        }
-
-        req->headers_num++;
+    if (strcmp(key, "Content-Length") == 0) {
+        req->content_length = atoi(val);
     }
+    else if (strcmp(key, "Expect") == 0 && strcmp(val, "100-continue") == 0) {
+        req->continue_expected = 1;
+    }
+
+    free(val);
 
     return 0;
 }
@@ -436,7 +434,7 @@ int clax_http_parse(http_parser *parser, clax_http_request_t *request, const cha
     }
 
     if (request->message_done) {
-        const char *content_type = clax_http_header_get(request->headers, request->headers_num, "Content-Type");
+        const char *content_type = clax_kv_list_find(&request->headers, "Content-Type");
 
         if (content_type && strcmp(content_type, "application/x-www-form-urlencoded") == 0) {
             clax_http_parse_form(request, (char *)request->body, request->body_len);
@@ -574,6 +572,8 @@ error:
 void clax_http_request_init(clax_http_request_t *request)
 {
     memset(request, 0, sizeof(clax_http_request_t));
+
+    clax_kv_list_init(&request->headers);
 }
 
 void clax_http_request_free(clax_http_request_t *request)
@@ -586,6 +586,8 @@ void clax_http_request_free(clax_http_request_t *request)
             free((void *)request->multiparts[i].part);
         }
     }
+
+    clax_kv_list_free(&request->headers);
 }
 
 void clax_http_response_init(clax_http_response_t *response)

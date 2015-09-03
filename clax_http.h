@@ -54,9 +54,7 @@ typedef struct {
   char url[MAX_ELEMENT_SIZE];
   char path_info[MAX_ELEMENT_SIZE];
 
-  clax_http_kv_t headers[MAX_HEADERS];
-  size_t headers_num;
-
+  clax_kv_list_t headers;
   size_t content_length;
 
   unsigned char *body;
