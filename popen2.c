@@ -75,5 +75,5 @@ int pclose2(popen2_t *child)
         pid = waitpid(child->pid, &pstat, 0);
     } while (pid == -1 && errno == EINTR);
 
-    return (pid == -1 ? -1 : pstat);
+    return (pid == -1 ? -1 : pstat / 256);
 }
