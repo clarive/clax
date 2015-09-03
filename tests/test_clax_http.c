@@ -19,6 +19,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
+
 #include "clax_http.h"
 #include "u.h"
 
@@ -336,5 +338,53 @@ TEST_START(clax_http_extract_kv_extracts_val)
     val = clax_http_extract_kv("name=\"upload\"; filename=\"file.zip\"", "something", &len);
     ASSERT(val == NULL);
     ASSERT_EQ((int)len, 0);
+}
+TEST_END
+
+char test_send_cb_buf[1024] = {0};
+size_t test_send_cb_buf_len = 0;
+size_t test_send_cb(void *ctx, const unsigned char *buf, size_t len)
+{
+    memcpy(test_send_cb_buf + test_send_cb_buf_len, buf, len);
+
+    test_send_cb_buf_len += len;
+
+    return len;
+}
+
+size_t clax_http_chunked_va(char *buf, size_t len, ...)
+{
+    va_list a_list;
+    size_t ret;
+
+    va_start(a_list, len);
+
+    ret = clax_http_chunked(buf, len, a_list);
+
+    va_end(a_list);
+
+    return ret;
+}
+
+TEST_START(clax_http_chunked_writes_chunks)
+{
+    test_send_cb_buf_len = 0;
+
+    clax_http_chunked_va("hello", 5, test_send_cb, NULL);
+    ASSERT_EQ(test_send_cb_buf_len, 10);
+    ASSERT_BUF_EQ(test_send_cb_buf, "5\r\nhello\r\n", 10);
+
+    test_send_cb_buf_len = 0;
+
+    clax_http_chunked_va(NULL, 0, test_send_cb, NULL);
+    ASSERT_EQ(test_send_cb_buf_len, 5);
+    ASSERT_BUF_EQ(test_send_cb_buf, "0\r\n\r\n", 5);
+
+    test_send_cb_buf_len = 0;
+
+    clax_http_chunked_va("Foo: bar\r\nBar: baz", 0, test_send_cb, NULL);
+    ASSERT_EQ(test_send_cb_buf_len, 25);
+    ASSERT_BUF_EQ(test_send_cb_buf, "0\r\nFoo: bar\r\nBar: baz\r\n\r\n", 25);
+
 }
 TEST_END

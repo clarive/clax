@@ -26,6 +26,8 @@
 #define MAX_MULTIPARTS 5
 #define MAX_CHUNKS 16
 
+#include <stdarg.h>
+
 #include "http_parser/http_parser.h"
 #include "multipart_parser.h"
 #include "clax.h"
@@ -95,6 +97,7 @@ typedef int (*send_cb_t)(void *ctx, const unsigned char *buf, size_t len);
 int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_cb, void *ctx);
 const char *clax_http_extract_kv(const char *str, const char *key, size_t *len);
 const char *clax_http_header_get(clax_http_kv_t *headers, size_t size, char *name);
+int clax_http_chunked(char *buf, size_t len, va_list a_list_);
 
 /* Private */
 

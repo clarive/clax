@@ -50,6 +50,7 @@ void clax_command_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
 {
     command_ctx_t *command_ctx = ctx;
     va_list a_list;
+    size_t ret;
 
     char *command = command_ctx->command;
 
@@ -58,16 +59,19 @@ void clax_command_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
     if (command && *command && strlen(command)) {
         char buf[255];
 
-        int ret = clax_command(command_ctx, chunk_cb, a_list);
+        int exit_code = clax_command(command_ctx, chunk_cb, a_list);
 
-        snprintf(buf, sizeof(buf), "--\nexit=%d", ret);
-        ret = chunk_cb(buf, strlen(buf), a_list);
+        strncpy(buf, "X-Clax-Exit: ", sizeof(buf));
+        snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%d", exit_code);
+
+        ret = chunk_cb(buf, 0, a_list);
 
         if (ret < 0) goto exit;
-    }
+    } else {
 
-    /* TODO error handling */
-    chunk_cb(NULL, 0, a_list);
+        /* TODO error handling */
+        chunk_cb(NULL, 0, a_list);
+    }
 
 exit:
     va_end(a_list);

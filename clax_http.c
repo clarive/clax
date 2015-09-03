@@ -466,13 +466,21 @@ int clax_http_chunked(char *buf, size_t len, va_list a_list_)
     ctx = va_arg(a_list, void *);
 
     if (len) {
-        olen = sprintf(obuf, "%x\r\n", (int)len);
+        olen = snprintf(obuf, sizeof(obuf), "%x\r\n", (int)len);
         TRY send_cb(ctx, (const unsigned char *)obuf, olen) GOTO
         TRY send_cb(ctx, (const unsigned char *)buf, len) GOTO
         TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO
     }
     else {
-        TRY send_cb(ctx, (const unsigned char *)"0\r\n\r\n", 5) GOTO
+        TRY send_cb(ctx, (const unsigned char *)"0\r\n", 3) GOTO
+
+        /* Trailing headers */
+        if (buf && strlen(buf)) {
+            TRY send_cb(ctx, (const unsigned char *)buf, strlen(buf)) GOTO
+            TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO
+        }
+
+        TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO
     }
 
     return 0;

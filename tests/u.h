@@ -86,6 +86,23 @@ int u_rv;
         printf("#   exp: '%s'\n", exp);       \
     }
 
+#define ASSERT_BUF_EQ(got, exp, len)    \
+    ASSERT(memcmp(got, exp, len) == 0)  \
+                                        \
+    if (!u_rv) {                        \
+        printf("# " #got ":\n");        \
+        printf("#   got: ");            \
+        for (int i = 0; i < len; i++) { \
+            printf("%02x ", got[i]);    \
+        }                               \
+        printf("\n");                   \
+        printf("#   exp: ");            \
+        for (int i = 0; i < len; i++) { \
+            printf("%02x ", exp[i]);    \
+        }                               \
+        printf("\n");                   \
+    }
+
 #define TEST_START(name)                    \
     void name() {                           \
         int u_local_tests = 0;              \
