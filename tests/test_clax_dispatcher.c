@@ -90,7 +90,7 @@ TEST_START(clax_dispatch_saves_upload_string_to_file)
     strcpy(request.multiparts[0].headers[0].key, "Content-Disposition");
     strcpy(request.multiparts[0].headers[0].val, "form-data; name=\"file\"; filename=\"foobar\"");
 
-    unsigned char *part = malloc(sizeof(char) * 6);
+    unsigned char *part = malloc(6 + 1);
     strcpy((char *)part, "foobar");
     request.multiparts[0].part = part;
     request.multiparts[0].part_len = 6;
