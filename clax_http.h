@@ -83,6 +83,7 @@ typedef struct {
   unsigned int status_code;
   char *content_type;
   char *transfer_encoding;
+  pid_t pid; /* TODO: make custom headers possible */
   unsigned char body[MAX_ELEMENT_SIZE];
   size_t body_len;
   void (*body_cb)(void *ctx, clax_http_chunk_cb_t chunk_cb, ...);

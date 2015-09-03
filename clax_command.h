@@ -21,12 +21,17 @@
 #define CLAX_COMMAND_H
 
 #include "clax_http.h"
+#include "popen2.h"
 
 typedef struct {
     char command[1024];
     int timeout;
+    popen2_t kid;
 } command_ctx_t;
 
-int clax_command(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list a_list);
+int clax_command_start(command_ctx_t *ctx);
+int clax_command_read_va(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, ...);
+int clax_command_read(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list a_list);
+int clax_command_close(command_ctx_t *ctx);
 
 #endif

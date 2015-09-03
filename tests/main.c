@@ -46,9 +46,10 @@ int main(int argc, char *argv[])
     RUN_TEST(clax_dispatch_saves_upload_file_to_file)
     RUN_TEST(clax_dispatch_returns_bad_request_when_wrong_params)
 
-    RUN_TEST(clax_command_runs_command)
+    RUN_TEST(clax_command_start_runs_command)
+    RUN_TEST(clax_command_start_returns_error)
+    RUN_TEST(clax_command_read_reads_output)
     RUN_TEST(clax_command_runs_command_vaargs)
-    RUN_TEST(clax_command_runs_command_with_error)
 
     RUN_TEST(clax_http_extract_kv_extracts_val)
 

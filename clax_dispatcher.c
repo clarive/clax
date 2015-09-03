@@ -46,34 +46,20 @@ int clax_dispatcher_write_file(char *fname, unsigned char *buf, size_t len)
     return 0;
 }
 
-void clax_command_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
+void clax_command_read_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
 {
     command_ctx_t *command_ctx = ctx;
     va_list a_list;
-    size_t ret;
-
-    char *command = command_ctx->command;
+    char buf[16];
 
     va_start(a_list, chunk_cb);
 
-    if (command && *command && strlen(command)) {
-        char buf[255];
+    int exit_code = clax_command_read(command_ctx, chunk_cb, a_list);
 
-        int exit_code = clax_command(command_ctx, chunk_cb, a_list);
+    /* Chunked trailing header */
+    snprintf(buf, sizeof(buf), "X-Clax-Exit: %d", exit_code);
+    chunk_cb(buf, 0, a_list);
 
-        strncpy(buf, "X-Clax-Exit: ", sizeof(buf));
-        snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%d", exit_code);
-
-        ret = chunk_cb(buf, 0, a_list);
-
-        if (ret < 0) goto exit;
-    } else {
-
-        /* TODO error handling */
-        chunk_cb(NULL, 0, a_list);
-    }
-
-exit:
     va_end(a_list);
 
     return;
@@ -98,10 +84,7 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
             for (i = 0; i < req->params_num; i++) {
                 char *key = req->params[i].key;
 
-                if (strcmp(key, "command") == 0) {
-                    res->status_code = 200;
-                    res->transfer_encoding = "chunked";
-
+                if (strcmp(key, "command") == 0 && strlen(req->params[i].val)) {
                     strncpy(command_ctx.command, req->params[i].val, sizeof_struct_member(command_ctx_t, command));
 
                     command_found = 1;
@@ -113,8 +96,22 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
         }
 
         if (command_found) {
-            res->body_cb_ctx = &command_ctx;
-            res->body_cb = clax_command_cb;
+            pid_t pid = clax_command_start(&command_ctx);
+
+            if (pid > 0) {
+                res->status_code = 200;
+                res->transfer_encoding = "chunked";
+                res->pid = pid;
+
+                res->body_cb_ctx = &command_ctx;
+                res->body_cb = clax_command_read_cb;
+            }
+            else {
+                res->status_code = 500;
+                res->content_type = "text/plain";
+                memcpy(res->body, "System error", 12);
+                res->body_len = 12;
+            }
         } else {
             res->status_code = 400;
             res->content_type = "text/plain";

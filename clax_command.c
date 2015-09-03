@@ -18,6 +18,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <signal.h>
@@ -55,29 +56,53 @@ void clax_kill_kid(popen2_t *kid)
         kill(kid->pid, SIGKILL);
 }
 
-int clax_command(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list a_list_)
+int clax_command_start(command_ctx_t *ctx)
 {
-    char buf[1024];
     int ret;
-    popen2_t kid;
-    va_list a_list;
 
     char *command = ctx->command;
-    int timeout = ctx->timeout;
 
-    va_copy(a_list, a_list_);
+    memset(&ctx->kid, 0, sizeof(popen2_t));
 
     clax_log("Running command '%s'", command);
 
-    ret = popen2(command, &kid);
+    ret = popen2(command, &ctx->kid);
     if (ret < 0) {
         clax_log("Command failed=%d", ret);
         return -1;
     }
 
-    clax_log("Command started, pid=%d", kid.pid);
+    clax_log("Command started, pid=%d", ctx->kid.pid);
 
-    fcntl(kid.out, F_SETFL, (fcntl(kid.out, F_GETFL, 0) | O_NONBLOCK));
+    return ctx->kid.pid;
+}
+
+int clax_command_read_va(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, ...)
+{
+    va_list a_list;
+    int ret;
+
+    va_start(a_list, chunk_cb);
+
+    ret = clax_command_read(ctx, chunk_cb, a_list);
+
+    va_end(a_list);
+
+    return ret;
+}
+
+int clax_command_read(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list a_list_)
+{
+    char buf[1024];
+    int ret;
+    va_list a_list;
+
+    int timeout = ctx->timeout;
+    popen2_t *kid = &ctx->kid;
+
+    va_copy(a_list, a_list_);
+
+    fcntl(kid->out, F_SETFL, (fcntl(kid->out, F_GETFL, 0) | O_NONBLOCK));
 
     if (timeout) {
         clax_log("Setting command timeout=%d", timeout);
@@ -88,7 +113,7 @@ int clax_command(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list a_li
     }
 
     while(1) {
-        ret = read(kid.out, buf, sizeof(buf));
+        ret = read(kid->out, buf, sizeof(buf));
 
         if (ret == 0)
             break;
@@ -96,7 +121,7 @@ int clax_command(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list a_li
         if (alarm_fired) {
             clax_log("Command timeout reached=%d", timeout);
 
-            clax_kill_kid(&kid);
+            clax_kill_kid(kid);
 
             break;
         }
@@ -113,7 +138,7 @@ int clax_command(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list a_li
             break;
         }
 
-        if (kill(kid.pid, 0) != 0) {
+        if (kill(kid->pid, 0) != 0) {
             clax_log("Command unexpectedty exited");
             break;
         }
@@ -124,7 +149,14 @@ int clax_command(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list a_li
         }
     };
 
-    ret = pclose2(&kid);
+    return clax_command_close(ctx);
+}
+
+int clax_command_close(command_ctx_t *ctx)
+{
+    int ret;
+
+    ret = pclose2(&ctx->kid);
     clax_log("Command finished, exit_code=%d", ret);
 
     return ret;

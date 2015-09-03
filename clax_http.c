@@ -551,6 +551,13 @@ int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t 
         TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO;
     }
 
+    if (response->pid) {
+        TRY send_cb(ctx, (const unsigned char *)"X-Clax-PID: ", 12) GOTO;
+        sprintf(buf, "%d", response->pid);
+        TRY send_cb(ctx, (const unsigned char *)buf, strlen(buf)) GOTO;
+        TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO;
+    }
+
     if (response->body_len) {
         char buf[255];
 
