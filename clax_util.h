@@ -50,6 +50,7 @@ clax_kv_list_item_t *clax_kv_list_find_item(clax_kv_list_t *list, char *key);
 clax_kv_list_item_t *clax_kv_list_at(clax_kv_list_t *list, size_t index);
 clax_kv_list_item_t *clax_kv_list_next(clax_kv_list_t *list, size_t *start);
 int clax_kv_list_set(clax_kv_list_t *list, char *key, char *val);
+void clax_kv_list_dump(clax_kv_list_t *list);
 
 char *clax_buf2str(const char *buf, size_t len);
 void clax_str_append(char **dst, const char *src);
