@@ -20,11 +20,32 @@
 #ifndef CLAX_UTIL_H
 #define CLAX_UTIL_H
 
+#include <stdio.h>
+#include <string.h>
+
 #define sizeof_struct_member(type, member) sizeof(((type *)0)->member)
 
 #define TRY if ((
 #define GOTO ) < 0) {goto error;}
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
+
+typedef struct {
+    char *key;
+    char *val;
+} clax_kv_list_item_t;
+
+typedef struct {
+    clax_kv_list_item_t **items;
+    size_t size;
+} clax_kv_list_t;
+
+void clax_kv_list_init(clax_kv_list_t *list);
+void clax_kv_list_free(clax_kv_list_t *list);
+int clax_kv_list_push(clax_kv_list_t *list, char *key, char *val);
+char *clax_kv_list_find_all(clax_kv_list_t *list, char *key, size_t *start);
+char *clax_kv_list_find(clax_kv_list_t *list, char *key);
+clax_kv_list_item_t *clax_kv_list_at(clax_kv_list_t *list, size_t index);
+clax_kv_list_item_t *clax_kv_list_next(clax_kv_list_t *list, size_t *start);
 
 #endif

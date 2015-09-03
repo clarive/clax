@@ -38,8 +38,8 @@ TEST_START(clax_dispatch_sets_404_on_unknown_path)
     clax_dispatch(NULL, &request, &response);
 
     ASSERT_EQ(response.status_code, 404)
-    ASSERT_STR_EQ(response.content_type, "text/plain")
-    ASSERT_STR_EQ((char *)response.body, "Not found")
+    ASSERT_STR_EQ(clax_kv_list_find(&response.headers, "Content-Type"), "text/plain")
+    ASSERT_STRN_EQ(response.body, "Not found", 9)
 
     clax_http_request_free(&request);
     clax_http_response_free(&response);
@@ -91,7 +91,7 @@ TEST_START(clax_dispatch_saves_upload_string_to_file)
     strcpy(request.multiparts[0].headers[0].val, "form-data; name=\"file\"; filename=\"foobar\"");
 
     unsigned char *part = malloc(sizeof(char) * 6);
-    strcpy(part, "foobar");
+    strcpy((char *)part, "foobar");
     request.multiparts[0].part = part;
     request.multiparts[0].part_len = 6;
 

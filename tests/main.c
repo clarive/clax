@@ -53,5 +53,12 @@ int main(int argc, char *argv[])
 
     RUN_TEST(clax_http_extract_kv_extracts_val)
 
+    RUN_TEST(clax_kv_list_default_values)
+    RUN_TEST(clax_kv_list_pushes_kv)
+    RUN_TEST(clax_kv_list_finds_all_kv)
+    RUN_TEST(clax_kv_list_finds_kv)
+    RUN_TEST(clax_kv_list_at_kv)
+    RUN_TEST(clax_kv_list_iter_kv)
+
     DONE_TESTING
 }

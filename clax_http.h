@@ -31,6 +31,7 @@
 #include "http_parser/http_parser.h"
 #include "multipart_parser.h"
 #include "clax.h"
+#include "clax_util.h"
 
 typedef struct {
     char key[MAX_ELEMENT_SIZE];
@@ -81,9 +82,7 @@ typedef struct {
 
 typedef struct {
   unsigned int status_code;
-  char *content_type;
-  char *transfer_encoding;
-  pid_t pid; /* TODO: make custom headers possible */
+  clax_kv_list_t headers;
   unsigned char body[MAX_ELEMENT_SIZE];
   size_t body_len;
   void (*body_cb)(void *ctx, clax_http_chunk_cb_t chunk_cb, ...);

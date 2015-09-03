@@ -539,22 +539,12 @@ int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t 
     TRY send_cb(ctx, (const unsigned char *)status_message, strlen(status_message)) GOTO
     TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO
 
-    if (response->content_type) {
-        TRY send_cb(ctx, (const unsigned char *)"Content-Type: ", 14) GOTO;
-        TRY send_cb(ctx, (const unsigned char *)response->content_type, strlen(response->content_type)) GOTO;
-        TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO;
-    }
-
-    if (response->transfer_encoding) {
-        TRY send_cb(ctx, (const unsigned char *)"Transfer-Encoding: ", 19) GOTO;
-        TRY send_cb(ctx, (const unsigned char *)response->transfer_encoding, strlen(response->transfer_encoding)) GOTO;
-        TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO;
-    }
-
-    if (response->pid) {
-        TRY send_cb(ctx, (const unsigned char *)"X-Clax-PID: ", 12) GOTO;
-        sprintf(buf, "%d", response->pid);
-        TRY send_cb(ctx, (const unsigned char *)buf, strlen(buf)) GOTO;
+    size_t header_iter = 0;
+    clax_kv_list_item_t *header;
+    while ((header = clax_kv_list_next(&response->headers, &header_iter)) != NULL) {
+        TRY send_cb(ctx, (const unsigned char *)header->key, strlen(header->key)) GOTO;
+        TRY send_cb(ctx, (const unsigned char *)": ", 2) GOTO;
+        TRY send_cb(ctx, (const unsigned char *)header->val, strlen(header->val)) GOTO;
         TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO;
     }
 
@@ -601,10 +591,13 @@ void clax_http_request_free(clax_http_request_t *request)
 void clax_http_response_init(clax_http_response_t *response)
 {
     memset(response, 0, sizeof(clax_http_response_t));
+
+    clax_kv_list_init(&response->headers);
 }
 
 void clax_http_response_free(clax_http_response_t *response)
 {
+    clax_kv_list_free(&response->headers);
 }
 
 int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_cb, void *ctx) {

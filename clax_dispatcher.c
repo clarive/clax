@@ -71,7 +71,7 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
 
     if (strcmp(path_info, "/ping") == 0) {
         res->status_code = 200;
-        res->content_type = "application/json";
+        clax_kv_list_push(&res->headers, "Content-Type", "application/json");
         memcpy(res->body, "{\"message\":\"pong\"}", 20);
         res->body_len = 20;
     }
@@ -98,23 +98,28 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
         if (command_found) {
             pid_t pid = clax_command_start(&command_ctx);
 
+            clax_kv_list_push(&res->headers, "Transfer-Encoding", "chunked");
+
             if (pid > 0) {
                 res->status_code = 200;
-                res->transfer_encoding = "chunked";
-                res->pid = pid;
+
+                char buf_pid[15];
+                snprintf(buf_pid, sizeof(buf_pid), "%d", pid);
+
+                clax_kv_list_push(&res->headers, "X-Clax-PID", buf_pid);
 
                 res->body_cb_ctx = &command_ctx;
                 res->body_cb = clax_command_read_cb;
             }
             else {
                 res->status_code = 500;
-                res->content_type = "text/plain";
+                clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
                 memcpy(res->body, "System error", 12);
                 res->body_len = 12;
             }
         } else {
             res->status_code = 400;
-            res->content_type = "text/plain";
+            clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
             memcpy(res->body, "Invalid params", 14);
             res->body_len = 14;
         }
@@ -154,13 +159,13 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
 
                         if (ret < 0) {
                             res->status_code = 500;
-                            res->content_type = "application/json";
+                            clax_kv_list_push(&res->headers, "Content-Type", "application/json");
                             memcpy(res->body, "{\"message\":\"System error\"}", 26);
                             res->body_len = 26;
                         }
                         else {
                             res->status_code = 200;
-                            res->content_type = "application/json";
+                            clax_kv_list_push(&res->headers, "Content-Type", "application/json");
                             memcpy(res->body, "{\"status\":\"ok\"}", 15);
                             res->body_len = 15;
                         }
@@ -173,13 +178,13 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
 
         if (!res->status_code) {
             res->status_code = 400;
-            res->content_type = "text/plain";
+            clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
             memcpy(res->body, "Bad request", 14);
             res->body_len = 14;
         }
     }
     else {
-        res->content_type = "text/plain";
+        clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
         res->status_code = 404;
         memcpy(res->body, "Not found", 9);
         res->body_len = 9;
