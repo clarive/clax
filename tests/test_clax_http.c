@@ -168,8 +168,8 @@ TEST_START(clax_http_parse_saves_body)
     _parse(&parser, &request, "\r\n");
     _parse(&parser, &request, "&&&&&foo&foo=&&&foo=bar&=bar&&&&");
 
-    ASSERT_EQ((int)request.body_len, 32)
-    ASSERT_STR_EQ((char *)request.body, "&&&&&foo&foo=&&&foo=bar&=bar&&&&");
+    ASSERT_EQ(request.body_len, 32)
+    ASSERT_BUF_EQ(request.body, "&&&&&foo&foo=&&&foo=bar&=bar&&&&", 32);
 
     clax_http_request_free(&request);
 }
