@@ -229,6 +229,8 @@ TEST_START(clax_buf2str_allocates_str_from_buffer)
     char *p = clax_buf2str("foo", 3);
 
     ASSERT_EQ(strlen(p), 3);
+
+    free(p);
 }
 TEST_END
 
