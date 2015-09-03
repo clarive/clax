@@ -140,7 +140,6 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
 
                     if (name && (strncmp(name, "file", name_len) == 0) && filename) {
                         char path_to_file[1024] = {0};
-                        strncpy(path_to_file, clax_ctx->options->root, sizeof(path_to_file));
                         strncat(path_to_file, filename, MIN(sizeof(path_to_file) - strlen(path_to_file), filename_len));
 
                         int ret;

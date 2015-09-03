@@ -72,6 +72,7 @@ TEST_START(clax_dispatch_saves_upload_string_to_file)
     char template[] = "/tmp/tmpdir.XXXXXX";
     char *tmp_dirname = mkdtemp(template);
     mkdir(tmp_dirname, 0755);
+    chdir(tmp_dirname);
 
     strcpy(options.root, tmp_dirname);
     strcat(options.root, "/");
@@ -119,6 +120,7 @@ TEST_START(clax_dispatch_saves_upload_file_to_file)
     char template[] = "/tmp/tmpdir.XXXXXX";
     char *tmp_dirname = mkdtemp(template);
     mkdir(tmp_dirname, 0777);
+    chdir(tmp_dirname);
 
     strcpy(options.root, tmp_dirname);
     strcat(options.root, "/");

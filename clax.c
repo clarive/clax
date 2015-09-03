@@ -167,6 +167,12 @@ void clax_parse_options(opt *options, int argc, char **argv)
         if (dir) {
             closedir(dir);
 
+            if (chdir(options->root) < 0) {
+                fprintf(stderr, "Error: cannot chdir to '%s'\n\n", options->root);
+
+                usage();
+            }
+
             char last = options->root[strlen(options->root) - 1];
             if (last != '/') {
                 strcat(options->root, "/");
