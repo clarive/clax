@@ -263,29 +263,29 @@ TEST_START(clax_http_parse_parses_multipart_body)
     ASSERT_EQ(request.message_done, 1);
 
     ASSERT_STR_EQ(request.multipart_boundary, "--------------------------7ca8ddb13928aa86");
-    ASSERT_EQ((int)request.multiparts_num, 3);
-    ASSERT_EQ((int)request.multiparts[0].headers_num, 2);
+    ASSERT_EQ(request.multiparts_num, 3);
+    ASSERT_EQ(request.multiparts[0].headers_num, 2);
 
     ASSERT_STR_EQ(request.multiparts[0].headers[0].key, "Content-Disposition");
     ASSERT_STR_EQ(request.multiparts[0].headers[0].val, "form-data; name=\"datafile1\"; filename=\"r.gif\"");
     ASSERT_STR_EQ(request.multiparts[0].headers[1].key, "Content-Type");
     ASSERT_STR_EQ(request.multiparts[0].headers[1].val, "image/gif");
-    ASSERT_EQ((int)request.multiparts[0].part_len, 6);
-    ASSERT_STR_EQ((char *)request.multiparts[0].part, "foobar");
+    ASSERT_EQ(request.multiparts[0].part_len, 6);
+    ASSERT_BUF_EQ(request.multiparts[0].part, "foobar", 6);
 
     ASSERT_STR_EQ(request.multiparts[1].headers[0].key, "Content-Disposition");
     ASSERT_STR_EQ(request.multiparts[1].headers[0].val, "form-data; name=\"datafile2\"; filename=\"g.gif\"");
     ASSERT_STR_EQ(request.multiparts[1].headers[1].key, "Content-Type");
     ASSERT_STR_EQ(request.multiparts[1].headers[1].val, "image/gif");
-    ASSERT_EQ((int)request.multiparts[1].part_len, 6);
-    ASSERT_STR_EQ((char *)request.multiparts[1].part, "barbaz");
+    ASSERT_EQ(request.multiparts[1].part_len, 6);
+    ASSERT_BUF_EQ(request.multiparts[1].part, "barbaz", 6);
 
     ASSERT_STR_EQ(request.multiparts[2].headers[0].key, "Content-Disposition");
     ASSERT_STR_EQ(request.multiparts[2].headers[0].val, "form-data; name=\"datafile3\"; filename=\"b.gif\"");
     ASSERT_STR_EQ(request.multiparts[2].headers[1].key, "Content-Type");
     ASSERT_STR_EQ(request.multiparts[2].headers[1].val, "image/gif");
-    ASSERT_EQ((int)request.multiparts[2].part_len, 3);
-    ASSERT_STR_EQ((char *)request.multiparts[2].part, "end");
+    ASSERT_EQ(request.multiparts[2].part_len, 3);
+    ASSERT_BUF_EQ(request.multiparts[2].part, "end", 3);
 
     clax_http_request_free(&request);
 }
