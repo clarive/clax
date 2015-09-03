@@ -156,3 +156,27 @@ TEST_START(clax_dispatch_saves_upload_file_to_file)
     rmdir(tmp_dirname);
 }
 TEST_END
+
+TEST_START(clax_dispatch_returns_bad_request_when_wrong_params)
+{
+    opt options;
+    clax_ctx_t clax_ctx;
+    clax_http_request_t request;
+    clax_http_response_t response;
+
+    memset(&clax_ctx, 0, sizeof(clax_ctx_t));
+    memset(&options, 0, sizeof(opt));
+    memset(&request, 0, sizeof(clax_http_request_t));
+    memset(&response, 0, sizeof(clax_http_response_t));
+
+    request.method = HTTP_POST;
+    strcpy(request.path_info, "/command");
+    request.params_num = 1;
+    strcpy(request.params[0].key, "foo");
+    strcpy(request.params[0].val, "bar");
+
+    clax_dispatch(&clax_ctx, &request, &response);
+
+    ASSERT_EQ(response.status_code, 400)
+}
+TEST_END

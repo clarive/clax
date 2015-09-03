@@ -92,6 +92,7 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
     else if (req->method == HTTP_POST && strcmp(path_info, "/command") == 0) {
         memset(&command_ctx, 0, sizeof(command_ctx_t));
 
+        int command_found = 0;
         if (req->params_num) {
             int i;
             for (i = 0; i < req->params_num; i++) {
@@ -102,6 +103,8 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
                     res->transfer_encoding = "chunked";
 
                     strncpy(command_ctx.command, req->params[i].val, sizeof_struct_member(command_ctx_t, command));
+
+                    command_found = 1;
                 }
                 else if (strcmp(key, "timeout") == 0) {
                     command_ctx.timeout = atoi(req->params[i].val);
@@ -109,7 +112,7 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
             }
         }
 
-        if (res->status_code) {
+        if (command_found) {
             res->body_cb_ctx = &command_ctx;
             res->body_cb = clax_command_cb;
         } else {
