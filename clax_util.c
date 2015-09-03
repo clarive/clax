@@ -177,3 +177,51 @@ void clax_str_append(char **dst, const char *src)
     }
 }
 
+void clax_buf_append(unsigned char **dst, size_t *dst_len, const char *src, size_t src_len)
+{
+    if (!*dst) {
+        *dst = malloc(src_len);
+        memcpy((void *)*dst, (const void *)src, src_len);
+        *dst_len = src_len;
+    }
+    else {
+        *dst = realloc((void *)*dst, *dst_len + src_len);
+        memcpy((void *)(*dst + *dst_len), (const void *)src, src_len);
+        *dst_len += src_len;
+    }
+}
+
+void clax_hexdump(unsigned char *buf, size_t len)
+{
+    int i;
+    int w = 32;
+    unsigned char *line = malloc(w + 1);
+
+    printf("\n");
+
+    for (i = 0; i < len; i++) {
+        if ((i % w) == 0) {
+            if (i != 0)
+                printf("  %s\n", line);
+
+            printf("  %04x ", i);
+        }
+
+        printf(" %02x", buf[i]);
+
+        if ((buf[i] < 0x20) || (buf[i] > 0x7e))
+            line[i % w] = '.';
+        else
+            line[i % w] = buf[i];
+        line[(i % w) + 1] = '\0';
+    }
+
+    while ((i % w) != 0) {
+        printf("   ");
+        i++;
+    }
+
+    printf("  %s\n\n", line);
+
+    free(line);
+}

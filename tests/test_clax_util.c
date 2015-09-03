@@ -17,6 +17,7 @@
  *  along with Clax.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
@@ -228,5 +229,22 @@ TEST_START(clax_buf2str_allocates_str_from_buffer)
     char *p = clax_buf2str("foo", 3);
 
     ASSERT_EQ(strlen(p), 3);
+}
+TEST_END
+
+TEST_START(clax_buf_append_appends_buffer)
+{
+    unsigned char *buf = NULL;
+    size_t len = 0;
+
+    clax_buf_append(&buf, &len, "foo", 3);
+    ASSERT_EQ(len, 3);
+    ASSERT_BUF_EQ(buf, "foo", 3);
+
+    clax_buf_append(&buf, &len, "bar", 3);
+    ASSERT_EQ(len, 6);
+    ASSERT_BUF_EQ(buf, "foobar", 6);
+
+    free(buf);
 }
 TEST_END

@@ -96,7 +96,7 @@ int header_field_cb(http_parser *p, const char *buf, size_t len)
 {
     clax_http_request_t *req = p->data;
 
-    char *key = clax_buf2str((const unsigned char *)buf, len);
+    char *key = clax_buf2str(buf, len);
 
     clax_kv_list_push(&req->headers, key, "");
 
@@ -112,7 +112,7 @@ int header_value_cb(http_parser *p, const char *buf, size_t len)
     clax_kv_list_item_t *item = clax_kv_list_at(&req->headers, req->headers.size - 1);
 
     char *key = item->key;
-    char *val = clax_buf2str((const unsigned char *)buf, len);
+    char *val = clax_buf2str(buf, len);
 
     clax_kv_list_set(&req->headers, key, val);
 
@@ -214,8 +214,6 @@ int on_multipart_header_name(multipart_parser* p, const char *buf, size_t len)
 {
     clax_http_request_t *request = multipart_parser_get_data(p);
 
-    clax_log("header %.*s", len, buf);
-
     if (request->multiparts_num < MAX_MULTIPARTS) {
         clax_http_multipart_t *multipart = &request->multiparts[request->multiparts_num];
 
@@ -231,8 +229,6 @@ int on_multipart_header_value(multipart_parser* p, const char *buf, size_t len)
 {
     clax_http_request_t *request = multipart_parser_get_data(p);
 
-    clax_log("value %.*s", len, buf);
-
     if (request->multiparts_num < MAX_MULTIPARTS) {
         clax_http_multipart_t *multipart = &request->multiparts[request->multiparts_num];
 
@@ -243,20 +239,6 @@ int on_multipart_header_value(multipart_parser* p, const char *buf, size_t len)
     }
 
     return 0;
-}
-
-void append_str(unsigned char **str, size_t *olen, const char *buf, size_t len)
-{
-    if (!*str) {
-        *str = (unsigned char *)malloc(sizeof(char) * len);
-        memcpy((void *)*str, (const void*)buf, len);
-        *olen = len;
-    }
-    else {
-        *str = (unsigned char *)realloc((void *)*str, sizeof(char) * *olen + len);
-        memcpy((void *)(*str + *olen), (const void*)buf, len);
-        *olen += len;
-    }
 }
 
 int on_part_data(multipart_parser* p, const char *buf, size_t len)
@@ -309,7 +291,7 @@ int on_part_data(multipart_parser* p, const char *buf, size_t len)
             multipart->part_len += len;
         }
         else {
-            append_str(&multipart->part, &multipart->part_len, buf, len);
+            clax_buf_append(&multipart->part, &multipart->part_len, buf, len);
         }
     }
 
@@ -336,10 +318,8 @@ int on_part_data_end(multipart_parser* p)
 
 int on_body_end(multipart_parser* p)
 {
-    clax_http_request_t *req = multipart_parser_get_data(p);
-
     clax_log("Done multipart parsing");
-    multipart_parser_free(req->multipart_parser);
+    multipart_parser_free(p);
 
     return 0;
 }
@@ -369,7 +349,7 @@ int clax_http_body(http_parser *p, const char *buf, size_t len)
             return -1;
         }
     } else {
-        append_str(&req->body, &req->body_len, buf, len);
+        clax_buf_append(&req->body, &req->body_len, buf, len);
     }
 
     return 0;
