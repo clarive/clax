@@ -95,6 +95,11 @@ typedef int (*send_cb_t)(void *ctx, const unsigned char *buf, size_t len);
 
 /* Public */
 
+void clax_http_request_init(clax_http_request_t *request);
+void clax_http_request_free(clax_http_request_t *request);
+void clax_http_response_init(clax_http_response_t *response);
+void clax_http_response_free(clax_http_response_t *response);
+
 int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_cb, void *ctx);
 const char *clax_http_extract_kv(const char *str, const char *key, size_t *len);
 const char *clax_http_header_get(clax_http_kv_t *headers, size_t size, char *name);

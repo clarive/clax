@@ -24,12 +24,6 @@
 #include "clax_http.h"
 #include "u.h"
 
-void _init_parser_and_request(http_parser *parser, clax_http_request_t *request)
-{
-    http_parser_init(parser, HTTP_REQUEST);
-    memset(request, 0, sizeof(clax_http_request_t));
-}
-
 int _parse(http_parser *parser, clax_http_request_t *req, const char *data)
 {
     return clax_http_parse(parser, req, data, strlen(data));
@@ -40,11 +34,14 @@ TEST_START(clax_http_parse_returns_error_when_error)
     http_parser parser;
     clax_http_request_t request;
 
-    _init_parser_and_request(&parser, &request);
+    http_parser_init(&parser, HTTP_REQUEST);
+    clax_http_request_init(&request);
 
     int rv = _parse(&parser, &request, "foobarbaz");
 
     ASSERT_EQ(rv, -1)
+
+    clax_http_request_free(&request);
 }
 TEST_END
 
@@ -53,11 +50,14 @@ TEST_START(clax_http_parse_returns_0_when_need_more)
     http_parser parser;
     clax_http_request_t request;
 
-    _init_parser_and_request(&parser, &request);
+    http_parser_init(&parser, HTTP_REQUEST);
+    clax_http_request_init(&request);
 
     int rv = _parse(&parser, &request, "GET / HTTP/1.1\r\n");
 
     ASSERT_EQ(rv, 0)
+
+    clax_http_request_free(&request);
 }
 TEST_END
 
@@ -66,7 +66,8 @@ TEST_START(clax_http_parse_returns_ok_chunks)
     http_parser parser;
     clax_http_request_t request;
 
-    _init_parser_and_request(&parser, &request);
+    http_parser_init(&parser, HTTP_REQUEST);
+    clax_http_request_init(&request);
 
     int rv = _parse(&parser, &request, "GET / ");
     ASSERT_EQ(request.headers_done, 0);
@@ -93,6 +94,8 @@ TEST_START(clax_http_parse_returns_ok_chunks)
     ASSERT_EQ(request.message_done, 1);
     ASSERT_EQ((int)request.body_len, 5);
     ASSERT_EQ(rv, 1)
+
+    clax_http_request_free(&request);
 }
 TEST_END
 
@@ -101,12 +104,15 @@ TEST_START(clax_http_parse_returns_done_when_100_continue)
     http_parser parser;
     clax_http_request_t request;
 
-    _init_parser_and_request(&parser, &request);
+    http_parser_init(&parser, HTTP_REQUEST);
+    clax_http_request_init(&request);
 
     int rv = _parse(&parser, &request, "GET / HTTP/1.1\r\n");
     rv = _parse(&parser, &request, "Host: localhost\r\nConnection: close\r\nContent-Length: 5\r\nExpect: 100-continue\r\n\r\n");
 
     ASSERT_EQ(rv, 1)
+
+    clax_http_request_free(&request);
 }
 TEST_END
 
@@ -115,10 +121,13 @@ TEST_START(clax_http_parse_returns_ok)
     http_parser parser;
     clax_http_request_t request;
 
-    _init_parser_and_request(&parser, &request);
+    http_parser_init(&parser, HTTP_REQUEST);
+    clax_http_request_init(&request);
 
     int rv = _parse(&parser, &request, "GET / HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n");
     ASSERT_EQ(rv, 1)
+
+    clax_http_request_free(&request);
 }
 TEST_END
 
@@ -127,7 +136,8 @@ TEST_START(clax_http_parse_saves_request)
     http_parser parser;
     clax_http_request_t request;
 
-    _init_parser_and_request(&parser, &request);
+    http_parser_init(&parser, HTTP_REQUEST);
+    clax_http_request_init(&request);
 
     _parse(&parser, &request, "GET /there?foo=bar HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n");
 
@@ -136,11 +146,14 @@ TEST_START(clax_http_parse_saves_request)
     ASSERT(request.method == HTTP_GET)
     ASSERT_STR_EQ(request.url, "/there?foo=bar")
     ASSERT_STR_EQ(request.path_info, "/there")
+
     ASSERT_EQ((int)request.headers_num, 2)
     ASSERT_STR_EQ(request.headers[0].key, "Host")
     ASSERT_STR_EQ(request.headers[0].val, "localhost")
     ASSERT_STR_EQ(request.headers[1].key, "Connection")
     ASSERT_STR_EQ(request.headers[1].val, "close")
+
+    clax_http_request_free(&request);
 }
 TEST_END
 
@@ -149,7 +162,8 @@ TEST_START(clax_http_parse_saves_body)
     http_parser parser;
     clax_http_request_t request;
 
-    _init_parser_and_request(&parser, &request);
+    http_parser_init(&parser, HTTP_REQUEST);
+    clax_http_request_init(&request);
 
     _parse(&parser, &request, "POST / HTTP/1.1\r\n");
     _parse(&parser, &request, "Host: localhost\r\n");
@@ -159,6 +173,8 @@ TEST_START(clax_http_parse_saves_body)
 
     ASSERT_EQ((int)request.body_len, 32)
     ASSERT_STR_EQ((char *)request.body, "&&&&&foo&foo=&&&foo=bar&=bar&&&&");
+
+    clax_http_request_free(&request);
 }
 TEST_END
 
@@ -167,7 +183,8 @@ TEST_START(clax_http_parse_parses_form_body)
     http_parser parser;
     clax_http_request_t request;
 
-    _init_parser_and_request(&parser, &request);
+    http_parser_init(&parser, HTTP_REQUEST);
+    clax_http_request_init(&request);
 
     _parse(&parser, &request, "POST / HTTP/1.1\r\n");
     _parse(&parser, &request, "Host: localhost\r\n");
@@ -185,6 +202,8 @@ TEST_START(clax_http_parse_parses_form_body)
     ASSERT_STR_EQ(request.params[2].val, "bar")
     ASSERT_STR_EQ(request.params[3].key, "")
     ASSERT_STR_EQ(request.params[3].val, "bar")
+
+    clax_http_request_free(&request);
 }
 TEST_END
 
@@ -193,7 +212,8 @@ TEST_START(clax_http_parse_parses_form_body_with_decoding)
     http_parser parser;
     clax_http_request_t request;
 
-    _init_parser_and_request(&parser, &request);
+    http_parser_init(&parser, HTTP_REQUEST);
+    clax_http_request_init(&request);
 
     _parse(&parser, &request, "POST / HTTP/1.1\r\n");
     _parse(&parser, &request, "Host: localhost\r\n");
@@ -205,6 +225,8 @@ TEST_START(clax_http_parse_parses_form_body_with_decoding)
     ASSERT_EQ((int)request.params_num, 1)
     ASSERT_STR_EQ(request.params[0].key, "f o")
     ASSERT_STR_EQ(request.params[0].val, "b/r baz%")
+
+    clax_http_request_free(&request);
 }
 TEST_END
 
@@ -213,7 +235,8 @@ TEST_START(clax_http_parse_parses_multipart_body)
     http_parser parser;
     clax_http_request_t request;
 
-    _init_parser_and_request(&parser, &request);
+    http_parser_init(&parser, HTTP_REQUEST);
+    clax_http_request_init(&request);
 
     _parse(&parser, &request, "POST / HTTP/1.1\r\n");
     _parse(&parser, &request, "Host: localhost\r\n");
@@ -265,6 +288,8 @@ TEST_START(clax_http_parse_parses_multipart_body)
     ASSERT_STR_EQ(request.multiparts[2].headers[1].val, "image/gif");
     ASSERT_EQ((int)request.multiparts[2].part_len, 3);
     ASSERT_STR_EQ((char *)request.multiparts[2].part, "end");
+
+    clax_http_request_free(&request);
 }
 TEST_END
 
@@ -385,6 +410,5 @@ TEST_START(clax_http_chunked_writes_chunks)
     clax_http_chunked_va("Foo: bar\r\nBar: baz", 0, test_send_cb, NULL);
     ASSERT_EQ(test_send_cb_buf_len, 25);
     ASSERT_BUF_EQ(test_send_cb_buf, "0\r\nFoo: bar\r\nBar: baz\r\n\r\n", 25);
-
 }
 TEST_END

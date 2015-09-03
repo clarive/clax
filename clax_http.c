@@ -581,6 +581,32 @@ error:
     return -1;
 }
 
+void clax_http_request_init(clax_http_request_t *request)
+{
+    memset(request, 0, sizeof(clax_http_request_t));
+}
+
+void clax_http_request_free(clax_http_request_t *request)
+{
+    free((void *)request->body);
+
+    if (request->multiparts_num) {
+        int i;
+        for (i = 0; i < request->multiparts_num; i++) {
+            free((void *)request->multiparts[i].part);
+        }
+    }
+}
+
+void clax_http_response_init(clax_http_response_t *response)
+{
+    memset(response, 0, sizeof(clax_http_response_t));
+}
+
+void clax_http_response_free(clax_http_response_t *response)
+{
+}
+
 int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_cb, void *ctx) {
     http_parser parser;
     clax_http_request_t request;
@@ -588,8 +614,8 @@ int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_c
 
     http_parser_init(&parser, HTTP_REQUEST);
 
-    memset(&request, 0, sizeof(clax_http_request_t));
-    memset(&response, 0, sizeof(clax_http_response_t));
+    clax_http_request_init(&request);
+    clax_http_response_init(&response);
 
     request.clax_ctx = clax_ctx;
 
@@ -620,14 +646,8 @@ int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_c
     TRY clax_http_write_response(ctx, send_cb, &response) GOTO;
     clax_log("ok");
 
-    if (request.multiparts_num) {
-        int i;
-        for (i = 0; i < request.multiparts_num; i++) {
-            free((void *)request.multiparts[i].part);
-        }
-    }
-
-    free((void *)request.body);
+    clax_http_request_free(&request);
+    clax_http_response_free(&response);
 
     return 1;
 
