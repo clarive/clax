@@ -79,20 +79,17 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
         memset(&command_ctx, 0, sizeof(command_ctx_t));
 
         int command_found = 0;
-        if (req->params_num) {
-            int i;
-            for (i = 0; i < req->params_num; i++) {
-                char *key = req->params[i].key;
 
-                if (strcmp(key, "command") == 0 && strlen(req->params[i].val)) {
-                    strncpy(command_ctx.command, req->params[i].val, sizeof_struct_member(command_ctx_t, command));
+        char *command = clax_kv_list_find(&req->body_params, "command");
+        if (command && strlen(command)) {
+            strncpy(command_ctx.command, command, sizeof_struct_member(command_ctx_t, command));
 
-                    command_found = 1;
-                }
-                else if (strcmp(key, "timeout") == 0) {
-                    command_ctx.timeout = atoi(req->params[i].val);
-                }
-            }
+            command_found = 1;
+        }
+
+        char *timeout = clax_kv_list_find(&req->body_params, "timeout");
+        if (timeout && strlen(timeout)) {
+            command_ctx.timeout = atoi(timeout);
         }
 
         if (command_found) {

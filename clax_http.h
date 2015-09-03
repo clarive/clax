@@ -60,8 +60,7 @@ typedef struct {
   unsigned char *body;
   size_t body_len;
 
-  clax_http_kv_t params[MAX_PARAMS];
-  size_t params_num;
+  clax_kv_list_t body_params;
 
   multipart_parser *multipart_parser;
   multipart_parser_settings multipart_callbacks;

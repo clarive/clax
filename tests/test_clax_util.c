@@ -48,6 +48,36 @@ TEST_START(clax_kv_list_pushes_kv)
     clax_kv_list_push(&list, "bar", "baz");
     ASSERT_EQ(list.size, 2);
 
+    clax_kv_list_push(&list, NULL, NULL);
+    ASSERT_EQ(list.size, 3);
+
+    clax_kv_list_free(&list);
+}
+TEST_END
+
+TEST_START(clax_kv_list_pushes_buf_kv)
+{
+    clax_kv_list_t list;
+
+    clax_kv_list_init(&list);
+
+    clax_kv_list_pushn(&list, "foo", 3, "bar", 3);
+    ASSERT_EQ(list.size, 1);
+    ASSERT_STR_EQ(clax_kv_list_find(&list, "foo"), "bar");
+
+    clax_kv_list_pushn(&list, "", 0, "bar", 3);
+    ASSERT_EQ(list.size, 2);
+    ASSERT_STR_EQ(clax_kv_list_find(&list, ""), "bar");
+
+    clax_kv_list_pushn(&list, "baz", 3, "", 0);
+    ASSERT_EQ(list.size, 3);
+    ASSERT_STR_EQ(clax_kv_list_find(&list, "baz"), "");
+
+    clax_kv_list_pushn(&list, "", 0, "", 0);
+    ASSERT_EQ(list.size, 4);
+    size_t start = 3;
+    ASSERT_STR_EQ(clax_kv_list_find_all(&list, "", &start), "");
+
     clax_kv_list_free(&list);
 }
 TEST_END

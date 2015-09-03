@@ -150,26 +150,6 @@ int request_url_cb(http_parser *p, const char *buf, size_t len)
     return 0;
 }
 
-void save_param(clax_http_request_t *req, const char *key, size_t key_len, const char *val, size_t val_len)
-{
-    if (key_len || val_len) {
-        if (req->params_num < MAX_PARAMS) {
-            if (key_len == 0)
-                key = "";
-            if (val_len == 0)
-                val = "";
-
-            strncpy(req->params[req->params_num].key, key, MIN(key_len, MAX_ELEMENT_SIZE));
-            strncpy(req->params[req->params_num].val, val, MIN(val_len, MAX_ELEMENT_SIZE));
-
-            clax_http_url_decode(req->params[req->params_num].key);
-            clax_http_url_decode(req->params[req->params_num].val);
-
-            req->params_num++;
-        }
-    }
-}
-
 void clax_http_parse_form(clax_http_request_t *req, const char *buf, size_t len)
 {
     const char *key = NULL;
@@ -183,7 +163,17 @@ void clax_http_parse_form(clax_http_request_t *req, const char *buf, size_t len)
         if (buf[j] == '&') {
             mode = PARAM_MODE_KEY;
 
-            save_param(req, key, key_len, val, val_len);
+            if (key_len || val_len) {
+                char *k = clax_buf2str(key, key_len);
+                clax_http_url_decode(k);
+                char *v = clax_buf2str(val, val_len);
+                clax_http_url_decode(v);
+
+                clax_kv_list_push(&req->body_params, k, v);
+
+                free(k);
+                free(v);
+            }
 
             key = NULL;
             key_len = 0;
@@ -207,7 +197,17 @@ void clax_http_parse_form(clax_http_request_t *req, const char *buf, size_t len)
         }
     }
 
-    save_param(req, key, key_len, val, val_len);
+    if (key_len || val_len) {
+        char *k = clax_buf2str(key, key_len);
+        clax_http_url_decode(k);
+        char *v = clax_buf2str(val, val_len);
+        clax_http_url_decode(v);
+
+        clax_kv_list_push(&req->body_params, k, v);
+
+        free(k);
+        free(v);
+    }
 }
 
 int on_multipart_header_name(multipart_parser* p, const char *buf, size_t len)
@@ -378,7 +378,10 @@ int clax_http_body(http_parser *p, const char *buf, size_t len)
 void clax_http_url_decode(char *str)
 {
     int code;
-    char buf[3];
+    char hex[3];
+
+    if (str == NULL)
+        return;
 
     char *p = str;
     while (*p++) {
@@ -386,11 +389,11 @@ void clax_http_url_decode(char *str)
             *p = ' ';
         }
         else if (*p == '%' && *(p + 1) && *(p + 2)) {
-            buf[0] = *(p + 1);
-            buf[1] = *(p + 2);
-            buf[2] = 0;
+            hex[0] = *(p + 1);
+            hex[1] = *(p + 2);
+            hex[2] = 0;
 
-            sscanf(buf, "%x", (unsigned int *)&code);
+            sscanf(hex, "%x", (unsigned int *)&code);
 
             *p = code;
 
@@ -574,6 +577,7 @@ void clax_http_request_init(clax_http_request_t *request)
     memset(request, 0, sizeof(clax_http_request_t));
 
     clax_kv_list_init(&request->headers);
+    clax_kv_list_init(&request->body_params);
 }
 
 void clax_http_request_free(clax_http_request_t *request)
@@ -588,6 +592,7 @@ void clax_http_request_free(clax_http_request_t *request)
     }
 
     clax_kv_list_free(&request->headers);
+    clax_kv_list_free(&request->body_params);
 }
 
 void clax_http_response_init(clax_http_response_t *response)

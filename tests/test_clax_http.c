@@ -190,15 +190,15 @@ TEST_START(clax_http_parse_parses_form_body)
     _parse(&parser, &request, "\r\n");
     _parse(&parser, &request, "&&&&&foo&foo=&&&foo=bar&=bar&&&&");
 
-    ASSERT_EQ((int)request.params_num, 4)
-    ASSERT_STR_EQ(request.params[0].key, "foo")
-    ASSERT_STR_EQ(request.params[0].val, "")
-    ASSERT_STR_EQ(request.params[1].key, "foo")
-    ASSERT_STR_EQ(request.params[1].val, "")
-    ASSERT_STR_EQ(request.params[2].key, "foo")
-    ASSERT_STR_EQ(request.params[2].val, "bar")
-    ASSERT_STR_EQ(request.params[3].key, "")
-    ASSERT_STR_EQ(request.params[3].val, "bar")
+    ASSERT_EQ(request.body_params.size, 4);
+    ASSERT_STR_EQ(clax_kv_list_at(&request.body_params, 0)->key, "foo");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.body_params, 0)->val, "");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.body_params, 1)->key, "foo");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.body_params, 1)->val, "");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.body_params, 2)->key, "foo");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.body_params, 2)->val, "bar");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.body_params, 3)->key, "");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.body_params, 3)->val, "bar");
 
     clax_http_request_free(&request);
 }
@@ -219,9 +219,10 @@ TEST_START(clax_http_parse_parses_form_body_with_decoding)
     _parse(&parser, &request, "\r\n");
     _parse(&parser, &request, "f%20o=b%2Fr+baz%");
 
-    ASSERT_EQ((int)request.params_num, 1)
-    ASSERT_STR_EQ(request.params[0].key, "f o")
-    ASSERT_STR_EQ(request.params[0].val, "b/r baz%")
+    clax_kv_list_dump(&request.body_params);
+
+    ASSERT_EQ(request.body_params.size, 1);
+    ASSERT_STR_EQ(clax_kv_list_find(&request.body_params, "f o"), "b/r baz%");
 
     clax_http_request_free(&request);
 }

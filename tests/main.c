@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
 
     RUN_TEST(clax_kv_list_default_values)
     RUN_TEST(clax_kv_list_pushes_kv)
+    RUN_TEST(clax_kv_list_pushes_buf_kv)
     RUN_TEST(clax_kv_list_finds_all_kv)
     RUN_TEST(clax_kv_list_finds_kv)
     RUN_TEST(clax_kv_list_at_kv)

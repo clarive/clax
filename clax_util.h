@@ -43,12 +43,15 @@ typedef struct {
 void clax_kv_list_init(clax_kv_list_t *list);
 void clax_kv_list_free(clax_kv_list_t *list);
 int clax_kv_list_push(clax_kv_list_t *list, char *key, char *val);
+int clax_kv_list_pushn(clax_kv_list_t *list, char *key, size_t key_len, char *val, size_t val_len);
 char *clax_kv_list_find_all(clax_kv_list_t *list, char *key, size_t *start);
 char *clax_kv_list_find(clax_kv_list_t *list, char *key);
 clax_kv_list_item_t *clax_kv_list_find_item(clax_kv_list_t *list, char *key);
 clax_kv_list_item_t *clax_kv_list_at(clax_kv_list_t *list, size_t index);
 clax_kv_list_item_t *clax_kv_list_next(clax_kv_list_t *list, size_t *start);
+int clax_kv_list_set(clax_kv_list_t *list, char *key, char *val);
 
-char *clax_buf2str(const unsigned char *buf, size_t len);
+char *clax_buf2str(const char *buf, size_t len);
+void clax_str_append(char **dst, const char *src);
 
 #endif

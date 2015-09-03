@@ -186,9 +186,7 @@ TEST_START(clax_dispatch_returns_bad_request_when_wrong_params)
 
     request.method = HTTP_POST;
     strcpy(request.path_info, "/command");
-    request.params_num = 1;
-    strcpy(request.params[0].key, "foo");
-    strcpy(request.params[0].val, "bar");
+    clax_kv_list_push(&request.body_params, "boo", "bar");
 
     clax_dispatch(&clax_ctx, &request, &response);
 
