@@ -319,7 +319,6 @@ int on_part_data_end(multipart_parser* p)
 int on_body_end(multipart_parser* p)
 {
     clax_log("Done multipart parsing");
-    multipart_parser_free(p);
 
     return 0;
 }
@@ -563,6 +562,9 @@ void clax_http_request_init(clax_http_request_t *request)
 void clax_http_request_free(clax_http_request_t *request)
 {
     free((void *)request->body);
+
+    if (request->multipart_parser)
+        multipart_parser_free(request->multipart_parser);
 
     if (request->multiparts_num) {
         int i;
