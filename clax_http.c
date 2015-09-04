@@ -141,16 +141,19 @@ int request_url_cb(http_parser *p, const char *buf, size_t len)
     int path_from = u.field_data[3].off;
     int path_len = u.field_data[3].len;
 
-    int query_from = u.field_data[4].off;
-    size_t query_len = u.field_data[4].len;
-
     strncpy(request->url, buf, len);
     request->url[len] = 0;
 
     strncpy(request->path_info, buf + path_from, path_len);
     request->path_info[path_len] = 0;
 
-    clax_http_parse_urlencoded(&request->query_params, buf + query_from, query_len);
+    if (u.field_set & (1 << UF_QUERY)) {
+        int query_from = u.field_data[UF_QUERY].off;
+        size_t query_len = u.field_data[UF_QUERY].len;
+
+        if (query_len)
+            clax_http_parse_urlencoded(&request->query_params, buf + query_from, query_len);
+    }
 
     return 0;
 }
@@ -241,10 +244,9 @@ int on_multipart_header_value(multipart_parser* p, const char *buf, size_t len)
 
         clax_kv_list_item_t *item = clax_kv_list_at(&multipart->headers, multipart->headers.size - 1);
 
-        char *key = item->key;
         char *val = clax_buf2str(buf, len);
 
-        clax_kv_list_set(&multipart->headers, key, val);
+        clax_kv_list_set(&multipart->headers, item->key, val);
 
         free(val);
     }
@@ -590,7 +592,7 @@ void clax_http_request_free(clax_http_request_t *request)
     }
 
     for (int i = 0; i < MAX_MULTIPARTS; i++) {
-        clax_kv_list_init(&request->multiparts[i].headers);
+        clax_kv_list_free(&request->multiparts[i].headers);
     }
 
     clax_kv_list_free(&request->headers);
