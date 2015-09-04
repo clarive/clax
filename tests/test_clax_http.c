@@ -175,6 +175,33 @@ TEST_START(clax_http_parse_saves_body)
 }
 TEST_END
 
+TEST_START(clax_http_parse_parses_query_string)
+{
+    http_parser parser;
+    clax_http_request_t request;
+
+    http_parser_init(&parser, HTTP_REQUEST);
+    clax_http_request_init(&request);
+
+    _parse(&parser, &request, "GET /?foo=&foo=&foo=bar&=bar HTTP/1.1\r\n");
+    _parse(&parser, &request, "Host: localhost\r\n");
+    _parse(&parser, &request, "Content-Length: 0\r\n");
+    _parse(&parser, &request, "\r\n");
+
+    ASSERT_EQ(request.query_params.size, 4);
+    ASSERT_STR_EQ(clax_kv_list_at(&request.query_params, 0)->key, "foo");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.query_params, 0)->val, "");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.query_params, 1)->key, "foo");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.query_params, 1)->val, "");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.query_params, 2)->key, "foo");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.query_params, 2)->val, "bar");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.query_params, 3)->key, "");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.query_params, 3)->val, "bar");
+
+    clax_http_request_free(&request);
+}
+TEST_END
+
 TEST_START(clax_http_parse_parses_form_body)
 {
     http_parser parser;

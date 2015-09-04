@@ -141,16 +141,21 @@ int request_url_cb(http_parser *p, const char *buf, size_t len)
     int path_from = u.field_data[3].off;
     int path_len = u.field_data[3].len;
 
+    int query_from = u.field_data[4].off;
+    size_t query_len = u.field_data[4].len;
+
     strncpy(request->url, buf, len);
     request->url[len] = 0;
 
     strncpy(request->path_info, buf + path_from, path_len);
     request->path_info[path_len] = 0;
 
+    clax_http_parse_urlencoded(&request->query_params, buf + query_from, query_len);
+
     return 0;
 }
 
-void clax_http_parse_form(clax_http_request_t *req, const char *buf, size_t len)
+void clax_http_parse_urlencoded(clax_kv_list_t *params, const char *buf, size_t len)
 {
     const char *key = NULL;
     size_t key_len = 0;
@@ -169,7 +174,7 @@ void clax_http_parse_form(clax_http_request_t *req, const char *buf, size_t len)
                 char *v = clax_buf2str(val, val_len);
                 clax_http_url_decode(v);
 
-                clax_kv_list_push(&req->body_params, k, v);
+                clax_kv_list_push(params, k, v);
 
                 free(k);
                 free(v);
@@ -203,7 +208,7 @@ void clax_http_parse_form(clax_http_request_t *req, const char *buf, size_t len)
         char *v = clax_buf2str(val, val_len);
         clax_http_url_decode(v);
 
-        clax_kv_list_push(&req->body_params, k, v);
+        clax_kv_list_push(params, k, v);
 
         free(k);
         free(v);
@@ -419,7 +424,7 @@ int clax_http_parse(http_parser *parser, clax_http_request_t *request, const cha
         const char *content_type = clax_kv_list_find(&request->headers, "Content-Type");
 
         if (content_type && strcmp(content_type, "application/x-www-form-urlencoded") == 0) {
-            clax_http_parse_form(request, (char *)request->body, request->body_len);
+            clax_http_parse_urlencoded(&request->body_params, (char *)request->body, request->body_len);
         }
 
         return 1;
@@ -556,6 +561,7 @@ void clax_http_request_init(clax_http_request_t *request)
     memset(request, 0, sizeof(clax_http_request_t));
 
     clax_kv_list_init(&request->headers);
+    clax_kv_list_init(&request->query_params);
     clax_kv_list_init(&request->body_params);
 }
 
@@ -574,6 +580,7 @@ void clax_http_request_free(clax_http_request_t *request)
     }
 
     clax_kv_list_free(&request->headers);
+    clax_kv_list_free(&request->query_params);
     clax_kv_list_free(&request->body_params);
 }
 
