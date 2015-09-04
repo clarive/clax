@@ -554,6 +554,16 @@ int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t 
 
         /* TODO: error handling */
         response->body_cb(response->body_cb_ctx, clax_http_chunked, send_cb, ctx);
+    } else if (response->body_fh) {
+        const unsigned char buf[1024];
+        size_t rcount;
+
+        TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO;
+        while ((rcount = fread((void *)buf, 1, sizeof(buf), response->body_fh)) > 0) {
+            TRY send_cb(ctx, buf, rcount) GOTO;
+        }
+
+        fclose(response->body_fh);
     } else {
         TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO;
     }

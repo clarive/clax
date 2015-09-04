@@ -20,6 +20,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <unistd.h>
+#include <libgen.h> /* basename */
+#include <sys/stat.h> /* stat */
 
 #include "clax.h"
 #include "clax_http.h"
@@ -178,6 +181,46 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
             clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
             memcpy(res->body, "Bad request", 14);
             res->body_len = 14;
+        }
+    }
+    else if (req->method == HTTP_GET && strcmp(path_info, "/download") == 0) {
+        char *file = clax_kv_list_find(&req->query_params, "file");
+
+        if (file && access(file, F_OK) != -1) {
+            FILE *fh = fopen(file, "rb");
+
+            if (fh == NULL) {
+                res->status_code = 500;
+                clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
+                memcpy(res->body, "System error", 12);
+                res->body_len = 12;
+            }
+            else {
+                char buf[255];
+                char base_buf[255];
+                struct stat st;
+                stat(file, &st);
+
+                snprintf(buf, sizeof(buf), "%d", (int)st.st_size);
+
+                char *base = basename(file);
+                strcpy(base_buf, "attachment; filename=");
+                strcat(base_buf, base);
+
+                res->status_code = 200;
+                clax_kv_list_push(&res->headers, "Content-Type", "application/octet-stream");
+                clax_kv_list_push(&res->headers, "Content-Disposition", base_buf);
+                clax_kv_list_push(&res->headers, "Pragma", "no-cache");
+                clax_kv_list_push(&res->headers, "Content-Length", buf);
+
+                res->body_fh = fh;
+            }
+        }
+        else {
+            clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
+            res->status_code = 404;
+            memcpy(res->body, "Not found", 9);
+            res->body_len = 9;
         }
     }
     else {

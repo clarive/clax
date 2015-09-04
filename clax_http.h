@@ -75,6 +75,7 @@ typedef struct {
 typedef struct {
   unsigned int status_code;
   clax_kv_list_t headers;
+  FILE *body_fh;
   unsigned char body[MAX_ELEMENT_SIZE];
   size_t body_len;
   void (*body_cb)(void *ctx, clax_http_chunk_cb_t chunk_cb, ...);
