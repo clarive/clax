@@ -222,9 +222,11 @@ int on_multipart_header_name(multipart_parser* p, const char *buf, size_t len)
     if (request->multiparts_num < MAX_MULTIPARTS) {
         clax_http_multipart_t *multipart = &request->multiparts[request->multiparts_num];
 
-        if (multipart->headers_num < MAX_HEADERS) {
-            strncpy(multipart->headers[multipart->headers_num].key, buf, len);
-        }
+        char *key = clax_buf2str(buf, len);
+
+        clax_kv_list_push(&multipart->headers, key, "");
+
+        free(key);
     }
 
     return 0;
@@ -237,10 +239,14 @@ int on_multipart_header_value(multipart_parser* p, const char *buf, size_t len)
     if (request->multiparts_num < MAX_MULTIPARTS) {
         clax_http_multipart_t *multipart = &request->multiparts[request->multiparts_num];
 
-        if (multipart->headers_num < MAX_HEADERS) {
-            strncpy(multipart->headers[multipart->headers_num].val, buf, len);
-            multipart->headers_num++;
-        }
+        clax_kv_list_item_t *item = clax_kv_list_at(&multipart->headers, multipart->headers.size - 1);
+
+        char *key = item->key;
+        char *val = clax_buf2str(buf, len);
+
+        clax_kv_list_set(&multipart->headers, key, val);
+
+        free(val);
     }
 
     return 0;
@@ -563,6 +569,10 @@ void clax_http_request_init(clax_http_request_t *request)
     clax_kv_list_init(&request->headers);
     clax_kv_list_init(&request->query_params);
     clax_kv_list_init(&request->body_params);
+
+    for (int i = 0; i < MAX_MULTIPARTS; i++) {
+        clax_kv_list_init(&request->multiparts[i].headers);
+    }
 }
 
 void clax_http_request_free(clax_http_request_t *request)
@@ -577,6 +587,10 @@ void clax_http_request_free(clax_http_request_t *request)
         for (i = 0; i < request->multiparts_num; i++) {
             free((void *)request->multiparts[i].part);
         }
+    }
+
+    for (int i = 0; i < MAX_MULTIPARTS; i++) {
+        clax_kv_list_init(&request->multiparts[i].headers);
     }
 
     clax_kv_list_free(&request->headers);
@@ -667,16 +681,4 @@ const char *clax_http_extract_kv(const char *str, const char *key, size_t *len)
     *len = q - p;
 
     return p;
-}
-
-const char *clax_http_header_get(clax_http_kv_t *headers, size_t size, char *name)
-{
-    int i;
-    for (i = 0; i < size; i++) {
-        if (strcmp(headers[i].key, name) == 0) {
-            return headers[i].val;
-        }
-    }
-
-    return NULL;
 }

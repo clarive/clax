@@ -34,13 +34,7 @@
 #include "clax_util.h"
 
 typedef struct {
-    char key[MAX_ELEMENT_SIZE];
-    char val[MAX_ELEMENT_SIZE];
-} clax_http_kv_t;
-
-typedef struct {
-  clax_http_kv_t headers[MAX_HEADERS];
-  size_t headers_num;
+  clax_kv_list_t headers;
   unsigned char *part;
   FILE *part_fh;
   char part_fpath[1024];
@@ -99,11 +93,11 @@ void clax_http_response_free(clax_http_response_t *response);
 
 int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_cb, void *ctx);
 const char *clax_http_extract_kv(const char *str, const char *key, size_t *len);
-const char *clax_http_header_get(clax_http_kv_t *headers, size_t size, char *name);
 int clax_http_chunked(char *buf, size_t len, va_list a_list_);
 
 /* Private */
 
+void clax_http_parse_urlencoded(clax_kv_list_t *params, const char *buf, size_t len);
 int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t *response);
 int clax_http_read_parse(void *ctx, recv_cb_t recv_cb, http_parser *parser, clax_http_request_t *request);
 int clax_http_parse(http_parser *parser, clax_http_request_t *request, const char *buf, size_t len);

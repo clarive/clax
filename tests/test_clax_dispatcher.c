@@ -86,9 +86,8 @@ TEST_START(clax_dispatch_saves_upload_string_to_file)
     strcpy(request.path_info, "/upload");
     strcpy(request.multipart_boundary, "---boundary");
     request.multiparts_num = 1;
-    request.multiparts[0].headers_num = 1;
-    strcpy(request.multiparts[0].headers[0].key, "Content-Disposition");
-    strcpy(request.multiparts[0].headers[0].val, "form-data; name=\"file\"; filename=\"foobar\"");
+
+    clax_kv_list_push(&request.multiparts[0].headers, "Content-Disposition", "form-data; name=\"file\"; filename=\"foobar\"");
 
     unsigned char *part = malloc(6 + 1);
     strcpy((char *)part, "foobar");
@@ -140,9 +139,8 @@ TEST_START(clax_dispatch_saves_upload_file_to_file)
     strcpy(request.path_info, "/upload");
     strcpy(request.multipart_boundary, "---boundary");
     request.multiparts_num = 1;
-    request.multiparts[0].headers_num = 1;
-    strcpy(request.multiparts[0].headers[0].key, "Content-Disposition");
-    strcpy(request.multiparts[0].headers[0].val, "form-data; name=\"file\"; filename=\"foobar\"");
+
+    clax_kv_list_push(&request.multiparts[0].headers, "Content-Disposition", "form-data; name=\"file\"; filename=\"foobar\"");
 
     char tpath[255] = {0};
     strcpy(tpath, options.root);

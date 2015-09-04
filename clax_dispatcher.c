@@ -127,7 +127,7 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
             for (i = 0; i < req->multiparts_num; i++) {
                 clax_http_multipart_t *multipart = &req->multiparts[i];
 
-                const char *content_disposition = clax_http_header_get(multipart->headers, multipart->headers_num, "Content-Disposition");
+                const char *content_disposition = clax_kv_list_find(&multipart->headers, "Content-Disposition");
                 if (!content_disposition)
                     continue;
 

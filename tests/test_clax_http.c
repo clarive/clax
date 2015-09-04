@@ -246,8 +246,6 @@ TEST_START(clax_http_parse_parses_form_body_with_decoding)
     _parse(&parser, &request, "\r\n");
     _parse(&parser, &request, "f%20o=b%2Fr+baz%");
 
-    clax_kv_list_dump(&request.body_params);
-
     ASSERT_EQ(request.body_params.size, 1);
     ASSERT_STR_EQ(clax_kv_list_find(&request.body_params, "f o"), "b/r baz%");
 
@@ -291,26 +289,28 @@ TEST_START(clax_http_parse_parses_multipart_body)
 
     ASSERT_STR_EQ(request.multipart_boundary, "--------------------------7ca8ddb13928aa86");
     ASSERT_EQ(request.multiparts_num, 3);
-    ASSERT_EQ(request.multiparts[0].headers_num, 2);
 
-    ASSERT_STR_EQ(request.multiparts[0].headers[0].key, "Content-Disposition");
-    ASSERT_STR_EQ(request.multiparts[0].headers[0].val, "form-data; name=\"datafile1\"; filename=\"r.gif\"");
-    ASSERT_STR_EQ(request.multiparts[0].headers[1].key, "Content-Type");
-    ASSERT_STR_EQ(request.multiparts[0].headers[1].val, "image/gif");
+    ASSERT_EQ(request.multiparts[0].headers.size, 2);
+    ASSERT_STR_EQ(clax_kv_list_at(&request.multiparts[0].headers, 0)->key, "Content-Disposition");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.multiparts[0].headers, 0)->val, "form-data; name=\"datafile1\"; filename=\"r.gif\"");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.multiparts[0].headers, 1)->key, "Content-Type");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.multiparts[0].headers, 1)->val, "image/gif");
     ASSERT_EQ(request.multiparts[0].part_len, 6);
     ASSERT_BUF_EQ(request.multiparts[0].part, "foobar", 6);
 
-    ASSERT_STR_EQ(request.multiparts[1].headers[0].key, "Content-Disposition");
-    ASSERT_STR_EQ(request.multiparts[1].headers[0].val, "form-data; name=\"datafile2\"; filename=\"g.gif\"");
-    ASSERT_STR_EQ(request.multiparts[1].headers[1].key, "Content-Type");
-    ASSERT_STR_EQ(request.multiparts[1].headers[1].val, "image/gif");
+    ASSERT_EQ(request.multiparts[1].headers.size, 2);
+    ASSERT_STR_EQ(clax_kv_list_at(&request.multiparts[1].headers, 0)->key, "Content-Disposition");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.multiparts[1].headers, 0)->val, "form-data; name=\"datafile2\"; filename=\"g.gif\"");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.multiparts[1].headers, 1)->key, "Content-Type");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.multiparts[1].headers, 1)->val, "image/gif");
     ASSERT_EQ(request.multiparts[1].part_len, 6);
     ASSERT_BUF_EQ(request.multiparts[1].part, "barbaz", 6);
 
-    ASSERT_STR_EQ(request.multiparts[2].headers[0].key, "Content-Disposition");
-    ASSERT_STR_EQ(request.multiparts[2].headers[0].val, "form-data; name=\"datafile3\"; filename=\"b.gif\"");
-    ASSERT_STR_EQ(request.multiparts[2].headers[1].key, "Content-Type");
-    ASSERT_STR_EQ(request.multiparts[2].headers[1].val, "image/gif");
+    ASSERT_EQ(request.multiparts[2].headers.size, 2);
+    ASSERT_STR_EQ(clax_kv_list_at(&request.multiparts[2].headers, 0)->key, "Content-Disposition");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.multiparts[2].headers, 0)->val, "form-data; name=\"datafile3\"; filename=\"b.gif\"");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.multiparts[2].headers, 1)->key, "Content-Type");
+    ASSERT_STR_EQ(clax_kv_list_at(&request.multiparts[2].headers, 1)->val, "image/gif");
     ASSERT_EQ(request.multiparts[2].part_len, 3);
     ASSERT_BUF_EQ(request.multiparts[2].part, "end", 3);
 
