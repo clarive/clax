@@ -1,3 +1,96 @@
+# Clax
+
+## API Documentation
+
+### Overview
+
+### Authentication
+
+### Upload File
+
+Upload file to the server via multipart form. The file is saved to the clax home directory. See **URL Params** on how to
+modify this behaviour.
+
+#### URL
+
+    /upload
+
+#### Method
+
+    POST
+
+#### URL Params
+
+Required
+
+None
+
+Optional
+
+* `file=[string]`
+
+    Save file as a different name
+
+* `dir=[string]`
+
+    Save file to the different directory
+
+* `crc32=[hex string]` 
+
+    CRC32 to calculate
+
+#### Data Params
+
+Required
+
+* `file=[bytes]`
+
+#### Successful Response
+
+* Code:
+
+    200
+
+* Content:
+
+    {"status":"ok"}
+
+#### Error Response:
+
+* Code:
+
+    400
+
+* Error:
+
+    Bad request
+
+* Reason:
+
+    Bad params were passed.
+
+OR
+
+* Code:
+
+    500
+
+* Error:
+
+    System error
+
+* Reason:
+
+    Some system error, like file cannot be opened.
+
+#### Example
+
+    curl -F 'file=@path_to_file' http://clax-server/upload
+
+#### Notes
+
+## Copyright
+
 Clax is a portable HTTP(s) remote deployment agent
 Copyright (C) 2015  Clarive Software
 
