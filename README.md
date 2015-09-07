@@ -1,5 +1,23 @@
 # Clax
 
+## Command-Line Usage
+
+    usage: clax [-n] [-l log_file] [-e entropy_file]
+
+    Options:
+
+       common
+       ------
+       -r <root>          home directory
+       -l <log_file>      path to log file
+
+       ssl
+       ---
+       -n                 do not use ssl
+       -e <entropy_file>  path to entropy file
+       -t <cert_file>     path to cert file (CA included)
+       -p <key_file>      path to private key file
+
 ## API Documentation
 
 ### Overview
