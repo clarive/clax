@@ -147,18 +147,17 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
                     const char *filename = clax_http_extract_kv(kv, "filename", &filename_len);
 
                     if (name && (strncmp(name, "file", name_len) == 0) && filename) {
-                        char path_to_file[1024] = {0};
+                        char fpath[1024] = {0};
+                        char *new_name = clax_kv_list_find(&req->query_params, "name");
 
-                        char *name = clax_kv_list_find(&req->query_params, "name");
-
-                        if (name && strlen(name)) {
-                            strncat(path_to_file, name, MIN(strlen(name), sizeof(path_to_file)));
+                        if (new_name && strlen(new_name)) {
+                            strncpy(fpath, new_name, MIN(strlen(new_name), sizeof(fpath)));
                         }
                         else {
-                            strncat(path_to_file, filename, MIN(sizeof(path_to_file) - strlen(path_to_file), filename_len));
+                            strncpy(fpath, filename, MIN(filename_len, sizeof(fpath)));
                         }
 
-                        int ret = clax_big_buf_write_file(&multipart->bbuf, path_to_file);
+                        int ret = clax_big_buf_write_file(&multipart->bbuf, fpath);
 
                         if (ret < 0) {
                             clax_dispatch_system_error(clax_ctx, req, res);
