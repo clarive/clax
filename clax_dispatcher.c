@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <libgen.h> /* basename */
 #include <sys/stat.h> /* stat */
+#include <fcntl.h>
 
 #include "clax.h"
 #include "clax_http.h"
@@ -30,6 +31,7 @@
 #include "clax_command.h"
 #include "clax_big_buf.h"
 #include "clax_util.h"
+#include "clax_crc32.h"
 #include "clax_dispatcher.h"
 
 command_ctx_t command_ctx;
@@ -150,6 +152,12 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
                         char fpath[1024] = {0};
                         char *new_name = clax_kv_list_find(&req->query_params, "name");
                         char *new_dir = clax_kv_list_find(&req->query_params, "dir");
+                        char *crc32 = clax_kv_list_find(&req->query_params, "crc");
+
+                        if (crc32 && strlen(crc32) != 8) {
+                            clax_dispatch_bad_request(clax_ctx, req, res);
+                            return;
+                        }
 
                         if (new_dir && strlen(new_dir)) {
                             if (strlen(new_dir) >= sizeof(fpath) - 1) {
@@ -187,6 +195,25 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
                             clax_dispatch_system_error(clax_ctx, req, res);
                         }
                         else {
+                            if (crc32 && strlen(crc32)) {
+                                unsigned long got_crc32 = strtol(crc32, NULL, 16);
+
+                                int fd = open(fpath, O_RDONLY);
+                                unsigned long real_crc32 = clax_crc32_calc_fd(fd);
+                                close(fd);
+
+                                if (got_crc32 != real_crc32) {
+                                    clax_log("CRC mismatch %d != %d", got_crc32, real_crc32);
+                                    clax_dispatch_bad_request(clax_ctx, req, res);
+
+                                    unlink(fpath);
+
+                                    return;
+                                } else {
+                                    clax_log("CRC ok");
+                                }
+                            }
+
                             res->status_code = 200;
                             clax_kv_list_push(&res->headers, "Content-Type", "application/json");
                             memcpy(res->body, "{\"status\":\"ok\"}", 15);
