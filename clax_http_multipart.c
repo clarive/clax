@@ -21,9 +21,11 @@
 #include "clax_http_multipart.h"
 #include "clax_util.h"
 
-void clax_http_multipart_list_init(clax_http_multipart_list_t *list)
+void clax_http_multipart_list_init(clax_http_multipart_list_t *list, char *tempdir)
 {
     memset(list, 0, sizeof(clax_http_multipart_list_t));
+
+    list->tempdir = strdup(tempdir ? tempdir : "/tmp");
 }
 
 void clax_http_multipart_list_free(clax_http_multipart_list_t *list)
@@ -32,15 +34,16 @@ void clax_http_multipart_list_free(clax_http_multipart_list_t *list)
         clax_http_multipart_t *item = list->items[i];
 
         clax_kv_list_free(&item->headers);
-
-        free(item->part);
+        clax_big_buf_free(&item->bbuf);
 
         free(item);
     }
 
     free(list->items);
 
-    clax_http_multipart_list_init(list);
+    free(list->tempdir);
+
+    memset(list, 0, sizeof(clax_http_multipart_list_t));
 }
 
 clax_http_multipart_t *clax_http_multipart_list_push(clax_http_multipart_list_t *list)
@@ -52,10 +55,12 @@ clax_http_multipart_t *clax_http_multipart_list_push(clax_http_multipart_list_t 
     }
 
     list->items[list->size] = malloc(sizeof(clax_http_multipart_t));
+    clax_http_multipart_t *multipart = list->items[list->size];
 
-    memset(list->items[list->size], 0, sizeof(clax_http_multipart_t));
+    memset(multipart, 0, sizeof(clax_http_multipart_t));
 
-    clax_kv_list_init(&list->items[list->size]->headers);
+    clax_kv_list_init(&multipart->headers);
+    clax_big_buf_init(&multipart->bbuf, list->tempdir, 1024 * 1024);
 
     list->size++;
 

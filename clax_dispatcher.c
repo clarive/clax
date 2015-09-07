@@ -28,6 +28,7 @@
 #include "clax_http.h"
 #include "clax_log.h"
 #include "clax_command.h"
+#include "clax_big_buf.h"
 #include "clax_util.h"
 
 command_ctx_t command_ctx;
@@ -147,15 +148,7 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
                         char path_to_file[1024] = {0};
                         strncat(path_to_file, filename, MIN(sizeof(path_to_file) - strlen(path_to_file), filename_len));
 
-                        int ret;
-                        if (multipart->part_fpath && strlen(multipart->part_fpath)) {
-                            clax_log("Renaming to file '%s' -> '%s'", multipart->part_fpath, path_to_file);
-                            ret = rename(multipart->part_fpath, path_to_file);
-                        }
-                        else {
-                            clax_log("Saving to file '%s'", path_to_file);
-                            ret = clax_dispatcher_write_file(path_to_file, multipart->part, multipart->part_len);
-                        }
+                        int ret = clax_big_buf_write_file(&multipart->bbuf, path_to_file);
 
                         if (ret < 0) {
                             res->status_code = 500;

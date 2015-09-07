@@ -257,6 +257,7 @@ TEST_START(clax_http_parse_parses_multipart_body)
 {
     http_parser parser;
     clax_http_request_t request;
+    char content[1024];
 
     http_parser_init(&parser, HTTP_REQUEST);
     clax_http_request_init(&request);
@@ -299,8 +300,10 @@ TEST_START(clax_http_parse_parses_multipart_body)
     ASSERT_STR_EQ(clax_kv_list_at(&multipart->headers, 0)->val, "form-data; name=\"datafile1\"; filename=\"r.gif\"");
     ASSERT_STR_EQ(clax_kv_list_at(&multipart->headers, 1)->key, "Content-Type");
     ASSERT_STR_EQ(clax_kv_list_at(&multipart->headers, 1)->val, "image/gif");
-    ASSERT_EQ(multipart->part_len, 6);
-    ASSERT_BUF_EQ(multipart->part, "foobar", 6);
+
+    clax_big_buf_read(&multipart->bbuf, content, sizeof(content));
+    ASSERT_EQ(multipart->bbuf.len, 6);
+    ASSERT_BUF_EQ(content, "foobar", 6);
 
     multipart = clax_http_multipart_list_at(&request.multiparts, 1);
 
@@ -309,8 +312,10 @@ TEST_START(clax_http_parse_parses_multipart_body)
     ASSERT_STR_EQ(clax_kv_list_at(&multipart->headers, 0)->val, "form-data; name=\"datafile2\"; filename=\"g.gif\"");
     ASSERT_STR_EQ(clax_kv_list_at(&multipart->headers, 1)->key, "Content-Type");
     ASSERT_STR_EQ(clax_kv_list_at(&multipart->headers, 1)->val, "image/gif");
-    ASSERT_EQ(multipart->part_len, 6);
-    ASSERT_BUF_EQ(multipart->part, "barbaz", 6);
+
+    clax_big_buf_read(&multipart->bbuf, content, sizeof(content));
+    ASSERT_EQ(multipart->bbuf.len, 6);
+    ASSERT_BUF_EQ(content, "barbaz", 6);
 
     multipart = clax_http_multipart_list_at(&request.multiparts, 2);
 
@@ -319,8 +324,10 @@ TEST_START(clax_http_parse_parses_multipart_body)
     ASSERT_STR_EQ(clax_kv_list_at(&multipart->headers, 0)->val, "form-data; name=\"datafile3\"; filename=\"b.gif\"");
     ASSERT_STR_EQ(clax_kv_list_at(&multipart->headers, 1)->key, "Content-Type");
     ASSERT_STR_EQ(clax_kv_list_at(&multipart->headers, 1)->val, "image/gif");
-    ASSERT_EQ(multipart->part_len, 3);
-    ASSERT_BUF_EQ(multipart->part, "end", 3);
+
+    clax_big_buf_read(&multipart->bbuf, content, sizeof(content));
+    ASSERT_EQ(multipart->bbuf.len, 3);
+    ASSERT_BUF_EQ(content, "end", 3);
 
     clax_http_request_free(&request);
 }

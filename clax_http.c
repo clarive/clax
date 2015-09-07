@@ -33,6 +33,7 @@
 #include "clax_http_multipart.h"
 #include "clax_log.h"
 #include "clax_http.h"
+#include "clax_big_buf.h"
 #include "clax_util.h"
 
 enum {
@@ -261,51 +262,7 @@ int on_part_data(multipart_parser* p, const char *buf, size_t len)
 
     clax_http_multipart_t *multipart = clax_http_multipart_list_last(&request->multiparts);
 
-    if (multipart->part_len + len > 1024 * 1024) {
-        if (!multipart->part_fh) {
-            int fd;
-            const char *template = ".fileXXXXXX";
-            char fpath[1024] = {0};
-            strncat(fpath, request->clax_ctx->options->root, sizeof(fpath) - strlen(template));
-            strcat(fpath, template);
-            fd = mkstemp(fpath);
-            if (fd < 0) return -1;
-            close(fd);
-
-            clax_log("Part is too big, saving to file '%s'", fpath);
-
-            multipart->part_fh = fopen(fpath, "wb");
-
-            if (multipart->part_fh == NULL) {
-                clax_log("Creating file '%s' failed", fpath);
-                return -1;
-            }
-
-            strcpy(multipart->part_fpath, fpath);
-
-            if (multipart->part_len) {
-                size_t wcount = fwrite(multipart->part, 1, multipart->part_len, multipart->part_fh);
-                if (wcount != multipart->part_len) {
-                    clax_log("Error writing to file");
-                    return -1;
-                }
-
-                free(multipart->part);
-                multipart->part = NULL;
-            }
-        }
-
-        size_t wcount = fwrite(buf, 1, len, multipart->part_fh);
-        if (wcount != len) {
-            clax_log("Error writing to file");
-            return -1;
-        }
-
-        multipart->part_len += len;
-    }
-    else {
-        clax_buf_append(&multipart->part, &multipart->part_len, buf, len);
-    }
+    clax_big_buf_append(&multipart->bbuf, buf, len);
 
     return 0;
 }
@@ -317,10 +274,7 @@ int on_part_data_end(multipart_parser* p)
     clax_http_multipart_t *multipart = clax_http_multipart_list_last(&request->multiparts);
     multipart->done++;
 
-    if (multipart->part_fh) {
-        clax_log("Closing part file");
-        fclose(multipart->part_fh);
-    }
+    clax_big_buf_close(&multipart->bbuf);
 
     return 0;
 }
@@ -578,7 +532,12 @@ void clax_http_request_init(clax_http_request_t *request)
     clax_kv_list_init(&request->query_params);
     clax_kv_list_init(&request->body_params);
 
-    clax_http_multipart_list_init(&request->multiparts);
+    char *tempdir = NULL;
+    if (request->clax_ctx && request->clax_ctx->options) {
+        tempdir = request->clax_ctx->options->root;
+    }
+
+    clax_http_multipart_list_init(&request->multiparts, tempdir);
 }
 
 void clax_http_request_free(clax_http_request_t *request)

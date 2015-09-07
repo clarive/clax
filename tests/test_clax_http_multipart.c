@@ -29,7 +29,7 @@ TEST_START(clax_http_multipart_list_default_values)
 {
     clax_http_multipart_list_t list;
 
-    clax_http_multipart_list_init(&list);
+    clax_http_multipart_list_init(&list, "/tmp");
 
     ASSERT_EQ(list.size, 0);
 
@@ -41,7 +41,7 @@ TEST_START(clax_http_multipart_list_pushes_multipart)
 {
     clax_http_multipart_list_t list;
 
-    clax_http_multipart_list_init(&list);
+    clax_http_multipart_list_init(&list, "/tmp");
 
     clax_http_multipart_list_push(&list);
     ASSERT_EQ(list.size, 1);
@@ -60,7 +60,7 @@ TEST_START(clax_http_multipart_list_returns_item_at_position)
 {
     clax_http_multipart_list_t list;
 
-    clax_http_multipart_list_init(&list);
+    clax_http_multipart_list_init(&list, "/tmp");
 
     ASSERT_NULL(clax_http_multipart_list_at(&list, 0));
 
@@ -81,7 +81,7 @@ TEST_START(clax_http_multipart_list_returns_last_item)
 {
     clax_http_multipart_list_t list;
 
-    clax_http_multipart_list_init(&list);
+    clax_http_multipart_list_init(&list, "/tmp");
 
     ASSERT_NULL(clax_http_multipart_list_last(&list));
 

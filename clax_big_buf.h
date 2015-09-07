@@ -17,30 +17,26 @@
  *  along with Clax.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLAX_HTTP_MULTIPART_H
-#define CLAX_HTTP_MULTIPART_H
+#ifndef CLAX_BIG_BUF_H
+#define CLAX_BIG_BUF_H
 
 #include <stdio.h>
 
-#include "clax_big_buf.h"
-#include "clax_util.h"
-
 typedef struct {
-  clax_kv_list_t headers;
-  clax_big_buf_t bbuf;
-  int done;
-} clax_http_multipart_t;
+    unsigned char *memory;
+    FILE *fh;
+    size_t len;
 
-typedef struct {
-    clax_http_multipart_t **items;
-    size_t size;
-    char *tempdir;
-} clax_http_multipart_list_t;
+    size_t max_size;
+    char *temp_dir;
+    char *fpath;
+} clax_big_buf_t;
 
-void clax_http_multipart_list_init(clax_http_multipart_list_t *list, char *tempdir);
-void clax_http_multipart_list_free(clax_http_multipart_list_t *list);
-clax_http_multipart_t *clax_http_multipart_list_push(clax_http_multipart_list_t *list);
-clax_http_multipart_t *clax_http_multipart_list_at(clax_http_multipart_list_t *list, size_t index);
-clax_http_multipart_t *clax_http_multipart_list_last(clax_http_multipart_list_t *list);
+clax_big_buf_t *clax_big_buf_init(clax_big_buf_t *bbuf, char *temp_dir, size_t max_size);
+clax_big_buf_t *clax_big_buf_free(clax_big_buf_t *bbuf);
+int clax_big_buf_append(clax_big_buf_t *bbuf, const unsigned char *buf, size_t len);
+int clax_big_buf_write_file(clax_big_buf_t *bbuf, char *fpath);
+int clax_big_buf_close(clax_big_buf_t *bbuf);
+size_t clax_big_buf_read(clax_big_buf_t *bbuf, unsigned char *buf, size_t len);
 
 #endif

@@ -62,6 +62,18 @@ int u_rv;
         }                                   \
     } while (0);
 
+#define ASSERT_NOT_EQ(got, exp)                 \
+    do {                                    \
+        int i = (int)got;                   \
+        ASSERT(got != exp)                  \
+                                            \
+        if (!u_rv) {                        \
+            printf("# " #got ":\n");        \
+            printf("#   got: %d\n", i);     \
+            printf("#   exp: != %d\n", exp);   \
+        }                                   \
+    } while (0);
+
 #define ASSERT_NULL(got)                 \
     do {                                    \
         ASSERT(got == NULL)                  \

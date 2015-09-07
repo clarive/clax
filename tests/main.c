@@ -48,8 +48,7 @@ int main(int argc, char *argv[])
     RUN_TEST(clax_http_multipart_list_returns_last_item)
 
     RUN_TEST(clax_dispatch_sets_404_on_unknown_path)
-    RUN_TEST(clax_dispatch_saves_upload_string_to_file)
-    RUN_TEST(clax_dispatch_saves_upload_file_to_file)
+    RUN_TEST(clax_dispatch_saves_upload_to_file)
     RUN_TEST(clax_dispatch_returns_bad_request_when_wrong_params)
 
     RUN_TEST(clax_command_start_runs_command)
@@ -69,6 +68,14 @@ int main(int argc, char *argv[])
     RUN_TEST(clax_kv_list_sets_new_val)
 
     RUN_TEST(clax_buf2str_allocates_str_from_buffer)
+
+    RUN_TEST(clax_big_buf_default_values)
+    RUN_TEST(clax_big_buf_creates_file_when_max_size)
+    RUN_TEST(clax_big_buf_deletes_file_on_free)
+    RUN_TEST(clax_big_buf_writes_memory_to_file)
+    RUN_TEST(clax_big_buf_renames_file)
+    RUN_TEST(clax_big_buf_read_from_memory)
+    RUN_TEST(clax_big_buf_read_from_file)
 
     DONE_TESTING
 }
