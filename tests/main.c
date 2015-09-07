@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
     RUN_TEST(clax_dispatch_sets_404_on_unknown_path)
     RUN_TEST(clax_dispatch_saves_upload_to_file)
     RUN_TEST(clax_dispatch_saves_upload_to_file_with_another_name)
+    RUN_TEST(clax_dispatch_saves_upload_to_another_dir)
     RUN_TEST(clax_dispatch_returns_bad_request_when_wrong_params)
 
     RUN_TEST(clax_command_start_runs_command)

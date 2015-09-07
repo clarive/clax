@@ -149,12 +149,36 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
                     if (name && (strncmp(name, "file", name_len) == 0) && filename) {
                         char fpath[1024] = {0};
                         char *new_name = clax_kv_list_find(&req->query_params, "name");
+                        char *new_dir = clax_kv_list_find(&req->query_params, "dir");
+
+                        if (new_dir && strlen(new_dir)) {
+                            if (strlen(new_dir) >= sizeof(fpath) - 1) {
+                                clax_dispatch_bad_request(clax_ctx, req, res);
+                                return;
+                            }
+
+                            struct stat info;
+
+                            if (stat(new_dir, &info) == 0 && info.st_mode & S_IFDIR) {
+                                strncpy(fpath, new_dir, MIN(strlen(new_dir), sizeof(fpath)));
+
+                                if (new_dir[strlen(new_dir) - 1] != '/') {
+                                    strcat(fpath, "/");
+                                }
+                            }
+                            else {
+                                clax_log("Output directory does not exist");
+
+                                clax_dispatch_bad_request(clax_ctx, req, res);
+                                break;
+                            }
+                        }
 
                         if (new_name && strlen(new_name)) {
-                            strncpy(fpath, new_name, MIN(strlen(new_name), sizeof(fpath)));
+                            strncat(fpath, new_name, MIN(strlen(new_name), sizeof(fpath) - strlen(fpath)));
                         }
                         else {
-                            strncpy(fpath, filename, MIN(filename_len, sizeof(fpath)));
+                            strncat(fpath, filename, MIN(filename_len, sizeof(fpath) - strlen(fpath)));
                         }
 
                         int ret = clax_big_buf_write_file(&multipart->bbuf, fpath);
