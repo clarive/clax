@@ -62,6 +62,26 @@ int u_rv;
         }                                   \
     } while (0);
 
+#define ASSERT_NULL(got)                 \
+    do {                                    \
+        ASSERT(got == NULL)                  \
+                                            \
+        if (!u_rv) {                        \
+            printf("# " #got ":\n");        \
+            printf("#   exp: NULL\n");   \
+        }                                   \
+    } while (0);
+
+#define ASSERT_NOT_NULL(got)                 \
+    do {                                    \
+        ASSERT(got != NULL)                  \
+                                            \
+        if (!u_rv) {                        \
+            printf("# " #got ":\n");        \
+            printf("#   exp: NOT NULL\n");   \
+        }                                   \
+    } while (0);
+
 #define ASSERT_STR_EQ(got, exp)                 \
     do {                                        \
         char *p = (char *)got;                  \

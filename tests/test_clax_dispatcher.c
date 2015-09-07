@@ -85,14 +85,15 @@ TEST_START(clax_dispatch_saves_upload_string_to_file)
     request.method = HTTP_POST;
     strcpy(request.path_info, "/upload");
     strcpy(request.multipart_boundary, "---boundary");
-    request.multiparts_num = 1;
 
-    clax_kv_list_push(&request.multiparts[0].headers, "Content-Disposition", "form-data; name=\"file\"; filename=\"foobar\"");
+    clax_http_multipart_t *multipart = clax_http_multipart_list_push(&request.multiparts);
+
+    clax_kv_list_push(&multipart->headers, "Content-Disposition", "form-data; name=\"file\"; filename=\"foobar\"");
 
     unsigned char *part = malloc(6 + 1);
     strcpy((char *)part, "foobar");
-    request.multiparts[0].part = part;
-    request.multiparts[0].part_len = 6;
+    multipart->part = part;
+    multipart->part_len = 6;
 
     clax_dispatch(&clax_ctx, &request, &response);
 
@@ -138,17 +139,18 @@ TEST_START(clax_dispatch_saves_upload_file_to_file)
     request.method = HTTP_POST;
     strcpy(request.path_info, "/upload");
     strcpy(request.multipart_boundary, "---boundary");
-    request.multiparts_num = 1;
 
-    clax_kv_list_push(&request.multiparts[0].headers, "Content-Disposition", "form-data; name=\"file\"; filename=\"foobar\"");
+    clax_http_multipart_t *multipart = clax_http_multipart_list_push(&request.multiparts);
+
+    clax_kv_list_push(&multipart->headers, "Content-Disposition", "form-data; name=\"file\"; filename=\"foobar\"");
 
     char tpath[255] = {0};
     strcpy(tpath, options.root);
     strcat(tpath, ".upload.file");
     clax_dispatcher_write_file(tpath, (const unsigned char *)"hello", 5);
 
-    strcpy(request.multiparts[0].part_fpath, tpath);
-    request.multiparts[0].part_len = 5;
+    strcpy(multipart->part_fpath, tpath);
+    multipart->part_len = 5;
 
     clax_dispatch(&clax_ctx, &request, &response);
 

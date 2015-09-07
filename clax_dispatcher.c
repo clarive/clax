@@ -127,8 +127,8 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
     else if (req->method == HTTP_POST && strcmp(path_info, "/upload") == 0) {
         if (strlen(req->multipart_boundary)) {
             int i;
-            for (i = 0; i < req->multiparts_num; i++) {
-                clax_http_multipart_t *multipart = &req->multiparts[i];
+            for (i = 0; i < req->multiparts.size; i++) {
+                clax_http_multipart_t *multipart = clax_http_multipart_list_at(&req->multiparts, i);
 
                 const char *content_disposition = clax_kv_list_find(&multipart->headers, "Content-Disposition");
                 if (!content_disposition)

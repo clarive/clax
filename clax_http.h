@@ -20,26 +20,16 @@
 #ifndef CLAX_HTTP_H
 #define CLAX_HTTP_H
 
-#define MAX_PARAMS 255
-#define MAX_HEADERS 13
 #define MAX_ELEMENT_SIZE 2048
-#define MAX_MULTIPARTS 5
-#define MAX_CHUNKS 16
 
+#include <stdio.h>
 #include <stdarg.h>
 
 #include "http_parser/http_parser.h"
 #include "multipart_parser.h"
 #include "clax.h"
 #include "clax_util.h"
-
-typedef struct {
-  clax_kv_list_t headers;
-  unsigned char *part;
-  FILE *part_fh;
-  char part_fpath[1024];
-  size_t part_len;
-} clax_http_multipart_t;
+#include "clax_http_multipart.h"
 
 typedef int (*clax_http_chunk_cb_t)(char *buf, size_t len, va_list a_list);
 
@@ -60,8 +50,7 @@ typedef struct {
   multipart_parser *multipart_parser;
   multipart_parser_settings multipart_callbacks;
   char multipart_boundary[70];
-  clax_http_multipart_t multiparts[MAX_MULTIPARTS];
-  size_t multiparts_num;
+  clax_http_multipart_list_t multiparts;
 
     /* Flags */
   char headers_done;

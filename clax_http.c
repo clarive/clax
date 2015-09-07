@@ -30,6 +30,7 @@
 #include "clax.h"
 #include "clax_dispatcher.h"
 #include "clax_http.h"
+#include "clax_http_multipart.h"
 #include "clax_log.h"
 #include "clax_http.h"
 #include "clax_util.h"
@@ -222,15 +223,17 @@ int on_multipart_header_name(multipart_parser* p, const char *buf, size_t len)
 {
     clax_http_request_t *request = multipart_parser_get_data(p);
 
-    if (request->multiparts_num < MAX_MULTIPARTS) {
-        clax_http_multipart_t *multipart = &request->multiparts[request->multiparts_num];
+    clax_http_multipart_t *multipart = clax_http_multipart_list_last(&request->multiparts);
 
-        char *key = clax_buf2str(buf, len);
-
-        clax_kv_list_push(&multipart->headers, key, "");
-
-        free(key);
+    if (!multipart || multipart->done) {
+        multipart = clax_http_multipart_list_push(&request->multiparts);
     }
+
+    char *key = clax_buf2str(buf, len);
+
+    clax_kv_list_push(&multipart->headers, key, "");
+
+    free(key);
 
     return 0;
 }
@@ -239,17 +242,15 @@ int on_multipart_header_value(multipart_parser* p, const char *buf, size_t len)
 {
     clax_http_request_t *request = multipart_parser_get_data(p);
 
-    if (request->multiparts_num < MAX_MULTIPARTS) {
-        clax_http_multipart_t *multipart = &request->multiparts[request->multiparts_num];
+    clax_http_multipart_t *multipart = clax_http_multipart_list_last(&request->multiparts);
 
-        clax_kv_list_item_t *item = clax_kv_list_at(&multipart->headers, multipart->headers.size - 1);
+    clax_kv_list_item_t *item = clax_kv_list_at(&multipart->headers, multipart->headers.size - 1);
 
-        char *val = clax_buf2str(buf, len);
+    char *val = clax_buf2str(buf, len);
 
-        clax_kv_list_set(&multipart->headers, item->key, val);
+    clax_kv_list_set(&multipart->headers, item->key, val);
 
-        free(val);
-    }
+    free(val);
 
     return 0;
 }
@@ -258,54 +259,52 @@ int on_part_data(multipart_parser* p, const char *buf, size_t len)
 {
     clax_http_request_t *request = multipart_parser_get_data(p);
 
-    if (request->multiparts_num < MAX_MULTIPARTS) {
-        clax_http_multipart_t *multipart = &request->multiparts[request->multiparts_num];
+    clax_http_multipart_t *multipart = clax_http_multipart_list_last(&request->multiparts);
 
-        if (multipart->part_len + len > 1024 * 1024) {
-            if (!multipart->part_fh) {
-                int fd;
-                const char *template = ".fileXXXXXX";
-                char fpath[1024] = {0};
-                strncat(fpath, request->clax_ctx->options->root, sizeof(fpath) - strlen(template));
-                strcat(fpath, template);
-                fd = mkstemp(fpath);
-                if (fd < 0) return -1;
-                close(fd);
+    if (multipart->part_len + len > 1024 * 1024) {
+        if (!multipart->part_fh) {
+            int fd;
+            const char *template = ".fileXXXXXX";
+            char fpath[1024] = {0};
+            strncat(fpath, request->clax_ctx->options->root, sizeof(fpath) - strlen(template));
+            strcat(fpath, template);
+            fd = mkstemp(fpath);
+            if (fd < 0) return -1;
+            close(fd);
 
-                clax_log("Part is too big, saving to file '%s'", fpath);
+            clax_log("Part is too big, saving to file '%s'", fpath);
 
-                multipart->part_fh = fopen(fpath, "wb");
+            multipart->part_fh = fopen(fpath, "wb");
 
-                if (multipart->part_fh == NULL) {
-                    clax_log("Creating file '%s' failed", fpath);
-                    return -1;
-                }
-
-                strcpy(multipart->part_fpath, fpath);
-
-                if (multipart->part_len) {
-                    size_t wcount = fwrite(multipart->part, 1, multipart->part_len, multipart->part_fh);
-                    if (wcount != multipart->part_len) {
-                        clax_log("Error writing to file");
-                        return -1;
-                    }
-
-                    free(multipart->part);
-                    multipart->part = NULL;
-                }
-            }
-
-            size_t wcount = fwrite(buf, 1, len, multipart->part_fh);
-            if (wcount != len) {
-                clax_log("Error writing to file");
+            if (multipart->part_fh == NULL) {
+                clax_log("Creating file '%s' failed", fpath);
                 return -1;
             }
 
-            multipart->part_len += len;
+            strcpy(multipart->part_fpath, fpath);
+
+            if (multipart->part_len) {
+                size_t wcount = fwrite(multipart->part, 1, multipart->part_len, multipart->part_fh);
+                if (wcount != multipart->part_len) {
+                    clax_log("Error writing to file");
+                    return -1;
+                }
+
+                free(multipart->part);
+                multipart->part = NULL;
+            }
         }
-        else {
-            clax_buf_append(&multipart->part, &multipart->part_len, buf, len);
+
+        size_t wcount = fwrite(buf, 1, len, multipart->part_fh);
+        if (wcount != len) {
+            clax_log("Error writing to file");
+            return -1;
         }
+
+        multipart->part_len += len;
+    }
+    else {
+        clax_buf_append(&multipart->part, &multipart->part_len, buf, len);
     }
 
     return 0;
@@ -315,15 +314,12 @@ int on_part_data_end(multipart_parser* p)
 {
     clax_http_request_t *request = multipart_parser_get_data(p);
 
-    if (request->multiparts_num < MAX_MULTIPARTS) {
-        clax_http_multipart_t *multipart = &request->multiparts[request->multiparts_num];
+    clax_http_multipart_t *multipart = clax_http_multipart_list_last(&request->multiparts);
+    multipart->done++;
 
-        if (multipart->part_fh) {
-            clax_log("Closing part file");
-            fclose(multipart->part_fh);
-        }
-
-        request->multiparts_num++;
+    if (multipart->part_fh) {
+        clax_log("Closing part file");
+        fclose(multipart->part_fh);
     }
 
     return 0;
@@ -582,9 +578,7 @@ void clax_http_request_init(clax_http_request_t *request)
     clax_kv_list_init(&request->query_params);
     clax_kv_list_init(&request->body_params);
 
-    for (int i = 0; i < MAX_MULTIPARTS; i++) {
-        clax_kv_list_init(&request->multiparts[i].headers);
-    }
+    clax_http_multipart_list_init(&request->multiparts);
 }
 
 void clax_http_request_free(clax_http_request_t *request)
@@ -594,16 +588,7 @@ void clax_http_request_free(clax_http_request_t *request)
     if (request->multipart_parser)
         multipart_parser_free(request->multipart_parser);
 
-    if (request->multiparts_num) {
-        int i;
-        for (i = 0; i < request->multiparts_num; i++) {
-            free((void *)request->multiparts[i].part);
-        }
-    }
-
-    for (int i = 0; i < MAX_MULTIPARTS; i++) {
-        clax_kv_list_free(&request->multiparts[i].headers);
-    }
+    clax_http_multipart_list_free(&request->multiparts);
 
     clax_kv_list_free(&request->headers);
     clax_kv_list_free(&request->query_params);
