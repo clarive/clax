@@ -53,6 +53,30 @@ void clax_command_read_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
     return;
 }
 
+void clax_dispatch_not_found(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
+{
+    clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
+    res->status_code = 404;
+    memcpy(res->body, "Not found", 9);
+    res->body_len = 9;
+}
+
+void clax_dispatch_system_error(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
+{
+    clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
+    res->status_code = 500;
+    memcpy(res->body, "System error", 12);
+    res->body_len = 12;
+}
+
+void clax_dispatch_bad_request(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
+{
+    res->status_code = 400;
+    clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
+    memcpy(res->body, "Bad request", 14);
+    res->body_len = 14;
+}
+
 void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     char *path_info = req->path_info;
@@ -97,16 +121,10 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
                 res->body_cb = clax_command_read_cb;
             }
             else {
-                res->status_code = 500;
-                clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
-                memcpy(res->body, "System error", 12);
-                res->body_len = 12;
+                clax_dispatch_system_error(clax_ctx, req, res);
             }
         } else {
-            res->status_code = 400;
-            clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
-            memcpy(res->body, "Invalid params", 14);
-            res->body_len = 14;
+            clax_dispatch_bad_request(clax_ctx, req, res);
         }
     }
     else if (req->method == HTTP_POST && strcmp(path_info, "/upload") == 0) {
@@ -135,10 +153,7 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
                         int ret = clax_big_buf_write_file(&multipart->bbuf, path_to_file);
 
                         if (ret < 0) {
-                            res->status_code = 500;
-                            clax_kv_list_push(&res->headers, "Content-Type", "application/json");
-                            memcpy(res->body, "{\"message\":\"System error\"}", 26);
-                            res->body_len = 26;
+                            clax_dispatch_system_error(clax_ctx, req, res);
                         }
                         else {
                             res->status_code = 200;
@@ -154,10 +169,7 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
         }
 
         if (!res->status_code) {
-            res->status_code = 400;
-            clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
-            memcpy(res->body, "Bad request", 14);
-            res->body_len = 14;
+            clax_dispatch_bad_request(clax_ctx, req, res);
         }
     }
     else if (req->method == HTTP_GET && strcmp(path_info, "/download") == 0) {
@@ -167,10 +179,7 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
             FILE *fh = fopen(file, "rb");
 
             if (fh == NULL) {
-                res->status_code = 500;
-                clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
-                memcpy(res->body, "System error", 12);
-                res->body_len = 12;
+                clax_dispatch_system_error(clax_ctx, req, res);
             }
             else {
                 char buf[255];
@@ -194,16 +203,10 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
             }
         }
         else {
-            clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
-            res->status_code = 404;
-            memcpy(res->body, "Not found", 9);
-            res->body_len = 9;
+            clax_dispatch_not_found(clax_ctx, req, res);
         }
     }
     else {
-        clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
-        res->status_code = 404;
-        memcpy(res->body, "Not found", 9);
-        res->body_len = 9;
+        clax_dispatch_not_found(clax_ctx, req, res);
     }
 }
