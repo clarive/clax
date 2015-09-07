@@ -30,25 +30,9 @@
 #include "clax_command.h"
 #include "clax_big_buf.h"
 #include "clax_util.h"
+#include "clax_dispatcher.h"
 
 command_ctx_t command_ctx;
-
-int clax_dispatcher_write_file(char *fname, unsigned char *buf, size_t len)
-{
-    FILE *fh;
-
-    fh = fopen(fname, "wb");
-
-    if (fh == NULL) {
-        return -1;
-    }
-
-    fwrite(buf, 1, len, fh);
-
-    fclose(fh);
-
-    return 0;
-}
 
 void clax_command_read_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
 {

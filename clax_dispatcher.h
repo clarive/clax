@@ -24,6 +24,5 @@
 #include "clax_http.h"
 
 void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res);
-int clax_dispatcher_write_file(char *fname, const unsigned char *buf, size_t len);
 
 #endif
