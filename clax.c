@@ -73,15 +73,16 @@ void usage()
             "Options:\n\n"
             "   common\n"
             "   ------\n"
-            "   -r <root>          home directory (will chdir to it)\n"
-            "   -l <log_file>      path to log file\n"
+            "   -r <root>          home directory (required, will chdir to it)\n"
+            "   -l <log_file>      path to log file (default: stderr)\n"
             "\n"
             "   ssl\n"
             "   ---\n"
-            "   -n                 do not use ssl\n"
+            "   -n                 do not use ssl at all (default: on)\n"
+            "   -k                 do not verify client certificate (default: on)\n"
+            "   -t <cert_file>     path to cert file (required if ssl, CA included)\n"
+            "   -p <key_file>      path to private key file (required if ssl)\n"
             "   -e <entropy_file>  path to entropy file (needed on some systems)\n"
-            "   -t <cert_file>     path to cert file (CA included)\n"
-            "   -p <key_file>      path to private key file\n"
             "\n"
             );
 
@@ -122,7 +123,7 @@ void clax_parse_options(opt *options, int argc, char **argv)
 #endif
 
     opterr = 0;
-    while ((c = getopt(argc, argv, "hnl:e:t:p:r:")) != -1) {
+    while ((c = getopt(argc, argv, "hnl:e:t:p:r:k")) != -1) {
         switch (c) {
         case 'l':
             strncpy(options->log_file, optarg, sizeof(options->log_file));
@@ -133,6 +134,9 @@ void clax_parse_options(opt *options, int argc, char **argv)
             break;
         case 'n':
             options->no_ssl = 1;
+            break;
+        case 'k':
+            options->no_ssl_verify = 1;
             break;
         case 'e':
             strncpy(options->entropy_file, optarg, sizeof(options->entropy_file));
@@ -319,13 +323,6 @@ void clax_loop_ssl()
         goto exit;
     }
 
-    /*ret = mbedtls_x509_crt_parse_file(&srvcert, (const unsigned char *) mbedtls_test_cas_pem,*/
-                                  /*mbedtls_test_cas_pem_len);*/
-    /*if (ret != 0) {*/
-        /*clax_log("failed\n  !  mbedtls_x509_crt_parse returned %d", ret);*/
-        /*goto exit;*/
-    /*}*/
-
     ret =  mbedtls_pk_parse_keyfile(&pkey, (const char *) options.key_file, NULL);
     if (ret != 0) {
         clax_log("failed\n  !  mbedtls_pk_parse_key returned %d", ret);
@@ -366,6 +363,10 @@ void clax_loop_ssl()
                 MBEDTLS_SSL_PRESET_DEFAULT)) != 0) {
         clax_log("failed\n  ! mbedtls_ssl_config_defaults returned %d", ret);
         goto exit;
+    }
+
+    if (!options.no_ssl_verify) {
+        mbedtls_ssl_conf_authmode(&conf, MBEDTLS_SSL_VERIFY_REQUIRED);
     }
 
     mbedtls_ssl_conf_rng(&conf, mbedtls_ctr_drbg_random, &ctr_drbg);
