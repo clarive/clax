@@ -315,6 +315,93 @@ TEST_START(clax_dispatch_accepts_upload_with_correct_crc)
 }
 TEST_END
 
+TEST_START(clax_dispatch_serves_404_when_file_not_found)
+{
+    opt options;
+    clax_ctx_t clax_ctx;
+    clax_http_request_t request;
+    clax_http_response_t response;
+
+    memset(&clax_ctx, 0, sizeof(clax_ctx_t));
+    memset(&options, 0, sizeof(opt));
+    clax_http_request_init(&request);
+    clax_http_response_init(&response);
+
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    char template[] = "/tmp/tmpdir.XXXXXX";
+    char *tmp_dirname = mkdtemp(template);
+    mkdir(tmp_dirname, 0755);
+    chdir(tmp_dirname);
+
+    strcpy(options.root, tmp_dirname);
+    strcat(options.root, "/");
+    clax_ctx.options = &options;
+
+    request.method = HTTP_GET;
+    strcpy(request.path_info, "/download");
+    clax_kv_list_push(&request.query_params, "file", "foo");
+
+    clax_dispatch(&clax_ctx, &request, &response);
+
+    ASSERT_EQ(response.status_code, 404)
+
+    chdir(cwd);
+    rmdir(tmp_dirname);
+
+    clax_http_request_free(&request);
+    clax_http_response_free(&response);
+}
+TEST_END
+
+TEST_START(clax_dispatch_serves_file_as_attachment)
+{
+    opt options;
+    clax_ctx_t clax_ctx;
+    clax_http_request_t request;
+    clax_http_response_t response;
+
+    memset(&clax_ctx, 0, sizeof(clax_ctx_t));
+    memset(&options, 0, sizeof(opt));
+    clax_http_request_init(&request);
+    clax_http_response_init(&response);
+
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    char template[] = "/tmp/tmpdir.XXXXXX";
+    char *tmp_dirname = mkdtemp(template);
+    mkdir(tmp_dirname, 0755);
+    chdir(tmp_dirname);
+
+    strcpy(options.root, tmp_dirname);
+    strcat(options.root, "/");
+    clax_ctx.options = &options;
+
+    char fpath[255];
+    strcpy(fpath, clax_ctx.options);
+    strcat(fpath, "foo");
+    FILE *fp = fopen(fpath, "wb");
+    char *buf = "hello";
+    fwrite(buf, 1, strlen(buf), fp);
+    fclose(fp);
+
+    request.method = HTTP_GET;
+    strcpy(request.path_info, "/download");
+    clax_kv_list_push(&request.query_params, "file", "foo");
+
+    clax_dispatch(&clax_ctx, &request, &response);
+
+    ASSERT_EQ(response.status_code, 200)
+    ASSERT(clax_kv_list_find(&response.headers, "Last-Modified"))
+
+    chdir(cwd);
+    rmdir(tmp_dirname);
+
+    clax_http_request_free(&request);
+    clax_http_response_free(&response);
+}
+TEST_END
+
 TEST_START(clax_dispatch_returns_bad_request_when_wrong_params)
 {
     opt options;

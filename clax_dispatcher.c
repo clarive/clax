@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <libgen.h> /* basename */
 #include <sys/stat.h> /* stat */
+#include <time.h>
 #include <fcntl.h>
 
 #include "clax.h"
@@ -242,7 +243,10 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
             else {
                 char buf[255];
                 char base_buf[255];
+                char last_modified_buf[30];
                 struct stat st;
+                struct tm last_modified_time;
+
                 stat(file, &st);
 
                 snprintf(buf, sizeof(buf), "%d", (int)st.st_size);
@@ -256,6 +260,10 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
                 clax_kv_list_push(&res->headers, "Content-Disposition", base_buf);
                 clax_kv_list_push(&res->headers, "Pragma", "no-cache");
                 clax_kv_list_push(&res->headers, "Content-Length", buf);
+
+                gmtime_r(&st.st_mtime, &last_modified_time);
+                strftime(last_modified_buf, sizeof(last_modified_buf), "%a, %d %b %Y %T GMT", &last_modified_time);
+                clax_kv_list_push(&res->headers, "Last-Modified", last_modified_buf);
 
                 res->body_fh = fh;
             }
