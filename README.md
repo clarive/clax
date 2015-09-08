@@ -11,21 +11,63 @@ requests from stdin and write responses to stdout, which makes it suitable for i
 
        common
        ------
-       -r <root>          home directory
-       -l <log_file>      path to log file
+       -r <root>          home directory (required, will chdir to it)
+       -l <log_file>      path to log file (default: stderr)
 
        ssl
        ---
-       -n                 do not use ssl
-       -e <entropy_file>  path to entropy file
-       -t <cert_file>     path to cert file (CA included)
-       -p <key_file>      path to private key file
+       -n                 do not use ssl at all (default: on)
+       -k                 do not verify client certificate (default: on)
+       -t <cert_file>     path to cert file (required if ssl, CA included)
+       -p <key_file>      path to private key file (required if ssl)
+       -e <entropy_file>  path to entropy file (needed on some systems)
 
 ## API Documentation
 
 ### Overview
 
 ### Authentication
+
+Authentication is done via SSL certificates (client authentication).
+
+#### Generating SSL certificates
+
+    # Generate CA certificate
+    openssl req -out ca.pem -new -x509 -subj '/CN=company'
+
+    # Create serial file
+    echo -n '00' > file.srl
+
+    # Generate server certificate
+    openssl genrsa -out server.key 2048
+
+    # Sign server certificate
+    openssl req -key server.key -new -out server.req
+    openssl x509 -req -in server.req -CA ca.pem -CAkey privkey.pem -CAserial file.srl -out server.pem -subj '/CN=clax-server'
+
+    # Generate client certificate
+    openssl genrsa -out client.key 2048 -subj '/CN=client'
+
+    # Sign client certificate
+    openssl req -key client.key -new -out client.req
+    openssl x509 -req -in client.req -CA ca.pem -CAkey privkey.pem -CAserial file.srl -out client.pem
+
+    # Convert client certificate to PKCS12
+    openssl pkcs12 -export -in client.pem -inkey client.key -out client.p12
+
+#### Example (curl with client SSL certificate)
+
+    # If you don't want to validate server certificate (without client authentication, option `-k` in clax)
+    curl -k https://clax.local/
+
+    # If you don't want to validate server certificate (with client authentication)
+    curl -k --cert ssl/client.pem --key ssl/client.key https://clax.local/
+
+    # If you want to validate server certificate
+    curl --cacert ssl/ca.pem --cert ssl/client.pem --key ssl/client.key https://clax.local/
+
+    # or if you want to use PKCS12 certificate
+    curl --cacert ssl/ca.pem -E ssl/client.p12 https://clax.local/
 
 ### Upload File
 
