@@ -101,6 +101,14 @@ void clax_dispatch_ping(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_htt
     res->body_len = 20;
 }
 
+void clax_dispatch_index(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
+{
+    res->status_code = 200;
+    clax_kv_list_push(&res->headers, "Content-Type", "application/json");
+    memcpy(res->body, "{\"message\":\"Hello, world!\"}", 27);
+    res->body_len = 27;
+}
+
 void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     command_ctx_t command_ctx;
@@ -305,6 +313,7 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
 }
 
 clax_dispatcher_action_t clax_dispatcher_actions[] = {
+    {"/", (1 << HTTP_GET), clax_dispatch_index},
     {"/ping", (1 << HTTP_GET), clax_dispatch_ping},
     {"/command", (1 << HTTP_POST), clax_dispatch_command},
     {"/download", (1 << HTTP_GET), clax_dispatch_download},
