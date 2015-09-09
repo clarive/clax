@@ -5,10 +5,20 @@ CFLAGS=-std=c99 -pedantic -Wall -Icontrib/mbedtls -Icontrib/multipart-parser-c -
 LFLAGS=
 LIBS=contrib/mbedtls/*.o contrib/jsmn/*.o contrib/http_parser/*.o contrib/multipart-parser-c/*.o
 
-all: mbedtls jsmn http_parser multipart_parser_c $(PROGRAM)
+all: lib $(PROGRAM)
+
+lib: mbedtls jsmn http_parser multipart_parser_c $(OBJECTS)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS) -o $(PROGRAM)
+
+depend: .depend
+
+.depend: $(SOURCES)
+	rm -rf ./.depend
+	$(CC) $(CFLAGS) -MM $^ > ./.depend
+
+include .depend
 
 jsmn:
 	$(MAKE) -C contrib/jsmn CFLAGS="-DJSMN_PARENT_LINKS"
@@ -22,13 +32,19 @@ http_parser:
 multipart_parser_c:
 	$(MAKE) -C contrib/multipart-parser-c
 
-check: $(PROGRAM)
+tests: lib
+	$(MAKE) -C tests
+
+check: tests
 	$(MAKE) -C tests check
 
-test: check
+check-valgrind: tests
+	$(MAKE) -C tests check-valgrind
 
 clean:
 	rm -f $(PROGRAM) $(OBJECTS)
 	$(MAKE) -C contrib/mbedtls clean
 	$(MAKE) -C contrib/jsmn clean
 	$(MAKE) -C contrib/http_parser clean
+	$(MAKE) -C contrib/multipart-parser-c clean
+	$(MAKE) -C tests clean
