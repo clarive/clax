@@ -514,6 +514,7 @@ int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t 
         }
 
         fclose(response->body_fh);
+        response->body_fh = NULL;
     } else {
         TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO;
     }
@@ -564,6 +565,9 @@ void clax_http_response_init(clax_http_response_t *response)
 void clax_http_response_free(clax_http_response_t *response)
 {
     clax_kv_list_free(&response->headers);
+
+    if (response->body_fh)
+        fclose(response->body_fh);
 }
 
 int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_cb, void *ctx) {
