@@ -27,7 +27,7 @@ check: $(PROGRAM)
 	./test
 
 check-valgrind: $(PROGRAM)
-	valgrind ./test
+	valgrind -v --leak-check=full --show-leak-kinds=all ./test
 
 clean:
 	rm -f $(PROGRAM) $(OBJECTS)
