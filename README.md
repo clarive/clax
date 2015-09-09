@@ -148,7 +148,7 @@ OR
 
 * Reason:
 
-    Some system error, like file cannot be opened.
+    Some system error, like file cannot be saved.
 
 #### Example
 
