@@ -1,3 +1,6 @@
+clax
 *.o
 *.a
 tests/test
+.depend
+tests/.depend
