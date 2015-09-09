@@ -4,3 +4,4 @@ clax
 tests/test
 .depend
 tests/.depend
+*.swp

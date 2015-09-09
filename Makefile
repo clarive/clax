@@ -41,10 +41,15 @@ check: tests
 check-valgrind: tests
 	$(MAKE) -C tests check-valgrind
 
+bench: lib
+	$(MAKE) -C bench bench
+
 clean:
 	rm -f $(PROGRAM) $(OBJECTS)
+	rm -f .depend
 	$(MAKE) -C contrib/mbedtls clean
 	$(MAKE) -C contrib/jsmn clean
 	$(MAKE) -C contrib/http_parser clean
 	$(MAKE) -C contrib/multipart-parser-c clean
 	$(MAKE) -C tests clean
+	$(MAKE) -C bench clean

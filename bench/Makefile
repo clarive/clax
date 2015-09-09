@@ -1,4 +1,4 @@
-PROGRAM=test
+PROGRAM=benchmark
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
 CFLAGS=-std=c99 -pedantic -Wall \
@@ -7,7 +7,7 @@ CFLAGS=-std=c99 -pedantic -Wall \
 LFLAGS=
 LIBS=../clax_*.o ../popen2.o ../contrib/mbedtls/*.o ../contrib/http_parser/*.o ../contrib/multipart-parser-c/*.o
 
-all: lib $(PROGRAM)
+all: $(PROGRAM)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS) -o $(PROGRAM)
@@ -20,15 +20,12 @@ depend: .depend
 
 include .depend
 
-lib:
-	$(MAKE) -C ../ lib
+clax:
+	$(MAKE) -C ../
 
-check: $(PROGRAM)
-	./test
-
-check-valgrind: $(PROGRAM)
-	valgrind ./test
+bench: clax $(PROGRAM)
+	./benchmark
 
 clean:
 	rm -f $(PROGRAM) $(OBJECTS)
-	rm -f .depend
+	rm -f ./.depend
