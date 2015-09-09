@@ -244,3 +244,27 @@ void clax_hexdump(unsigned char *buf, size_t len)
 
     free(line);
 }
+
+void clax_san_path(char *buf)
+{
+    char *p = buf;
+
+    while (1) {
+        if ((p = strstr(buf, "/../")) != NULL) {
+            memmove(p, p + 3, strlen(buf) - (p - buf));
+            continue;
+        }
+
+        if ((p = strstr(buf, "/./")) != NULL) {
+            memmove(p, p + 2, strlen(buf) - (p - buf));
+            continue;
+        }
+
+        if ((p = strstr(buf, "//")) != NULL) {
+            memmove(p, p + 1, strlen(buf) - (p - buf));
+            continue;
+        }
+
+        break;
+    }
+}

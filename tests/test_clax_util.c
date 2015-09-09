@@ -250,3 +250,43 @@ TEST_START(clax_buf_append_appends_buffer)
     free(buf);
 }
 TEST_END
+
+TEST_START(clax_san_path_fixes_path)
+{
+    char buf[1024];
+
+    strcpy(buf, "/");
+    clax_san_path(buf);
+    ASSERT_STR_EQ(buf, "/");
+    ASSERT_EQ(strlen(buf), 1);
+
+    strcpy(buf, "//");
+    clax_san_path(buf);
+    ASSERT_STR_EQ(buf, "/");
+    ASSERT_EQ(strlen(buf), 1);
+
+    strcpy(buf, "//////.///../////..///");
+    clax_san_path(buf);
+    ASSERT_STR_EQ(buf, "/");
+    ASSERT_EQ(strlen(buf), 1);
+
+    strcpy(buf, "/./");
+    clax_san_path(buf);
+    ASSERT_STR_EQ(buf, "/");
+    ASSERT_EQ(strlen(buf), 1);
+
+    strcpy(buf, "/../");
+    clax_san_path(buf);
+    ASSERT_STR_EQ(buf, "/");
+
+    strcpy(buf, "/foo/bar/");
+    clax_san_path(buf);
+    ASSERT_STR_EQ(buf, "/foo/bar/");
+    ASSERT_EQ(strlen(buf), 9);
+
+    strcpy(buf, "/foo/bar/../baz");
+    clax_san_path(buf);
+    ASSERT_STR_EQ(buf, "/foo/bar/baz");
+    ASSERT_EQ(strlen(buf), 12);
+}
+TEST_END

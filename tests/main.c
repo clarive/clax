@@ -85,5 +85,7 @@ int main(int argc, char *argv[])
     RUN_TEST(clax_big_buf_read_from_memory)
     RUN_TEST(clax_big_buf_read_from_file)
 
+    RUN_TEST(clax_san_path_fixes_path)
+
     DONE_TESTING
 }

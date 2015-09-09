@@ -181,7 +181,7 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
                                 clax_log("Output directory does not exist");
 
                                 clax_dispatch_bad_request(clax_ctx, req, res);
-                                break;
+                                return;
                             }
                         }
 
@@ -253,6 +253,7 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
 
             if (fh == NULL) {
                 clax_dispatch_system_error(clax_ctx, req, res);
+                return;
             }
             else {
                 char buf[255];
