@@ -24,6 +24,7 @@
 #include <libgen.h> /* basename */
 #include <sys/stat.h> /* stat */
 #include <time.h>
+#include <utime.h>
 #include <fcntl.h>
 
 #include "clax.h"
@@ -154,6 +155,7 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
                         char *new_name = clax_kv_list_find(&req->query_params, "name");
                         char *new_dir = clax_kv_list_find(&req->query_params, "dir");
                         char *crc32 = clax_kv_list_find(&req->query_params, "crc");
+                        char *time = clax_kv_list_find(&req->query_params, "time");
 
                         if (crc32 && strlen(crc32) != 8) {
                             clax_dispatch_bad_request(clax_ctx, req, res);
@@ -213,6 +215,18 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
                                 } else {
                                     clax_log("CRC ok");
                                 }
+                            }
+
+                            if (time && strlen(time)) {
+                                int mtime = atol(time);
+
+#ifdef _WIN32
+#else
+                                struct utimbuf t;
+                                t.actime = mtime;
+                                t.modtime = mtime;
+                                utime(fpath, &t);
+#endif
                             }
 
                             res->status_code = 200;

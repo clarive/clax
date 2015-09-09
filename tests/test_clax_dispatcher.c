@@ -318,6 +318,63 @@ TEST_START(clax_dispatch_accepts_upload_with_correct_crc)
 }
 TEST_END
 
+TEST_START(clax_dispatch_saves_upload_with_passed_time)
+{
+    opt options;
+    clax_ctx_t clax_ctx;
+    clax_http_request_t request;
+    clax_http_response_t response;
+
+    memset(&clax_ctx, 0, sizeof(clax_ctx_t));
+    memset(&options, 0, sizeof(opt));
+    clax_http_request_init(&request);
+    clax_http_response_init(&response);
+
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    char template[] = "/tmp/tmpdir.XXXXXX";
+    char *tmp_dirname = mkdtemp(template);
+    mkdir(tmp_dirname, 0755);
+    chdir(tmp_dirname);
+
+    strcpy(options.root, tmp_dirname);
+    strcat(options.root, "/");
+    clax_ctx.options = &options;
+
+    request.method = HTTP_POST;
+    strcpy(request.path_info, "/upload");
+    clax_kv_list_push(&request.query_params, "time", "1234567890");
+    strcpy(request.multipart_boundary, "---boundary");
+
+    clax_http_multipart_t *multipart = clax_http_multipart_list_push(&request.multiparts);
+
+    clax_kv_list_push(&multipart->headers, "Content-Disposition", "form-data; name=\"file\"; filename=\"foobar\"");
+
+    clax_big_buf_append(&multipart->bbuf, (const unsigned char *)"foobar", 6);
+
+    clax_dispatch(&clax_ctx, &request, &response);
+
+    ASSERT_EQ(response.status_code, 200)
+
+    char fpath[255] = {0};
+    strcpy(fpath, options.root);
+    strcat(fpath, "foobar");
+
+    struct stat st;
+
+    stat(fpath, &st);
+
+    ASSERT_EQ(st.st_mtim.tv_sec, 1234567890);
+
+    unlink(fpath);
+    chdir(cwd);
+    rmdir(tmp_dirname);
+
+    clax_http_request_free(&request);
+    clax_http_response_free(&response);
+}
+TEST_END
+
 TEST_START(clax_dispatch_serves_404_when_file_not_found)
 {
     opt options;
