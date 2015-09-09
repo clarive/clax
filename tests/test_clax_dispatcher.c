@@ -20,6 +20,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "clax.h"
 #include "clax_dispatcher.h"
@@ -78,7 +81,7 @@ TEST_START(clax_dispatch_saves_upload_to_file)
 
     clax_kv_list_push(&multipart->headers, "Content-Disposition", "form-data; name=\"file\"; filename=\"foobar\"");
 
-    clax_big_buf_append(&multipart->bbuf, "foobar", 6);
+    clax_big_buf_append(&multipart->bbuf, (const unsigned char *)"foobar", 6);
 
     clax_dispatch(&clax_ctx, &request, &response);
 
@@ -133,7 +136,7 @@ TEST_START(clax_dispatch_saves_upload_to_file_with_another_name)
 
     clax_kv_list_push(&multipart->headers, "Content-Disposition", "form-data; name=\"file\"; filename=\"foobar\"");
 
-    clax_big_buf_append(&multipart->bbuf, "foobar", 6);
+    clax_big_buf_append(&multipart->bbuf, (const unsigned char *)"foobar", 6);
 
     clax_dispatch(&clax_ctx, &request, &response);
 
@@ -174,7 +177,7 @@ TEST_START(clax_dispatch_saves_upload_to_another_dir)
     char *tmp_dirname = mkdtemp(template);
     mkdir(tmp_dirname, 0755);
     chdir(tmp_dirname);
-    mkdir("subdir");
+    mkdir("subdir", 0755);
 
     strcpy(options.root, tmp_dirname);
     strcat(options.root, "/");
@@ -189,7 +192,7 @@ TEST_START(clax_dispatch_saves_upload_to_another_dir)
 
     clax_kv_list_push(&multipart->headers, "Content-Disposition", "form-data; name=\"file\"; filename=\"foobar\"");
 
-    clax_big_buf_append(&multipart->bbuf, "foobar", 6);
+    clax_big_buf_append(&multipart->bbuf, (const unsigned char *)"foobar", 6);
 
     clax_dispatch(&clax_ctx, &request, &response);
 
@@ -245,7 +248,7 @@ TEST_START(clax_dispatch_rejects_upload_if_crc_fails)
 
     clax_kv_list_push(&multipart->headers, "Content-Disposition", "form-data; name=\"file\"; filename=\"foobar\"");
 
-    clax_big_buf_append(&multipart->bbuf, "foobar", 6);
+    clax_big_buf_append(&multipart->bbuf, (const unsigned char *)"foobar", 6);
 
     clax_dispatch(&clax_ctx, &request, &response);
 
@@ -296,7 +299,7 @@ TEST_START(clax_dispatch_accepts_upload_with_correct_crc)
 
     clax_kv_list_push(&multipart->headers, "Content-Disposition", "form-data; name=\"file\"; filename=\"foobar\"");
 
-    clax_big_buf_append(&multipart->bbuf, "foobar", 6);
+    clax_big_buf_append(&multipart->bbuf, (const unsigned char *)"foobar", 6);
 
     clax_dispatch(&clax_ctx, &request, &response);
 
@@ -378,7 +381,7 @@ TEST_START(clax_dispatch_serves_file_as_attachment)
     clax_ctx.options = &options;
 
     char fpath[255];
-    strcpy(fpath, clax_ctx.options);
+    strcpy(fpath, clax_ctx.options->root);
     strcat(fpath, "foo");
     FILE *fp = fopen(fpath, "wb");
     char *buf = "hello";

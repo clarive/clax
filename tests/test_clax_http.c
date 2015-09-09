@@ -257,7 +257,7 @@ TEST_START(clax_http_parse_parses_multipart_body)
 {
     http_parser parser;
     clax_http_request_t request;
-    char content[1024];
+    unsigned char content[1024];
 
     http_parser_init(&parser, HTTP_REQUEST);
     clax_http_request_init(&request);

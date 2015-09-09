@@ -21,6 +21,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "clax_big_buf.h"
 #include "u.h"
@@ -52,12 +55,12 @@ TEST_START(clax_big_buf_creates_file_when_max_size)
     ASSERT_EQ(is_dir_empty(tmp_dirname), 1);
 
     for (int i = 0; i < 1024; i++) {
-        clax_big_buf_append(&bbuf, "1", 1);
+        clax_big_buf_append(&bbuf, (const unsigned char *)"1", 1);
     }
 
     ASSERT_EQ(is_dir_empty(tmp_dirname), 1);
 
-    clax_big_buf_append(&bbuf, "1", 1);
+    clax_big_buf_append(&bbuf, (const unsigned char *)"1", 1);
 
     ASSERT_EQ(is_dir_empty(tmp_dirname), 0);
 
@@ -79,7 +82,7 @@ TEST_START(clax_big_buf_deletes_file_on_free)
     clax_big_buf_init(&bbuf, tmp_dirname, 1024);
 
     for (int i = 0; i < 1025; i++) {
-        clax_big_buf_append(&bbuf, "1", 1);
+        clax_big_buf_append(&bbuf, (const unsigned char *)"1", 1);
     }
 
     ASSERT_EQ(is_dir_empty(tmp_dirname), 0);
@@ -103,7 +106,7 @@ TEST_START(clax_big_buf_writes_memory_to_file)
 
     clax_big_buf_init(&bbuf, tmp_dirname, 1024);
 
-    clax_big_buf_append(&bbuf, "123", 3);
+    clax_big_buf_append(&bbuf, (const unsigned char *)"123", 3);
 
     char fpath[1024];
     strcpy(fpath, tmp_dirname);
@@ -135,7 +138,7 @@ TEST_START(clax_big_buf_renames_file)
 
     clax_big_buf_init(&bbuf, tmp_dirname, 2);
 
-    clax_big_buf_append(&bbuf, "123", 3);
+    clax_big_buf_append(&bbuf, (const unsigned char *)"123", 3);
 
     ASSERT_EQ(is_dir_empty(tmp_dirname), 0);
 
@@ -162,9 +165,9 @@ TEST_START(clax_big_buf_read_from_memory)
 
     clax_big_buf_init(&bbuf, "/tmp/", 1024);
 
-    clax_big_buf_append(&bbuf, "123", 3);
+    clax_big_buf_append(&bbuf, (const unsigned char *)"123", 3);
 
-    char buf[3];
+    unsigned char buf[3];
     int rcount = 0;
     rcount = clax_big_buf_read(&bbuf, buf, sizeof(buf));
 
@@ -190,7 +193,7 @@ TEST_START(clax_big_buf_read_from_file)
 
     clax_big_buf_close(&bbuf);
 
-    char buf[3];
+    unsigned char buf[3];
     int rcount = 0;
     rcount = clax_big_buf_read(&bbuf, buf, sizeof(buf));
 
