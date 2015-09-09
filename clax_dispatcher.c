@@ -114,86 +114,79 @@ void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_
     command_ctx_t command_ctx;
     memset(&command_ctx, 0, sizeof(command_ctx_t));
 
-    int command_found = 0;
-
     char *command = clax_kv_list_find(&req->body_params, "command");
-    if (command && strlen(command)) {
-        strncpy(command_ctx.command, command, sizeof_struct_member(command_ctx_t, command));
-
-        command_found = 1;
+    if (!command || !strlen(command)) {
+        clax_dispatch_bad_request(clax_ctx, req, res);
+        return;
     }
+
+    strncpy(command_ctx.command, command, sizeof_struct_member(command_ctx_t, command));
 
     char *timeout = clax_kv_list_find(&req->body_params, "timeout");
     if (timeout && strlen(timeout)) {
         command_ctx.timeout = atoi(timeout);
     }
 
-    if (command_found) {
-        pid_t pid = clax_command_start(&command_ctx);
-
-        clax_kv_list_push(&res->headers, "Transfer-Encoding", "chunked");
-
-        if (pid > 0) {
-            res->status_code = 200;
-
-            char buf_pid[15];
-            snprintf(buf_pid, sizeof(buf_pid), "%d", pid);
-
-            clax_kv_list_push(&res->headers, "X-Clax-PID", buf_pid);
-
-            res->body_cb_ctx = &command_ctx;
-            res->body_cb = clax_command_read_cb;
-        }
-        else {
-            clax_dispatch_system_error(clax_ctx, req, res);
-        }
-    } else {
-        clax_dispatch_bad_request(clax_ctx, req, res);
+    pid_t pid = clax_command_start(&command_ctx);
+    if (pid <= 0) {
+        clax_dispatch_system_error(clax_ctx, req, res);
+        return;
     }
+
+    res->status_code = 200;
+
+    clax_kv_list_push(&res->headers, "Transfer-Encoding", "chunked");
+
+    char buf_pid[15];
+    snprintf(buf_pid, sizeof(buf_pid), "%d", pid);
+
+    clax_kv_list_push(&res->headers, "X-Clax-PID", buf_pid);
+
+    res->body_cb_ctx = &command_ctx;
+    res->body_cb = clax_command_read_cb;
 }
 
 void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     char *file = clax_kv_list_find(&req->query_params, "file");
 
-    if (file && access(file, F_OK) != -1) {
-        FILE *fh = fopen(file, "rb");
-
-        if (fh == NULL) {
-            clax_dispatch_system_error(clax_ctx, req, res);
-            return;
-        }
-        else {
-            char buf[255];
-            char base_buf[255];
-            char last_modified_buf[30];
-            struct stat st;
-            struct tm last_modified_time;
-
-            stat(file, &st);
-
-            snprintf(buf, sizeof(buf), "%d", (int)st.st_size);
-
-            char *base = basename(file);
-            strcpy(base_buf, "attachment; filename=");
-            strcat(base_buf, base);
-
-            res->status_code = 200;
-            clax_kv_list_push(&res->headers, "Content-Type", "application/octet-stream");
-            clax_kv_list_push(&res->headers, "Content-Disposition", base_buf);
-            clax_kv_list_push(&res->headers, "Pragma", "no-cache");
-            clax_kv_list_push(&res->headers, "Content-Length", buf);
-
-            gmtime_r(&st.st_mtime, &last_modified_time);
-            strftime(last_modified_buf, sizeof(last_modified_buf), "%a, %d %b %Y %T GMT", &last_modified_time);
-            clax_kv_list_push(&res->headers, "Last-Modified", last_modified_buf);
-
-            res->body_fh = fh;
-        }
-    }
-    else {
+    if (file && access(file, F_OK) == -1) {
         clax_dispatch_not_found(clax_ctx, req, res);
+        return;
     }
+
+    FILE *fh = fopen(file, "rb");
+
+    if (fh == NULL) {
+        clax_dispatch_system_error(clax_ctx, req, res);
+        return;
+    }
+
+    char buf[255];
+    char base_buf[255];
+    char last_modified_buf[30];
+    struct stat st;
+    struct tm last_modified_time;
+
+    stat(file, &st);
+
+    snprintf(buf, sizeof(buf), "%d", (int)st.st_size);
+
+    char *base = basename(file);
+    strcpy(base_buf, "attachment; filename=");
+    strcat(base_buf, base);
+
+    res->status_code = 200;
+    clax_kv_list_push(&res->headers, "Content-Type", "application/octet-stream");
+    clax_kv_list_push(&res->headers, "Content-Disposition", base_buf);
+    clax_kv_list_push(&res->headers, "Pragma", "no-cache");
+    clax_kv_list_push(&res->headers, "Content-Length", buf);
+
+    gmtime_r(&st.st_mtime, &last_modified_time);
+    strftime(last_modified_buf, sizeof(last_modified_buf), "%a, %d %b %Y %T GMT", &last_modified_time);
+    clax_kv_list_push(&res->headers, "Last-Modified", last_modified_buf);
+
+    res->body_fh = fh;
 }
 
 void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
