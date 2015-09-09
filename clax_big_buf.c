@@ -149,9 +149,10 @@ size_t clax_big_buf_read(clax_big_buf_t *bbuf, unsigned char *buf, size_t len)
         fclose(fh);
     }
     else {
-        memcpy(buf, bbuf->memory, len);
+        size_t rcount = MIN(bbuf->len, len);
+        memcpy(buf, bbuf->memory, rcount);
 
-        ret = len;
+        ret = rcount;
     }
 
     return ret;

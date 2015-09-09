@@ -178,6 +178,25 @@ TEST_START(clax_big_buf_read_from_memory)
 }
 TEST_END
 
+TEST_START(clax_big_buf_read_from_memory_more_than_available)
+{
+    clax_big_buf_t bbuf;
+
+    clax_big_buf_init(&bbuf, "/tmp/", 1024);
+
+    clax_big_buf_append(&bbuf, (const unsigned char *)"123", 3);
+
+    unsigned char buf[1024];
+    int rcount = 0;
+    rcount = clax_big_buf_read(&bbuf, buf, sizeof(buf));
+
+    ASSERT_EQ(rcount, 3);
+    ASSERT_BUF_EQ(buf, "123", 3);
+
+    clax_big_buf_free(&bbuf);
+}
+TEST_END
+
 TEST_START(clax_big_buf_read_from_file)
 {
     clax_big_buf_t bbuf;
