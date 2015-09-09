@@ -262,7 +262,7 @@ int on_part_data(multipart_parser* p, const char *buf, size_t len)
 
     clax_http_multipart_t *multipart = clax_http_multipart_list_last(&request->multiparts);
 
-    clax_big_buf_append(&multipart->bbuf, buf, len);
+    clax_big_buf_append(&multipart->bbuf, (const unsigned char *)buf, len);
 
     return 0;
 }

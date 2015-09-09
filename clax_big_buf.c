@@ -100,7 +100,7 @@ int clax_big_buf_append(clax_big_buf_t *bbuf, const unsigned char *buf, size_t l
         bbuf->len += len;
     }
     else {
-        clax_buf_append(&bbuf->memory, &bbuf->len, buf, len);
+        clax_buf_append(&bbuf->memory, &bbuf->len, (const char *)buf, len);
     }
 
     return 0;
