@@ -98,9 +98,13 @@ Optional
 
     Save file to the different directory
 
-* `crc32=[hex string]` 
+* `crc32=[hex string]`
 
     CRC32 to calculate
+
+* `time=[int]`
+
+    Set atime/mtime to the provided value
 
 #### Data Params
 
