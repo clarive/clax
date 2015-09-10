@@ -113,7 +113,7 @@ void benchmark_file_upload(char *tmpdir, int iter)
                   "--------------------------0e6bb0a28f620f98--\r\n";
 
     sprintf(request,
-            "POST /upload HTTP/1.1\r\n"
+            "POST /tree/ HTTP/1.1\r\n"
             "Content-Type: multipart/form-data; boundary=------------------------0e6bb0a28f620f98\r\n"
             "Content-Length: %d\r\n"
             "\r\n"
@@ -127,7 +127,7 @@ void benchmark_file_upload(char *tmpdir, int iter)
 
 void benchmark_file_download(char *tmpdir, int iter)
 {
-    benchmark("File Download", "../clax -n -r . -l /dev/null > /dev/null", "GET /download?file=benchmark.c\r\n\r\n", iter);
+    benchmark("File Download", "../clax -n -r . -l /dev/null > /dev/null", "GET /tree/benchmark.c\r\n\r\n", iter);
 }
 
 void benchmark_command_execution(char *tmpdir, int iter)
@@ -135,7 +135,7 @@ void benchmark_command_execution(char *tmpdir, int iter)
     char request[1024];
     char body[] = "command=echo 'foo'";
 
-    sprintf(request, 
+    sprintf(request,
             "POST /command\r\n"
             "Content-Type: application/x-www-form-urlencoded\r\n"
             "Content-Length: %d\r\n"

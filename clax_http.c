@@ -512,14 +512,17 @@ int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t 
 
     if (response->body.len) {
         size_t rcount;
+        size_t offset;
         unsigned char buf[255];
 
         TRY send_cb(ctx, (const unsigned char *)"Content-Length: ", 16) GOTO;
         sprintf((char *)buf, "%d\r\n\r\n", (int)response->body.len);
         TRY send_cb(ctx, buf, strlen((char *)buf)) GOTO;
 
-        while ((rcount = clax_big_buf_read(&response->body, buf, sizeof(buf))) > 0) {
+        offset = 0;
+        while ((rcount = clax_big_buf_read(&response->body, buf, sizeof(buf), offset)) > 0) {
             TRY send_cb(ctx, buf, rcount) GOTO;
+            offset += rcount;
         }
     } else if (response->body_cb) {
         TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO;

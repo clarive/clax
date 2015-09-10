@@ -45,7 +45,7 @@ TEST_START(clax_dispatch_sets_404_on_unknown_path)
     ASSERT_STR_EQ(clax_kv_list_find(&response.headers, "Content-Type"), "text/plain")
 
     unsigned char buf[255];
-    clax_big_buf_read(&response.body, buf, sizeof(buf));
+    clax_big_buf_read(&response.body, buf, sizeof(buf), 0);
     ASSERT_BUF_EQ(buf, "Not found", 9)
 
     clax_http_request_free(&request);

@@ -316,7 +316,7 @@ TEST_START(clax_http_parse_parses_multipart_body)
     ASSERT_STR_EQ(clax_kv_list_at(&multipart->headers, 1)->key, "Content-Type");
     ASSERT_STR_EQ(clax_kv_list_at(&multipart->headers, 1)->val, "image/gif");
 
-    clax_big_buf_read(&multipart->bbuf, content, sizeof(content));
+    clax_big_buf_read(&multipart->bbuf, content, sizeof(content), 0);
     ASSERT_EQ(multipart->bbuf.len, 6);
     ASSERT_BUF_EQ(content, "foobar", 6);
 
@@ -328,7 +328,7 @@ TEST_START(clax_http_parse_parses_multipart_body)
     ASSERT_STR_EQ(clax_kv_list_at(&multipart->headers, 1)->key, "Content-Type");
     ASSERT_STR_EQ(clax_kv_list_at(&multipart->headers, 1)->val, "image/gif");
 
-    clax_big_buf_read(&multipart->bbuf, content, sizeof(content));
+    clax_big_buf_read(&multipart->bbuf, content, sizeof(content), 0);
     ASSERT_EQ(multipart->bbuf.len, 6);
     ASSERT_BUF_EQ(content, "barbaz", 6);
 
@@ -340,7 +340,7 @@ TEST_START(clax_http_parse_parses_multipart_body)
     ASSERT_STR_EQ(clax_kv_list_at(&multipart->headers, 1)->key, "Content-Type");
     ASSERT_STR_EQ(clax_kv_list_at(&multipart->headers, 1)->val, "image/gif");
 
-    clax_big_buf_read(&multipart->bbuf, content, sizeof(content));
+    clax_big_buf_read(&multipart->bbuf, content, sizeof(content), 0);
     ASSERT_EQ(multipart->bbuf.len, 3);
     ASSERT_BUF_EQ(content, "end", 3);
 

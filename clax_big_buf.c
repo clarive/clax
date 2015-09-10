@@ -136,7 +136,7 @@ int clax_big_buf_write_file(clax_big_buf_t *bbuf, char *fpath)
     }
 }
 
-size_t clax_big_buf_read(clax_big_buf_t *bbuf, unsigned char *buf, size_t len)
+size_t clax_big_buf_read(clax_big_buf_t *bbuf, unsigned char *buf, size_t len, size_t offset)
 {
     size_t ret = 0;
 
@@ -149,13 +149,17 @@ size_t clax_big_buf_read(clax_big_buf_t *bbuf, unsigned char *buf, size_t len)
             return -1;
         }
 
+        fseek(fh, offset, 0);
         ret = fread(buf, 1, len, fh);
 
         fclose(fh);
     }
     else {
-        size_t rcount = MIN(bbuf->len, len);
-        memcpy(buf, bbuf->memory, rcount);
+        if (offset > bbuf->len)
+            return 0;
+
+        size_t rcount = MIN(bbuf->len - offset, len);
+        memcpy(buf, bbuf->memory + offset, rcount);
 
         ret = rcount;
     }

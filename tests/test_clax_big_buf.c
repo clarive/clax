@@ -169,10 +169,20 @@ TEST_START(clax_big_buf_read_from_memory)
 
     unsigned char buf[3];
     int rcount = 0;
-    rcount = clax_big_buf_read(&bbuf, buf, sizeof(buf));
+    rcount = clax_big_buf_read(&bbuf, buf, 1, 0);
+    ASSERT_EQ(rcount, 1);
+    ASSERT_BUF_EQ(buf, "1", 1);
 
-    ASSERT_EQ(rcount, 3);
-    ASSERT_BUF_EQ(buf, "123", 3);
+    rcount = clax_big_buf_read(&bbuf, buf, 1, 1);
+    ASSERT_EQ(rcount, 1);
+    ASSERT_BUF_EQ(buf, "2", 1);
+
+    rcount = clax_big_buf_read(&bbuf, buf, 1, 2);
+    ASSERT_EQ(rcount, 1);
+    ASSERT_BUF_EQ(buf, "3", 1);
+
+    rcount = clax_big_buf_read(&bbuf, buf, 1, 3);
+    ASSERT_EQ(rcount, 0);
 
     clax_big_buf_free(&bbuf);
 }
@@ -188,7 +198,7 @@ TEST_START(clax_big_buf_read_from_memory_more_than_available)
 
     unsigned char buf[1024];
     int rcount = 0;
-    rcount = clax_big_buf_read(&bbuf, buf, sizeof(buf));
+    rcount = clax_big_buf_read(&bbuf, buf, sizeof(buf), 0);
 
     ASSERT_EQ(rcount, 3);
     ASSERT_BUF_EQ(buf, "123", 3);
@@ -214,10 +224,21 @@ TEST_START(clax_big_buf_read_from_file)
 
     unsigned char buf[3];
     int rcount = 0;
-    rcount = clax_big_buf_read(&bbuf, buf, sizeof(buf));
 
-    ASSERT_EQ(rcount, 3);
-    ASSERT_BUF_EQ(buf, "123", 3);
+    rcount = clax_big_buf_read(&bbuf, buf, 1, 0);
+    ASSERT_EQ(rcount, 1);
+    ASSERT_BUF_EQ(buf, "1", 1);
+
+    rcount = clax_big_buf_read(&bbuf, buf, 1, 1);
+    ASSERT_EQ(rcount, 1);
+    ASSERT_BUF_EQ(buf, "2", 1);
+
+    rcount = clax_big_buf_read(&bbuf, buf, 1, 2);
+    ASSERT_EQ(rcount, 1);
+    ASSERT_BUF_EQ(buf, "3", 1);
+
+    rcount = clax_big_buf_read(&bbuf, buf, 1, 3);
+    ASSERT_EQ(rcount, 0);
 
     clax_big_buf_free(&bbuf);
 
