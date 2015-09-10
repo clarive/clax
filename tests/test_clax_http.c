@@ -131,6 +131,21 @@ TEST_START(clax_http_parse_returns_ok)
 }
 TEST_END
 
+TEST_START(clax_http_parse_returns_error_when_path_has_zeros)
+{
+    http_parser parser;
+    clax_http_request_t request;
+
+    http_parser_init(&parser, HTTP_REQUEST);
+    clax_http_request_init(&request);
+
+    int rv = _parse(&parser, &request, "GET /%00 HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n");
+    ASSERT_EQ(rv, -1)
+
+    clax_http_request_free(&request);
+}
+TEST_END
+
 TEST_START(clax_http_parse_saves_request)
 {
     http_parser parser;
@@ -139,13 +154,13 @@ TEST_START(clax_http_parse_saves_request)
     http_parser_init(&parser, HTTP_REQUEST);
     clax_http_request_init(&request);
 
-    _parse(&parser, &request, "GET /there?foo=bar HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n");
+    _parse(&parser, &request, "GET /the%20re?foo=bar HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n");
 
     ASSERT(request.headers_done)
     ASSERT(request.message_done)
     ASSERT(request.method == HTTP_GET)
-    ASSERT_STR_EQ(request.url, "/there?foo=bar")
-    ASSERT_STR_EQ(request.path_info, "/there")
+    ASSERT_STR_EQ(request.url, "/the%20re?foo=bar")
+    ASSERT_STR_EQ(request.path_info, "/the re")
 
     ASSERT_STR_EQ(clax_kv_list_find(&request.headers, "Host"), "localhost");
     ASSERT_STR_EQ(clax_kv_list_find(&request.headers, "Connection"), "close");
@@ -338,40 +353,44 @@ TEST_START(clax_http_url_decode_decodes_string_inplace)
     char buf[1024];
 
     strcpy(buf, "hello");
-    clax_http_url_decode(buf);
+    ASSERT_EQ(clax_http_url_decode(buf), 5);
     ASSERT_STR_EQ(buf, "hello")
 
     strcpy(buf, "f%20o");
-    clax_http_url_decode(buf);
+    ASSERT_EQ(clax_http_url_decode(buf), 3);
     ASSERT_STR_EQ(buf, "f o")
 
     strcpy(buf, "f+o");
-    clax_http_url_decode(buf);
+    ASSERT_EQ(clax_http_url_decode(buf), 3);
     ASSERT_STR_EQ(buf, "f o")
 
     strcpy(buf, "fo%");
-    clax_http_url_decode(buf);
+    ASSERT_EQ(clax_http_url_decode(buf), 3);
     ASSERT_STR_EQ(buf, "fo%")
 
     strcpy(buf, "fo%2");
-    clax_http_url_decode(buf);
+    ASSERT_EQ(clax_http_url_decode(buf), 4);
     ASSERT_STR_EQ(buf, "fo%2")
 
     strcpy(buf, "fo%20");
-    clax_http_url_decode(buf);
+    ASSERT_EQ(clax_http_url_decode(buf), 3);
     ASSERT_STR_EQ(buf, "fo ")
 
     strcpy(buf, "fo%20%20");
-    clax_http_url_decode(buf);
+    ASSERT_EQ(clax_http_url_decode(buf), 4);
     ASSERT_STR_EQ(buf, "fo  ")
 
     strcpy(buf, "fo%20%20bar");
-    clax_http_url_decode(buf);
+    ASSERT_EQ(clax_http_url_decode(buf), 7);
     ASSERT_STR_EQ(buf, "fo  bar")
 
     strcpy(buf, "while%20true%3B%20do%20echo%20foo%3B%20done");
-    clax_http_url_decode(buf);
+    ASSERT_EQ(clax_http_url_decode(buf), 29);
     ASSERT_STR_EQ(buf, "while true; do echo foo; done")
+
+    strcpy(buf, "null%00byte");
+    ASSERT_EQ(clax_http_url_decode(buf), 9);
+    ASSERT_STR_EQ(buf, "null\0byte")
 }
 TEST_END
 

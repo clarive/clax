@@ -149,6 +149,15 @@ int request_url_cb(http_parser *p, const char *buf, size_t len)
     strncpy(request->path_info, buf + path_from, path_len);
     request->path_info[path_len] = 0;
 
+    size_t path_info_len = clax_http_url_decode(request->path_info);
+
+    /* path_info can have %00 -> \0, and we can have security problems */
+    for (int i = 0; i < path_info_len; i++) {
+        if (request->path_info[i] == 0) {
+            return -1;
+        }
+    }
+
     if (u.field_set & (1 << UF_QUERY)) {
         int query_from = u.field_data[UF_QUERY].off;
         size_t query_len = u.field_data[UF_QUERY].len;
@@ -317,16 +326,20 @@ int clax_http_body(http_parser *p, const char *buf, size_t len)
     return 0;
 }
 
-void clax_http_url_decode(char *str)
+size_t clax_http_url_decode(char *str)
 {
     int code;
     char hex[3];
+    size_t len = strlen(str);
+    size_t new_len = len;
 
     if (str == NULL)
-        return;
+        return 0;
 
     char *p = str;
-    while (*p++) {
+
+    /* we cannot use *p++ pattern here, since we can get \0 from %00 */
+    while (p - str <= len) {
         if (*p == '+') {
             *p = ' ';
         }
@@ -336,6 +349,7 @@ void clax_http_url_decode(char *str)
             hex[2] = 0;
 
             sscanf(hex, "%x", (unsigned int *)&code);
+            new_len -= 2;
 
             *p = code;
 
@@ -344,9 +358,14 @@ void clax_http_url_decode(char *str)
             }
             else {
                 *(p + 1) = 0;
+                break;
             }
         }
+
+        p++;
     }
+
+    return new_len;
 }
 
 static http_parser_settings settings =
@@ -583,7 +602,16 @@ int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_c
     request.clax_ctx = clax_ctx;
 
     clax_log("Reading & parsing request...");
-    TRY clax_http_read_parse(ctx, recv_cb, &parser, &request) GOTO;
+    if (clax_http_read_parse(ctx, recv_cb, &parser, &request) < 0) {
+        response.status_code = 400;
+        clax_kv_list_push(&response.headers, "Content-Type", "text/plain");
+        memcpy(response.body, "Bad request", 14);
+        response.body_len = 14;
+
+        TRY clax_http_write_response(ctx, send_cb, &response) GOTO;
+
+        goto error;
+    }
     clax_log("ok");
 
     if (request.continue_expected) {

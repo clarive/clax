@@ -92,5 +92,5 @@ int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t 
 int clax_http_read_parse(void *ctx, recv_cb_t recv_cb, http_parser *parser, clax_http_request_t *request);
 int clax_http_parse(http_parser *parser, clax_http_request_t *request, const char *buf, size_t len);
 const char *clax_http_status_message(int code);
-void clax_http_url_decode(char *str);
+size_t clax_http_url_decode(char *str);
 #endif

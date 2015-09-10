@@ -52,12 +52,12 @@ int u_rv;
 
 #define ASSERT_EQ(got, exp)                 \
     do {                                    \
-        int i = (int)got;                   \
-        ASSERT(got == exp)                  \
+        int got_i = (int)got;               \
+        ASSERT(got_i == exp)                \
                                             \
         if (!u_rv) {                        \
             printf("# " #got ":\n");        \
-            printf("#   got: %d\n", i);     \
+            printf("#   got: %d\n", got_i); \
             printf("#   exp: %d\n", exp);   \
         }                                   \
     } while (0);
