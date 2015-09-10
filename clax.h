@@ -21,14 +21,15 @@
 #define CLAX_H
 
 typedef struct {
-    char entropy_file[255];
     char log_file[255];
+    char config_file[255];
     char root[255];
 
     char no_ssl;
     char no_ssl_verify;
     char cert_file[255];
     char key_file[255];
+    char entropy_file[255];
 
     /* Private */
     FILE *_log_file;

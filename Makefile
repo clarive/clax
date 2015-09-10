@@ -1,13 +1,13 @@
 PROGRAM=clax
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
-CFLAGS=-std=c99 -pedantic -Wall -Icontrib/mbedtls -Icontrib/multipart-parser-c -Icontrib/jsmn -Icontrib -D_ALL_SOURCE -D_POSIX_SOURCE -D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED
+CFLAGS=-std=c99 -pedantic -Wall -Icontrib/mbedtls -Icontrib/multipart-parser-c -Icontrib/jsmn -Icontib/inih -Icontrib -D_ALL_SOURCE -D_POSIX_SOURCE -D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED
 LFLAGS=
-LIBS=contrib/mbedtls/*.o contrib/jsmn/*.o contrib/http_parser/*.o contrib/multipart-parser-c/*.o
+LIBS=contrib/mbedtls/*.o contrib/jsmn/*.o contrib/http_parser/*.o contrib/multipart-parser-c/*.o contrib/inih/*.o
 
 all: lib $(PROGRAM)
 
-lib: mbedtls jsmn http_parser multipart_parser_c $(OBJECTS)
+lib: mbedtls jsmn http_parser multipart_parser_c inih $(OBJECTS)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS) -o $(PROGRAM)
@@ -19,6 +19,9 @@ depend: .depend
 	$(CC) $(CFLAGS) -MM $^ > ./.depend
 
 include .depend
+
+inih:
+	$(MAKE) -C contrib/inih
 
 jsmn:
 	$(MAKE) -C contrib/jsmn CFLAGS="-DJSMN_PARENT_LINKS"
@@ -51,5 +54,6 @@ clean:
 	$(MAKE) -C contrib/jsmn clean
 	$(MAKE) -C contrib/http_parser clean
 	$(MAKE) -C contrib/multipart-parser-c clean
+	$(MAKE) -C contrib/inih clean
 	$(MAKE) -C tests clean
 	$(MAKE) -C bench clean

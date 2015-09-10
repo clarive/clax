@@ -52,9 +52,12 @@
 #include "mbedtls/debug.h"
 #include "mbedtls/ssl_cache.h"
 
+#include "inih/ini.h"
+
 #include "clax.h"
 #include "clax_http.h"
 #include "clax_log.h"
+#include "clax_util.h"
 
 #define DEBUG_LEVEL 0
 
@@ -73,6 +76,7 @@ void usage()
             "Options:\n\n"
             "   common\n"
             "   ------\n"
+            "   -c <config_file>   path to configuration file\n"
             "   -r <root>          home directory (required, will chdir to it)\n"
             "   -l <log_file>      path to log file (default: stderr)\n"
             "\n"
@@ -111,11 +115,41 @@ void term(int dummy)
     abort();
 }
 
+int clax_config_handler(void *ctx, const char *section, const char *name, const char *value)
+{
+    opt *options = ctx;
+
+#define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
+
+    if (MATCH("", "root")) {
+        strncpy(options->root, value, sizeof_struct_member(opt, root));
+    } else if (MATCH("", "log_file")) {
+        strncpy(options->log_file, value, sizeof_struct_member(opt, log_file));
+    } else if (MATCH("ssl", "enabled")) {
+        if (strcmp(value, "no") == 0) {
+            options->no_ssl = 1;
+        }
+    } else if (MATCH("ssl", "cert_file")) {
+        strncpy(options->cert_file, value, sizeof_struct_member(opt, cert_file));
+    } else if (MATCH("ssl", "key_file")) {
+        strncpy(options->key_file, value, sizeof_struct_member(opt, key_file));
+    } else if (MATCH("ssl", "entropy_file")) {
+        strncpy(options->entropy_file, value, sizeof_struct_member(opt, entropy_file));
+    } else {
+        return 0;
+    }
+
+    return 1;
+}
+
 void clax_parse_options(opt *options, int argc, char **argv)
 {
     int c;
 
     memset(options, 0, sizeof(opt));
+
+    if (argc < 2)
+        usage();
 
 #ifdef MVS
     if (argc > 1)
@@ -123,8 +157,11 @@ void clax_parse_options(opt *options, int argc, char **argv)
 #endif
 
     opterr = 0;
-    while ((c = getopt(argc, argv, "hnl:e:t:p:r:k")) != -1) {
+    while ((c = getopt(argc, argv, "hnl:e:t:p:r:kc:")) != -1) {
         switch (c) {
+        case 'c':
+            strncpy(options->config_file, optarg, sizeof(options->config_file));
+            break;
         case 'l':
             strncpy(options->log_file, optarg, sizeof(options->log_file));
             break;
@@ -154,6 +191,14 @@ void clax_parse_options(opt *options, int argc, char **argv)
         }
     }
 
+    if (strlen(options->config_file)) {
+        if (ini_parse(options->config_file, clax_config_handler, options) < 0) {
+            fprintf(stderr, "Error: can't load '%s\n\n", options->config_file);
+
+            usage();
+        }
+    }
+
     if (!options->no_ssl) {
         if (!strlen(options->cert_file) || !strlen(options->key_file)) {
             fprintf(stderr, "Error: cert_file and key_file are required\n\n");
@@ -167,7 +212,7 @@ void clax_parse_options(opt *options, int argc, char **argv)
 
         usage();
     } else {
-        DIR* dir = opendir(options->root);
+        DIR *dir = opendir(options->root);
         if (dir) {
             closedir(dir);
 
