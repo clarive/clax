@@ -69,18 +69,75 @@ Authentication is done via SSL certificates (client authentication).
     # or if you want to use PKCS12 certificate
     curl --cacert ssl/ca.pem -E ssl/client.p12 https://clax.local/
 
-### Upload File
+### Client Errors
 
-Upload file to the server via multipart form. The file is saved to the clax home directory. See **URL Params** on how to
-modify this behaviour.
+There are several types of errors.
 
-#### URL
+1. Client sent invalid HTTP request
 
-    /upload
+    HTTP/1.1 400 Bad Request
+    Content-Length: *
 
-#### Method
+    {"message":"Bad request"}
 
-    POST
+1. Client sent invalid parameters
+
+    HTTP/1.1 422 Unprocessible Entity
+    Content-Length: *
+
+    {"message":"Invalid params"}
+
+### Server Errors
+
+1. An error occured on the server-side
+
+    HTTP/1.1 500 System Error
+    Content-Length: *
+
+    {"message":"Cannot save file"}
+
+### File Management
+
+#### Check if file exists
+
+    HEAD /tree/:filename
+    HEAD /tree/:some/:sub/:directory/:filename
+
+Same as downloading a file without actually receiving the body.
+
+### Response
+
+    HTTP/1.1 200 OK
+    Content-Type: application/octet-stream
+    Content-Disposition: attachment; filename="filename"
+    Pragma: no-cache
+    Content-Length: 13915
+    Last-Modified: Thu, 10 Sep 2015 14:32:19 GMT
+
+#### Download file
+
+    GET /tree/:filename
+    GET /tree/:some/:sub/:directory/:filename
+
+Download a file as attachment.
+
+### Response
+
+    HTTP/1.1 200 OK
+    Content-Type: application/octet-stream
+    Content-Disposition: attachment; filename="filename"
+    Pragma: no-cache
+    Content-Length: 13915
+    Last-Modified: Thu, 10 Sep 2015 14:32:19 GMT
+
+    ...<file content>...
+
+#### Upload file
+
+    POST /tree/
+    POST /tree/:some/:sub/:directory
+
+Upload file to the server via multipart form.
 
 #### URL Params
 
@@ -90,13 +147,9 @@ None
 
 Optional
 
-* `file=[string]`
+* `name=[string]`
 
     Save file as a different name
-
-* `dir=[string]`
-
-    Save file to the different directory
 
 * `crc32=[hex string]`
 
@@ -112,49 +165,15 @@ Required
 
 * `file=[bytes]`
 
-#### Successful Response
+#### Response
 
-* Code:
-
-    200
-
-* Content:
+    200 OK
 
     {"status":"ok"}
-
-#### Error Response:
-
-* Code:
-
-    400
-
-* Error:
-
-    Bad request
-
-* Reason:
-
-    Bad params were passed.
-
-OR
-
-* Code:
-
-    500
-
-* Error:
-
-    System error
-
-* Reason:
-
-    Some system error, like file cannot be saved.
 
 #### Example
 
     curl -F 'file=@path_to_file' http://clax-server/upload
-
-#### Notes
 
 ## Copyright
 
