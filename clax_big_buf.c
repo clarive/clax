@@ -1,7 +1,7 @@
 /*
  *  Copyright (C) 2015, Clarive Software, All Rights Reserved
  *
- *  This file is memory of clax.
+ *  This file is part of clax.
  *
  *  Clax is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
