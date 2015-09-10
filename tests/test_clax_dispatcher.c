@@ -35,7 +35,7 @@ TEST_START(clax_dispatch_sets_404_on_unknown_path)
     clax_http_response_t response;
 
     clax_http_request_init(&request);
-    clax_http_response_init(&response);
+    clax_http_response_init(&response, NULL, 0);
 
     strcpy(request.path_info, "/unknown-path");
 
@@ -43,7 +43,10 @@ TEST_START(clax_dispatch_sets_404_on_unknown_path)
 
     ASSERT_EQ(response.status_code, 404)
     ASSERT_STR_EQ(clax_kv_list_find(&response.headers, "Content-Type"), "text/plain")
-    ASSERT_STRN_EQ(response.body, "Not found", 9)
+
+    unsigned char buf[255];
+    clax_big_buf_read(&response.body, buf, sizeof(buf));
+    ASSERT_BUF_EQ(buf, "Not found", 9)
 
     clax_http_request_free(&request);
     clax_http_response_free(&response);
@@ -60,7 +63,7 @@ TEST_START(clax_dispatch_saves_upload_to_file)
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
     memset(&options, 0, sizeof(opt));
     clax_http_request_init(&request);
-    clax_http_response_init(&response);
+    clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
@@ -114,7 +117,7 @@ TEST_START(clax_dispatch_saves_upload_to_file_with_another_name)
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
     memset(&options, 0, sizeof(opt));
     clax_http_request_init(&request);
-    clax_http_response_init(&response);
+    clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
@@ -169,7 +172,7 @@ TEST_START(clax_dispatch_saves_upload_to_another_dir)
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
     memset(&options, 0, sizeof(opt));
     clax_http_request_init(&request);
-    clax_http_response_init(&response);
+    clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
@@ -225,7 +228,7 @@ TEST_START(clax_dispatch_rejects_upload_if_crc_fails)
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
     memset(&options, 0, sizeof(opt));
     clax_http_request_init(&request);
-    clax_http_response_init(&response);
+    clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
@@ -276,7 +279,7 @@ TEST_START(clax_dispatch_accepts_upload_with_correct_crc)
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
     memset(&options, 0, sizeof(opt));
     clax_http_request_init(&request);
-    clax_http_response_init(&response);
+    clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
@@ -327,7 +330,7 @@ TEST_START(clax_dispatch_saves_upload_with_passed_time)
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
     memset(&options, 0, sizeof(opt));
     clax_http_request_init(&request);
-    clax_http_response_init(&response);
+    clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
@@ -384,7 +387,7 @@ TEST_START(clax_dispatch_serves_404_when_file_not_found)
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
     memset(&options, 0, sizeof(opt));
     clax_http_request_init(&request);
-    clax_http_response_init(&response);
+    clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
@@ -422,7 +425,7 @@ TEST_START(clax_dispatch_serves_file_as_attachment)
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
     memset(&options, 0, sizeof(opt));
     clax_http_request_init(&request);
-    clax_http_response_init(&response);
+    clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
@@ -469,7 +472,7 @@ TEST_START(clax_dispatch_returns_bad_request_when_wrong_params)
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
     memset(&options, 0, sizeof(opt));
     clax_http_request_init(&request);
-    clax_http_response_init(&response);
+    clax_http_response_init(&response, NULL, 0);
 
     request.method = HTTP_POST;
     strcpy(request.path_info, "/command");

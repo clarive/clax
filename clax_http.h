@@ -64,9 +64,9 @@ typedef struct {
 typedef struct {
   unsigned int status_code;
   clax_kv_list_t headers;
+
   FILE *body_fh;
-  unsigned char body[MAX_ELEMENT_SIZE];
-  size_t body_len;
+  clax_big_buf_t body;
   void (*body_cb)(void *ctx, clax_http_chunk_cb_t chunk_cb, ...);
   void *body_cb_ctx;
 } clax_http_response_t;
@@ -78,7 +78,7 @@ typedef int (*send_cb_t)(void *ctx, const unsigned char *buf, size_t len);
 
 void clax_http_request_init(clax_http_request_t *request);
 void clax_http_request_free(clax_http_request_t *request);
-void clax_http_response_init(clax_http_response_t *response);
+void clax_http_response_init(clax_http_response_t *response, char *tempdir, size_t max_size);
 void clax_http_response_free(clax_http_response_t *response);
 
 int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_cb, void *ctx);

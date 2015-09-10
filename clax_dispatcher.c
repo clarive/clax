@@ -71,48 +71,42 @@ void clax_dispatch_not_found(clax_ctx_t *clax_ctx, clax_http_request_t *req, cla
 {
     clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
     res->status_code = 404;
-    memcpy(res->body, "Not found", 9);
-    res->body_len = 9;
+    clax_big_buf_append_str(&res->body, "Not found");
 }
 
 void clax_dispatch_method_not_allowed(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
     res->status_code = 405;
-    memcpy(res->body, "Method not allowed", 18);
-    res->body_len = 18;
+    clax_big_buf_append_str(&res->body, "Method not allowed");
 }
 
 void clax_dispatch_system_error(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
     res->status_code = 500;
-    memcpy(res->body, "System error", 12);
-    res->body_len = 12;
+    clax_big_buf_append_str(&res->body, "System error");
 }
 
 void clax_dispatch_bad_request(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     res->status_code = 400;
     clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
-    memcpy(res->body, "Bad request", 14);
-    res->body_len = 14;
+    clax_big_buf_append_str(&res->body, "Bad request");
 }
 
 void clax_dispatch_ping(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     res->status_code = 200;
     clax_kv_list_push(&res->headers, "Content-Type", "application/json");
-    memcpy(res->body, "{\"message\":\"pong\"}", 20);
-    res->body_len = 20;
+    clax_big_buf_append_str(&res->body, "{\"message\":\"pong\"}");
 }
 
 void clax_dispatch_index(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     res->status_code = 200;
     clax_kv_list_push(&res->headers, "Content-Type", "application/json");
-    memcpy(res->body, "{\"message\":\"Hello, world!\"}", 27);
-    res->body_len = 27;
+    clax_big_buf_append_str(&res->body, "{\"message\":\"Hello, world!\"}");
 }
 
 void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
@@ -301,8 +295,8 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
 
                 res->status_code = 200;
                 clax_kv_list_push(&res->headers, "Content-Type", "application/json");
-                memcpy(res->body, "{\"status\":\"ok\"}", 15);
-                res->body_len = 15;
+
+                clax_big_buf_append_str(&res->body, "{\"message\":\"ok\"}");
             }
 
             free(fpath);

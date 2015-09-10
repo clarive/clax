@@ -510,14 +510,17 @@ int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t 
         TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO;
     }
 
-    if (response->body_len) {
-        char buf[255];
+    if (response->body.len) {
+        size_t rcount;
+        unsigned char buf[255];
 
         TRY send_cb(ctx, (const unsigned char *)"Content-Length: ", 16) GOTO;
-        sprintf(buf, "%d\r\n\r\n", (int)response->body_len);
-        TRY send_cb(ctx, (const unsigned char *)buf, strlen(buf)) GOTO;
+        sprintf((char *)buf, "%d\r\n\r\n", (int)response->body.len);
+        TRY send_cb(ctx, buf, strlen((char *)buf)) GOTO;
 
-        TRY send_cb(ctx, response->body, response->body_len) GOTO;
+        while ((rcount = clax_big_buf_read(&response->body, buf, sizeof(buf))) > 0) {
+            TRY send_cb(ctx, buf, rcount) GOTO;
+        }
     } else if (response->body_cb) {
         TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO;
 
@@ -574,16 +577,19 @@ void clax_http_request_free(clax_http_request_t *request)
     clax_kv_list_free(&request->body_params);
 }
 
-void clax_http_response_init(clax_http_response_t *response)
+void clax_http_response_init(clax_http_response_t *response, char *tempdir, size_t max_size)
 {
     memset(response, 0, sizeof(clax_http_response_t));
 
     clax_kv_list_init(&response->headers);
+    clax_big_buf_init(&response->body, tempdir, max_size);
 }
 
 void clax_http_response_free(clax_http_response_t *response)
 {
     clax_kv_list_free(&response->headers);
+
+    clax_big_buf_free(&response->body);
 
     if (response->body_fh)
         fclose(response->body_fh);
@@ -597,7 +603,7 @@ int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_c
     http_parser_init(&parser, HTTP_REQUEST);
 
     clax_http_request_init(&request);
-    clax_http_response_init(&response);
+    clax_http_response_init(&response, clax_ctx->options->root, 1024 * 1024);
 
     request.clax_ctx = clax_ctx;
 

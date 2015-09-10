@@ -55,9 +55,14 @@ clax_big_buf_t *clax_big_buf_free(clax_big_buf_t *bbuf)
     return bbuf;
 }
 
+int clax_big_buf_append_str(clax_big_buf_t *bbuf, const char *buf)
+{
+    return clax_big_buf_append(bbuf, (const unsigned char *)buf, strlen(buf));
+}
+
 int clax_big_buf_append(clax_big_buf_t *bbuf, const unsigned char *buf, size_t len)
 {
-    if (bbuf->len + len > bbuf->max_size) {
+    if (bbuf->temp_dir && bbuf->max_size && bbuf->len + len > bbuf->max_size) {
         if (!bbuf->fh) {
             int fd;
             const char *template = "/.fileXXXXXX";

@@ -35,6 +35,7 @@ typedef struct {
 clax_big_buf_t *clax_big_buf_init(clax_big_buf_t *bbuf, char *temp_dir, size_t max_size);
 clax_big_buf_t *clax_big_buf_free(clax_big_buf_t *bbuf);
 int clax_big_buf_append(clax_big_buf_t *bbuf, const unsigned char *buf, size_t len);
+int clax_big_buf_append_str(clax_big_buf_t *bbuf, const char *str);
 int clax_big_buf_write_file(clax_big_buf_t *bbuf, char *fpath);
 int clax_big_buf_close(clax_big_buf_t *bbuf);
 size_t clax_big_buf_read(clax_big_buf_t *bbuf, unsigned char *buf, size_t len);
