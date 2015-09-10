@@ -156,7 +156,13 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
 {
     char *file = req->path_info + strlen("/tree/");
 
-    if (file && access(file, F_OK) == -1) {
+    char buf[255];
+    char base_buf[255];
+    char last_modified_buf[30];
+    struct stat st;
+    struct tm last_modified_time;
+
+    if (stat(file, &st) != 0 || !(st.st_mode & S_IFREG)) {
         clax_dispatch_not_found(clax_ctx, req, res);
         return;
     }
@@ -164,17 +170,9 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
     FILE *fh = fopen(file, "rb");
 
     if (fh == NULL) {
-        clax_dispatch_system_error(clax_ctx, req, res);
+        clax_dispatch_not_found(clax_ctx, req, res);
         return;
     }
-
-    char buf[255];
-    char base_buf[255];
-    char last_modified_buf[30];
-    struct stat st;
-    struct tm last_modified_time;
-
-    stat(file, &st);
 
     snprintf(buf, sizeof(buf), "%d", (int)st.st_size);
 
