@@ -290,3 +290,33 @@ TEST_START(clax_san_path_fixes_path)
     ASSERT_EQ(strlen(buf), 12);
 }
 TEST_END
+
+TEST_START(clax_strjoin_joins_strings)
+{
+    char *p;
+
+    p = clax_strjoin("/", NULL);
+
+    ASSERT_STR_EQ(p, "");
+
+    free(p);
+
+    p = clax_strjoin("/", "foo", "bar", "baz", NULL);
+
+    ASSERT_STR_EQ(p, "foo/bar/baz");
+
+    free(p);
+
+    p = clax_strjoin("/", "foo", "bar", "baz", NULL);
+
+    ASSERT_STR_EQ(p, "foo/bar/baz");
+
+    free(p);
+
+    p = clax_strjoin("/", "", "", "", NULL);
+
+    ASSERT_STR_EQ(p, "");
+
+    free(p);
+}
+TEST_END

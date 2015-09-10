@@ -24,5 +24,6 @@
 #include "clax_http.h"
 
 void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res);
+size_t clax_dispatcher_match(const char *path_info, size_t path_info_len, const char *path, size_t path_len);
 
 #endif

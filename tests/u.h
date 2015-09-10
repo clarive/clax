@@ -96,13 +96,13 @@ int u_rv;
 
 #define ASSERT_STR_EQ(got, exp)                 \
     do {                                        \
-        char *p = (char *)got;                  \
-        if (p != NULL) {                        \
-            ASSERT(strcmp(p, exp) == 0)         \
+        char *__got = (char *)got;              \
+        if (__got != NULL) {                    \
+            ASSERT(strcmp(__got, exp) == 0)     \
                                                 \
             if (!u_rv) {                        \
                 printf("# " #got ":\n");        \
-                printf("#   got: '%s'\n", p);   \
+                printf("#   got: '%s'\n", __got);   \
                 printf("#   exp: '%s'\n", exp); \
             }                                   \
         } else {                                \

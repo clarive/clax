@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "clax_util.h"
 
@@ -267,4 +268,35 @@ void clax_san_path(char *buf)
 
         break;
     }
+}
+
+char *clax_strjoin(char *sep, ...)
+{
+    char *p;
+    char *join = strdup("");
+    size_t sep_len = strlen(sep);
+    va_list a_list;
+
+    va_start(a_list, sep);
+
+    int first = 1;
+    while ((p = (char *)va_arg(a_list, void *)) != NULL) {
+        if (!strlen(p))
+            continue;
+
+        if (first) {
+            join = realloc(join, strlen(p) + 1);
+            strcat(join, p);
+
+            first = 0;
+        } else {
+            join = realloc(join, strlen(join) + sep_len + strlen(p) + 1);
+            strcat(join, sep);
+            strcat(join, p);
+        }
+    }
+
+    va_end(a_list);
+
+    return join;
 }

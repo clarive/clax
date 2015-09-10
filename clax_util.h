@@ -58,5 +58,6 @@ void clax_buf_append(unsigned char **dst, size_t *dst_len, const char *src, size
 void clax_hexdump(unsigned char *buf, size_t len);
 
 void clax_san_path(char *buf);
+char *clax_strjoin(char *sep, ...);
 
 #endif

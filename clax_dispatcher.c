@@ -154,7 +154,7 @@ void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_
 
 void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
-    char *file = clax_kv_list_find(&req->query_params, "file");
+    char *file = req->path_info + strlen("/tree/");
 
     if (file && access(file, F_OK) == -1) {
         clax_dispatch_not_found(clax_ctx, req, res);
@@ -179,8 +179,9 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
     snprintf(buf, sizeof(buf), "%d", (int)st.st_size);
 
     char *base = basename(file);
-    strcpy(base_buf, "attachment; filename=");
+    strcpy(base_buf, "attachment; filename=\"");
     strcat(base_buf, base);
+    strcat(base_buf, "\"");
 
     res->status_code = 200;
     clax_kv_list_push(&res->headers, "Content-Type", "application/octet-stream");
@@ -192,11 +193,28 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
     strftime(last_modified_buf, sizeof(last_modified_buf), "%a, %d %b %Y %T GMT", &last_modified_time);
     clax_kv_list_push(&res->headers, "Last-Modified", last_modified_buf);
 
-    res->body_fh = fh;
+    if (req->method == HTTP_GET)
+        res->body_fh = fh;
+    else
+        fclose(fh);
 }
 
 void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
+    char *subdir = req->path_info + strlen("/tree/");
+
+    if (strlen(subdir)) {
+        struct stat info;
+
+        if (stat(subdir, &info) == 0 && info.st_mode & S_IFDIR) {
+        } else {
+            clax_log("Output directory does not exist");
+
+            clax_dispatch_bad_request(clax_ctx, req, res);
+            return;
+        }
+    }
+
     if (req->continue_expected) {
         return;
     }
@@ -211,102 +229,87 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
                 continue;
 
             char prefix[] = "form-data; ";
-            if (strncmp(content_disposition, prefix, strlen(prefix)) == 0) {
-                const char *kv = content_disposition + strlen(prefix);
-                size_t name_len;
-                size_t filename_len;
+            if (strncmp(content_disposition, prefix, strlen(prefix)) != 0)
+                continue;
 
-                const char *name = clax_http_extract_kv(kv, "name", &name_len);
-                const char *filename = clax_http_extract_kv(kv, "filename", &filename_len);
+            const char *kv = content_disposition + strlen(prefix);
+            size_t name_len;
+            size_t filename_len;
+            const char *name = clax_http_extract_kv(kv, "name", &name_len);
+            const char *filename = clax_http_extract_kv(kv, "filename", &filename_len);
 
-                if (name && (strncmp(name, "file", name_len) == 0) && filename) {
-                    char fpath[1024] = {0};
-                    char *new_name = clax_kv_list_find(&req->query_params, "name");
-                    char *new_dir = clax_kv_list_find(&req->query_params, "dir");
-                    char *crc32 = clax_kv_list_find(&req->query_params, "crc");
-                    char *time = clax_kv_list_find(&req->query_params, "time");
+            if (!name || !filename || (strncmp(name, "file", name_len) != 0))
+                continue;
 
-                    if (crc32 && strlen(crc32) != 8) {
+            char *new_name = clax_kv_list_find(&req->query_params, "name");
+            char *crc32 = clax_kv_list_find(&req->query_params, "crc");
+            char *time = clax_kv_list_find(&req->query_params, "time");
+
+            if (crc32 && strlen(crc32) != 8) {
+                clax_dispatch_bad_request(clax_ctx, req, res);
+                return;
+            }
+
+            char *fpath;
+
+            if (new_name && strlen(new_name)) {
+                fpath = clax_strjoin("/", clax_ctx->options->root, subdir, new_name, NULL);
+            }
+            else {
+                char *p = strndup(filename, filename_len);
+                fpath = clax_strjoin("/", clax_ctx->options->root, subdir, p, NULL);
+                free(p);
+            }
+
+            clax_san_path(fpath);
+
+            int ret = clax_big_buf_write_file(&multipart->bbuf, fpath);
+
+            if (ret < 0) {
+                clax_dispatch_system_error(clax_ctx, req, res);
+            }
+            else {
+                if (crc32 && strlen(crc32)) {
+                    unsigned long got_crc32 = strtol(crc32, NULL, 16);
+
+                    int fd = open(fpath, O_RDONLY);
+                    unsigned long real_crc32 = clax_crc32_calc_fd(fd);
+                    close(fd);
+
+                    if (got_crc32 != real_crc32) {
+                        clax_log("CRC mismatch %d != %d", got_crc32, real_crc32);
                         clax_dispatch_bad_request(clax_ctx, req, res);
+
+                        unlink(fpath);
+                        free(fpath);
+
                         return;
+                    } else {
+                        clax_log("CRC ok");
                     }
+                }
 
-                    if (new_dir && strlen(new_dir)) {
-                        if (strlen(new_dir) >= sizeof(fpath) - 1) {
-                            clax_dispatch_bad_request(clax_ctx, req, res);
-                            return;
-                        }
-
-                        struct stat info;
-
-                        if (stat(new_dir, &info) == 0 && info.st_mode & S_IFDIR) {
-                            strncpy(fpath, new_dir, MIN(strlen(new_dir), sizeof(fpath)));
-
-                            if (new_dir[strlen(new_dir) - 1] != '/') {
-                                strcat(fpath, "/");
-                            }
-                        }
-                        else {
-                            clax_log("Output directory does not exist");
-
-                            clax_dispatch_bad_request(clax_ctx, req, res);
-                            return;
-                        }
-                    }
-
-                    if (new_name && strlen(new_name)) {
-                        strncat(fpath, new_name, MIN(strlen(new_name), sizeof(fpath) - strlen(fpath)));
-                    }
-                    else {
-                        strncat(fpath, filename, MIN(filename_len, sizeof(fpath) - strlen(fpath)));
-                    }
-
-                    int ret = clax_big_buf_write_file(&multipart->bbuf, fpath);
-
-                    if (ret < 0) {
-                        clax_dispatch_system_error(clax_ctx, req, res);
-                    }
-                    else {
-                        if (crc32 && strlen(crc32)) {
-                            unsigned long got_crc32 = strtol(crc32, NULL, 16);
-
-                            int fd = open(fpath, O_RDONLY);
-                            unsigned long real_crc32 = clax_crc32_calc_fd(fd);
-                            close(fd);
-
-                            if (got_crc32 != real_crc32) {
-                                clax_log("CRC mismatch %d != %d", got_crc32, real_crc32);
-                                clax_dispatch_bad_request(clax_ctx, req, res);
-
-                                unlink(fpath);
-
-                                return;
-                            } else {
-                                clax_log("CRC ok");
-                            }
-                        }
-
-                        if (time && strlen(time)) {
-                            int mtime = atol(time);
+                if (time && strlen(time)) {
+                    int mtime = atol(time);
 
 #ifdef _WIN32
 #else
-                            struct utimbuf t;
-                            t.actime = mtime;
-                            t.modtime = mtime;
-                            utime(fpath, &t);
+                    struct utimbuf t;
+                    t.actime = mtime;
+                    t.modtime = mtime;
+                    utime(fpath, &t);
 #endif
-                        }
-
-                        res->status_code = 200;
-                        clax_kv_list_push(&res->headers, "Content-Type", "application/json");
-                        memcpy(res->body, "{\"status\":\"ok\"}", 15);
-                        res->body_len = 15;
-                    }
-
-                    break;
                 }
+
+                res->status_code = 200;
+                clax_kv_list_push(&res->headers, "Content-Type", "application/json");
+                memcpy(res->body, "{\"status\":\"ok\"}", 15);
+                res->body_len = 15;
             }
+
+            free(fpath);
+
+            break;
         }
     }
 
@@ -315,23 +318,54 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
     }
 }
 
+void clax_dispatch_tree(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
+{
+    if (req->method == HTTP_HEAD || req->method == HTTP_GET) {
+        clax_dispatch_download(clax_ctx, req, res);
+    } else if (req->method == HTTP_POST) {
+        clax_dispatch_upload(clax_ctx, req, res);
+    } else {
+        clax_dispatch_not_found(clax_ctx, req, res);
+    }
+}
+
 clax_dispatcher_action_t clax_dispatcher_actions[] = {
     {"/", (1 << HTTP_GET), CLAX_DISPATCHER_NO_FLAGS, clax_dispatch_index},
     {"/ping", (1 << HTTP_GET), CLAX_DISPATCHER_NO_FLAGS, clax_dispatch_ping},
     {"/command", (1 << HTTP_POST), CLAX_DISPATCHER_NO_FLAGS, clax_dispatch_command},
-    {"/download", (1 << HTTP_GET), CLAX_DISPATCHER_NO_FLAGS, clax_dispatch_download},
-    {"/upload", (1 << HTTP_POST), (1 << CLAX_DISPATCHER_FLAG_100_CONTINUE), clax_dispatch_upload}
+    {"^/tree/", (1 << HTTP_HEAD | 1 << HTTP_GET | 1 << HTTP_POST), CLAX_DISPATCHER_FLAG_100_CONTINUE, clax_dispatch_tree},
 };
+
+size_t clax_dispatcher_match(const char *path_info, size_t path_info_len, const char *path, size_t path_len)
+{
+    int match;
+
+    if (path[0] == '^') {
+        path++;
+        path_len--;
+
+        match = path_info_len >= path_len && strncmp(path_info, path, path_len) == 0;
+    }
+    else {
+        match = strcmp(path_info, path) == 0;
+    }
+
+    return match ? path_len : 0;
+}
 
 void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     char *path_info = req->path_info;
+    size_t path_info_len = strlen(path_info);
 
     size_t len = sizeof clax_dispatcher_actions / sizeof clax_dispatcher_actions[0];
 
     for (int i = 0; i < len; i++) {
         clax_dispatcher_action_t *action = &clax_dispatcher_actions[i];
-        if (strcmp(path_info, action->path) == 0) {
+
+        size_t match = clax_dispatcher_match(path_info, path_info_len, action->path, strlen(action->path));
+
+        if (match) {
             if (action->method_mask & (1 << req->method)) {
                 if (req->continue_expected) {
                     if (action->flags_mask & (1 << CLAX_DISPATCHER_FLAG_100_CONTINUE)) {
@@ -352,6 +386,8 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
             }
         }
     }
+
+    clax_log("No suitable action matched");
 
     clax_dispatch_not_found(clax_ctx, req, res);
     return;

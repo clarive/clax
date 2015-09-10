@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
     RUN_TEST(clax_dispatch_serves_404_when_file_not_found)
     RUN_TEST(clax_dispatch_serves_file_as_attachment)
     RUN_TEST(clax_dispatch_returns_bad_request_when_wrong_params)
+    RUN_TEST(clax_dispatch_match_matches_paths)
 
     RUN_TEST(clax_command_start_runs_command)
     RUN_TEST(clax_command_start_returns_error)
@@ -87,6 +88,7 @@ int main(int argc, char *argv[])
     RUN_TEST(clax_big_buf_read_from_file)
 
     RUN_TEST(clax_san_path_fixes_path)
+    RUN_TEST(clax_strjoin_joins_strings)
 
     DONE_TESTING
 }

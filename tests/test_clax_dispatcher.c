@@ -74,7 +74,7 @@ TEST_START(clax_dispatch_saves_upload_to_file)
     clax_ctx.options = &options;
 
     request.method = HTTP_POST;
-    strcpy(request.path_info, "/upload");
+    strcpy(request.path_info, "/tree/");
     strcpy(request.multipart_boundary, "---boundary");
 
     clax_http_multipart_t *multipart = clax_http_multipart_list_push(&request.multiparts);
@@ -128,7 +128,7 @@ TEST_START(clax_dispatch_saves_upload_to_file_with_another_name)
     clax_ctx.options = &options;
 
     request.method = HTTP_POST;
-    strcpy(request.path_info, "/upload");
+    strcpy(request.path_info, "/tree/");
     clax_kv_list_push(&request.query_params, "name", "another-name");
     strcpy(request.multipart_boundary, "---boundary");
 
@@ -184,8 +184,7 @@ TEST_START(clax_dispatch_saves_upload_to_another_dir)
     clax_ctx.options = &options;
 
     request.method = HTTP_POST;
-    strcpy(request.path_info, "/upload");
-    clax_kv_list_push(&request.query_params, "dir", "subdir");
+    strcpy(request.path_info, "/tree/subdir");
     strcpy(request.multipart_boundary, "---boundary");
 
     clax_http_multipart_t *multipart = clax_http_multipart_list_push(&request.multiparts);
@@ -240,7 +239,7 @@ TEST_START(clax_dispatch_rejects_upload_if_crc_fails)
     clax_ctx.options = &options;
 
     request.method = HTTP_POST;
-    strcpy(request.path_info, "/upload");
+    strcpy(request.path_info, "/tree/");
     clax_kv_list_push(&request.query_params, "crc", "12345678");
     strcpy(request.multipart_boundary, "---boundary");
 
@@ -291,7 +290,7 @@ TEST_START(clax_dispatch_accepts_upload_with_correct_crc)
     clax_ctx.options = &options;
 
     request.method = HTTP_POST;
-    strcpy(request.path_info, "/upload");
+    strcpy(request.path_info, "/tree/");
     clax_kv_list_push(&request.query_params, "crc", "9ef61f95");
     strcpy(request.multipart_boundary, "---boundary");
 
@@ -342,7 +341,7 @@ TEST_START(clax_dispatch_saves_upload_with_passed_time)
     clax_ctx.options = &options;
 
     request.method = HTTP_POST;
-    strcpy(request.path_info, "/upload");
+    strcpy(request.path_info, "/tree/");
     clax_kv_list_push(&request.query_params, "time", "1234567890");
     strcpy(request.multipart_boundary, "---boundary");
 
@@ -399,8 +398,7 @@ TEST_START(clax_dispatch_serves_404_when_file_not_found)
     clax_ctx.options = &options;
 
     request.method = HTTP_GET;
-    strcpy(request.path_info, "/download");
-    clax_kv_list_push(&request.query_params, "file", "foo");
+    strcpy(request.path_info, "/tree/foo");
 
     clax_dispatch(&clax_ctx, &request, &response);
 
@@ -446,8 +444,7 @@ TEST_START(clax_dispatch_serves_file_as_attachment)
     fclose(fp);
 
     request.method = HTTP_GET;
-    strcpy(request.path_info, "/download");
-    clax_kv_list_push(&request.query_params, "file", "foo");
+    strcpy(request.path_info, "/tree/foo");
 
     clax_dispatch(&clax_ctx, &request, &response);
 
@@ -484,5 +481,22 @@ TEST_START(clax_dispatch_returns_bad_request_when_wrong_params)
 
     clax_http_request_free(&request);
     clax_http_response_free(&response);
+}
+TEST_END
+
+int clax_dispatcher_match_(const char *path_info, const char *path)
+{
+    return clax_dispatcher_match(path_info, strlen(path_info), path, strlen(path));
+}
+
+TEST_START(clax_dispatch_match_matches_paths)
+{
+    ASSERT_EQ(clax_dispatcher_match_("/foo", "/bar"), 0)
+    ASSERT_EQ(clax_dispatcher_match_("/foo", "/foo"), 4)
+    ASSERT_EQ(clax_dispatcher_match_("/foo/", "/foo/"), 5)
+
+    ASSERT_EQ(clax_dispatcher_match_("/foobar", "^/foo/"), 0)
+    ASSERT_EQ(clax_dispatcher_match_("/foo/", "^/foo/"), 5)
+    ASSERT_EQ(clax_dispatcher_match_("/foo/bar", "^/foo/"), 5)
 }
 TEST_END
