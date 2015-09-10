@@ -603,10 +603,7 @@ int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_c
 
     clax_log("Reading & parsing request...");
     if (clax_http_read_parse(ctx, recv_cb, &parser, &request) < 0) {
-        response.status_code = 400;
-        clax_kv_list_push(&response.headers, "Content-Type", "text/plain");
-        memcpy(response.body, "Bad request", 14);
-        response.body_len = 14;
+        clax_dispatch_bad_request(ctx, &request, &response);
 
         TRY clax_http_write_response(ctx, send_cb, &response) GOTO;
 
