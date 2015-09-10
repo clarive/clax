@@ -140,8 +140,8 @@ int request_url_cb(http_parser *p, const char *buf, size_t len)
     if (rv != 0)
         return -1;
 
-    int path_from = u.field_data[3].off;
-    int path_len = u.field_data[3].len;
+    int path_from = u.field_data[UF_PATH].off;
+    int path_len = u.field_data[UF_PATH].len;
 
     strncpy(request->url, buf, len);
     request->url[len] = 0;
