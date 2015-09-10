@@ -36,6 +36,8 @@
 #include "clax_crc32.h"
 #include "clax_dispatcher.h"
 
+static command_ctx_t command_ctx;
+
 enum {
     CLAX_DISPATCHER_NO_FLAGS = 0,
     CLAX_DISPATCHER_FLAG_100_CONTINUE
@@ -111,7 +113,6 @@ void clax_dispatch_index(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_ht
 
 void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
-    command_ctx_t command_ctx;
     memset(&command_ctx, 0, sizeof(command_ctx_t));
 
     char *command = clax_kv_list_find(&req->body_params, "command");
