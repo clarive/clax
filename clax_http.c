@@ -612,11 +612,19 @@ int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_c
     clax_log("ok");
 
     if (request.continue_expected) {
-        response.status_code = 100;
+        clax_dispatch(clax_ctx, &request, &response);
+
+        if (!response.status_code)
+            response.status_code = 100;
 
         clax_log("Writing 100 Continue response...");
         TRY clax_http_write_response(ctx, send_cb, &response) GOTO;
         clax_log("ok");
+
+        if (response.status_code != 100) {
+            clax_log("100 Continue cancelled");
+            goto cleanup;
+        }
 
         request.continue_expected = 0;
         memset(&response, 0, sizeof(clax_http_response_t));
@@ -634,6 +642,7 @@ int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_c
     TRY clax_http_write_response(ctx, send_cb, &response) GOTO;
     clax_log("ok");
 
+cleanup:
     clax_http_request_free(&request);
     clax_http_response_free(&response);
 

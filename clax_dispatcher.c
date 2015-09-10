@@ -36,9 +36,15 @@
 #include "clax_crc32.h"
 #include "clax_dispatcher.h"
 
+enum {
+    CLAX_DISPATCHER_NO_FLAGS = 0,
+    CLAX_DISPATCHER_FLAG_100_CONTINUE
+};
+
 typedef struct {
     char *path;
     int method_mask;
+    int flags_mask;
     void (*fn)(clax_ctx_t *, clax_http_request_t *, clax_http_response_t *);
 } clax_dispatcher_action_t;
 
@@ -191,6 +197,10 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
 
 void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
+    if (req->continue_expected) {
+        return;
+    }
+
     if (strlen(req->multipart_boundary)) {
         int i;
         for (i = 0; i < req->multiparts.size; i++) {
@@ -306,11 +316,11 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
 }
 
 clax_dispatcher_action_t clax_dispatcher_actions[] = {
-    {"/", (1 << HTTP_GET), clax_dispatch_index},
-    {"/ping", (1 << HTTP_GET), clax_dispatch_ping},
-    {"/command", (1 << HTTP_POST), clax_dispatch_command},
-    {"/download", (1 << HTTP_GET), clax_dispatch_download},
-    {"/upload", (1 << HTTP_POST), clax_dispatch_upload}
+    {"/", (1 << HTTP_GET), CLAX_DISPATCHER_NO_FLAGS, clax_dispatch_index},
+    {"/ping", (1 << HTTP_GET), CLAX_DISPATCHER_NO_FLAGS, clax_dispatch_ping},
+    {"/command", (1 << HTTP_POST), CLAX_DISPATCHER_NO_FLAGS, clax_dispatch_command},
+    {"/download", (1 << HTTP_GET), CLAX_DISPATCHER_NO_FLAGS, clax_dispatch_download},
+    {"/upload", (1 << HTTP_POST), (1 << CLAX_DISPATCHER_FLAG_100_CONTINUE), clax_dispatch_upload}
 };
 
 void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
@@ -320,12 +330,24 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
     size_t len = sizeof clax_dispatcher_actions / sizeof clax_dispatcher_actions[0];
 
     for (int i = 0; i < len; i++) {
-        if (strcmp(path_info, clax_dispatcher_actions[i].path) == 0) {
-            if (clax_dispatcher_actions[i].method_mask & (1 << req->method)) {
-                clax_dispatcher_actions[i].fn(clax_ctx, req, res);
+        clax_dispatcher_action_t *action = &clax_dispatcher_actions[i];
+        if (strcmp(path_info, action->path) == 0) {
+            if (action->method_mask & (1 << req->method)) {
+                if (req->continue_expected) {
+                    if (action->flags_mask & (1 << CLAX_DISPATCHER_FLAG_100_CONTINUE)) {
+                        action->fn(clax_ctx, req, res);
+                    }
+                    else {
+                        return;
+                    }
+                } else {
+                    action->fn(clax_ctx, req, res);
+                }
+
                 return;
             } else {
                 clax_dispatch_method_not_allowed(clax_ctx, req, res);
+
                 return;
             }
         }
