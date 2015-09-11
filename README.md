@@ -11,28 +11,35 @@ requests from stdin and write responses to stdout, which makes it suitable for i
 
        common
        ------
-       -c <config_file>   path to configuration file
-       -z                 print default configuration
-       -r <root>          home directory (required, will chdir to it)
-       -l <log_file>      path to log file (default: stderr)
+       -c <config_file>        path to configuration file
+       -z                      print default configuration
+       -r <root>               home directory (required, will chdir to it)
+       -l <log_file>           path to log file (default: stderr)
+       -a <username:password>  basic authentication credentials
 
        ssl
        ---
-       -n                 do not use ssl at all (default: on)
-       -k                 do not verify client certificate (default: on)
-       -t <cert_file>     path to cert file (required if ssl, CA included)
-       -p <key_file>      path to private key file (required if ssl)
-       -e <entropy_file>  path to entropy file (needed on some systems)
+       -n                      do not use ssl at all (default: on)
+       -k                      do not verify client certificate (default: on)
+       -t <cert_file>          path to cert file (required if ssl, CA included)
+       -p <key_file>           path to private key file (required if ssl)
+       -e <entropy_file>       path to entropy file (needed on some systems)
 
 # API Documentation
 
 ## Overview
 
-## Authentication
+## Authorization
 
 Authentication is done via basic authentication and/or SSL certificates (client verification).
 
-### Basic authentication
+### Basic authorization
+
+Standard basic authorization described in [rfc2617](http://tools.ietf.org/html/rfc2617).
+
+#### Example
+
+    curl http://clax.local/ -u 'clax:password'
 
 ### Generating SSL certificates
 
@@ -59,7 +66,7 @@ Authentication is done via basic authentication and/or SSL certificates (client 
     # Convert client certificate to PKCS12
     openssl pkcs12 -export -in client.pem -inkey client.key -out client.p12
 
-### Example (curl with client SSL certificate)
+#### Example (with client SSL verification)
 
     # If you don't want to validate server certificate (without client authentication, option `-k` in clax)
     curl -k https://clax.local/

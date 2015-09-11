@@ -142,7 +142,6 @@ void clax_parse_options(opt *options, int argc, char **argv)
                     "#entropy_file = /opt/clarive/entropy\n"
                     "\n"
                     "[http_basic_auth]\n"
-                    "enabled = yes\n"
                     "username = clax\n"
                     "password = password\n"
                    );
