@@ -61,7 +61,7 @@ TEST_START(clax_dispatch_saves_upload_to_file)
     clax_http_response_t response;
 
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
-    memset(&options, 0, sizeof(opt));
+    clax_options_init(&options);
     clax_http_request_init(&request);
     clax_http_response_init(&response, NULL, 0);
 
@@ -104,6 +104,7 @@ TEST_START(clax_dispatch_saves_upload_to_file)
 
     clax_http_request_free(&request);
     clax_http_response_free(&response);
+    clax_options_free(&options);
 }
 TEST_END
 
@@ -115,7 +116,7 @@ TEST_START(clax_dispatch_saves_upload_to_file_with_another_name)
     clax_http_response_t response;
 
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
-    memset(&options, 0, sizeof(opt));
+    clax_options_init(&options);
     clax_http_request_init(&request);
     clax_http_response_init(&response, NULL, 0);
 
@@ -159,6 +160,7 @@ TEST_START(clax_dispatch_saves_upload_to_file_with_another_name)
 
     clax_http_request_free(&request);
     clax_http_response_free(&response);
+    clax_options_free(&options);
 }
 TEST_END
 
@@ -170,7 +172,7 @@ TEST_START(clax_dispatch_saves_upload_to_another_dir)
     clax_http_response_t response;
 
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
-    memset(&options, 0, sizeof(opt));
+    clax_options_init(&options);
     clax_http_request_init(&request);
     clax_http_response_init(&response, NULL, 0);
 
@@ -215,6 +217,7 @@ TEST_START(clax_dispatch_saves_upload_to_another_dir)
 
     clax_http_request_free(&request);
     clax_http_response_free(&response);
+    clax_options_free(&options);
 }
 TEST_END
 
@@ -226,7 +229,7 @@ TEST_START(clax_dispatch_rejects_upload_if_crc_fails)
     clax_http_response_t response;
 
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
-    memset(&options, 0, sizeof(opt));
+    clax_options_init(&options);
     clax_http_request_init(&request);
     clax_http_response_init(&response, NULL, 0);
 
@@ -266,6 +269,7 @@ TEST_START(clax_dispatch_rejects_upload_if_crc_fails)
 
     clax_http_request_free(&request);
     clax_http_response_free(&response);
+    clax_options_free(&options);
 }
 TEST_END
 
@@ -277,7 +281,7 @@ TEST_START(clax_dispatch_accepts_upload_with_correct_crc)
     clax_http_response_t response;
 
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
-    memset(&options, 0, sizeof(opt));
+    clax_options_init(&options);
     clax_http_request_init(&request);
     clax_http_response_init(&response, NULL, 0);
 
@@ -317,6 +321,7 @@ TEST_START(clax_dispatch_accepts_upload_with_correct_crc)
 
     clax_http_request_free(&request);
     clax_http_response_free(&response);
+    clax_options_free(&options);
 }
 TEST_END
 
@@ -328,7 +333,7 @@ TEST_START(clax_dispatch_saves_upload_with_passed_time)
     clax_http_response_t response;
 
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
-    memset(&options, 0, sizeof(opt));
+    clax_options_init(&options);
     clax_http_request_init(&request);
     clax_http_response_init(&response, NULL, 0);
 
@@ -374,6 +379,7 @@ TEST_START(clax_dispatch_saves_upload_with_passed_time)
 
     clax_http_request_free(&request);
     clax_http_response_free(&response);
+    clax_options_free(&options);
 }
 TEST_END
 
@@ -385,7 +391,7 @@ TEST_START(clax_dispatch_serves_404_when_file_not_found)
     clax_http_response_t response;
 
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
-    memset(&options, 0, sizeof(opt));
+    clax_options_init(&options);
     clax_http_request_init(&request);
     clax_http_response_init(&response, NULL, 0);
 
@@ -412,6 +418,7 @@ TEST_START(clax_dispatch_serves_404_when_file_not_found)
 
     clax_http_request_free(&request);
     clax_http_response_free(&response);
+    clax_options_free(&options);
 }
 TEST_END
 
@@ -423,7 +430,7 @@ TEST_START(clax_dispatch_serves_file_as_attachment)
     clax_http_response_t response;
 
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
-    memset(&options, 0, sizeof(opt));
+    clax_options_init(&options);
     clax_http_request_init(&request);
     clax_http_response_init(&response, NULL, 0);
 
@@ -459,6 +466,7 @@ TEST_START(clax_dispatch_serves_file_as_attachment)
 
     clax_http_request_free(&request);
     clax_http_response_free(&response);
+    clax_options_free(&options);
 }
 TEST_END
 
@@ -470,7 +478,7 @@ TEST_START(clax_dispatch_returns_bad_request_when_wrong_params)
     clax_http_response_t response;
 
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
-    memset(&options, 0, sizeof(opt));
+    clax_options_init(&options);
     clax_http_request_init(&request);
     clax_http_response_init(&response, NULL, 0);
 
@@ -484,6 +492,7 @@ TEST_START(clax_dispatch_returns_bad_request_when_wrong_params)
 
     clax_http_request_free(&request);
     clax_http_response_free(&response);
+    clax_options_free(&options);
 }
 TEST_END
 
