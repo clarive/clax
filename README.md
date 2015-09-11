@@ -3,7 +3,7 @@
 Clax is a portable HTTP(s) remote deployment agent that can run commands, exchange files and more. Clax can read
 requests from stdin and write responses to stdout, which makes it suitable for inetd integration.
 
-## Command-Line Usage
+# Command-Line Usage
 
     usage: clax [-n] [-l log_file] [-e entropy_file]
 
@@ -22,15 +22,17 @@ requests from stdin and write responses to stdout, which makes it suitable for i
        -p <key_file>      path to private key file (required if ssl)
        -e <entropy_file>  path to entropy file (needed on some systems)
 
-## API Documentation
+# API Documentation
 
-### Overview
+## Overview
 
-### Authentication
+## Authentication
 
-Authentication is done via SSL certificates (client authentication).
+Authentication is done via basic authentication and/or SSL certificates (client verification).
 
-#### Generating SSL certificates
+### Basic authentication
+
+### Generating SSL certificates
 
     # Generate CA certificate
     openssl req -out ca.pem -new -x509 -subj '/CN=company'
@@ -55,7 +57,7 @@ Authentication is done via SSL certificates (client authentication).
     # Convert client certificate to PKCS12
     openssl pkcs12 -export -in client.pem -inkey client.key -out client.p12
 
-#### Example (curl with client SSL certificate)
+### Example (curl with client SSL certificate)
 
     # If you don't want to validate server certificate (without client authentication, option `-k` in clax)
     curl -k https://clax.local/
@@ -69,7 +71,7 @@ Authentication is done via SSL certificates (client authentication).
     # or if you want to use PKCS12 certificate
     curl --cacert ssl/ca.pem -E ssl/client.p12 https://clax.local/
 
-### Client Errors
+## Client Errors
 
 There are several types of errors.
 
@@ -87,7 +89,7 @@ There are several types of errors.
 
     {"message":"Invalid params"}
 
-### Server Errors
+## Server Errors
 
 1. An error occured on the server-side
 
@@ -96,16 +98,16 @@ There are several types of errors.
 
     {"message":"Cannot save file"}
 
-### File Management
+## File Management
 
-#### Check if file exists
+### Check if file exists
 
     HEAD /tree/:filename
     HEAD /tree/:some/:sub/:directory/:filename
 
 Same as downloading a file without actually receiving the body.
 
-### Response
+#### Response
 
     HTTP/1.1 200 OK
     Content-Type: application/octet-stream
@@ -114,14 +116,18 @@ Same as downloading a file without actually receiving the body.
     Content-Length: 13915
     Last-Modified: Thu, 10 Sep 2015 14:32:19 GMT
 
-#### Download file
+#### Example
+
+    curl -X HEAD http://clax-server/tree/my-file
+
+### Download file
 
     GET /tree/:filename
     GET /tree/:some/:sub/:directory/:filename
 
 Download a file as attachment.
 
-### Response
+#### Response
 
     HTTP/1.1 200 OK
     Content-Type: application/octet-stream
@@ -132,7 +138,11 @@ Download a file as attachment.
 
     ...<file content>...
 
-#### Upload file
+#### Example
+
+    curl http://clax-server/tree/my-file
+
+### Upload file
 
     POST /tree/
     POST /tree/:some/:sub/:directory
@@ -173,7 +183,41 @@ Required
 
 #### Example
 
-    curl -F 'file=@path_to_file' http://clax-server/upload
+    curl -F 'file=@path_to_file' http://clax-server/tree/
+
+## Run Command
+
+    POST /command
+
+Runs a command returns the chunks of the output. `X-Clax-PID` holds the process `PID` and `X-Clax-Exit` holds the exit
+code.
+
+#### Data Params
+
+Required
+
+* `command=[string]`
+
+Optional
+
+* `timeout=[integer]`
+
+#### Response
+
+    HTTP/1.1 200 OK
+    Transfer-Encoding: chunked
+    Trailer: X-Clax-Exit
+    X-Clax-PID: 10566
+
+    4
+    foo
+
+    0
+    X-Clax-Exit: 0
+
+#### Example
+
+    curl -d 'command=echo foo' http://clax-server/command
 
 ## Copyright
 
