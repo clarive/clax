@@ -38,8 +38,12 @@ multipart_parser_c:
 tests: lib
 	$(MAKE) -C tests
 
+tests_func: lib
+	$(MAKE) -C tests_func
+
 check: tests
 	$(MAKE) -C tests check
+	$(MAKE) -C tests_func check
 
 check-valgrind: tests
 	$(MAKE) -C tests check-valgrind

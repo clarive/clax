@@ -29,6 +29,9 @@
 #define COLOR_YELLOW "\x1b[0;33m"
 #define COLOR_OFF "\x1b[0m"
 
+#include <stdlib.h>
+#include <stdio.h>
+
 int u_tests;
 int u_tests_failed;
 int u_rv;
