@@ -3,6 +3,24 @@
 Clax is a portable HTTP(s) remote deployment agent that can run commands, exchange files and more. Clax can read
 requests from stdin and write responses to stdout, which makes it suitable for inetd integration.
 
+## Supported Platforms
+
+- GNU/Linux
+- FreeBSD
+- z/OS
+- Windows
+- MacOS
+
+## Compiling, testing and installing
+
+Clax is statically linked, so it can be moved around without worring about the libraries. Compiling is as simple as:
+
+    $ make
+
+Clax has a rich unit and functional test suites.
+
+    $ make check
+
 # Command-Line Usage
 
     usage: clax [options]
