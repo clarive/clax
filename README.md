@@ -86,26 +86,26 @@ There are several types of errors.
 
 1. Client sent invalid HTTP request
 
-    HTTP/1.1 400 Bad Request
-    Content-Length: *
+        HTTP/1.1 400 Bad Request
+        Content-Length: *
 
-    {"message":"Bad request"}
+        {"message":"Bad request"}
 
 1. Client sent invalid parameters
 
-    HTTP/1.1 422 Unprocessible Entity
-    Content-Length: *
+        HTTP/1.1 422 Unprocessible Entity
+        Content-Length: *
 
-    {"message":"Invalid params"}
+        {"message":"Invalid params"}
 
 ## Server Errors
 
 1. An error occured on the server-side
 
-    HTTP/1.1 500 System Error
-    Content-Length: *
+        HTTP/1.1 500 System Error
+        Content-Length: *
 
-    {"message":"Cannot save file"}
+        {"message":"Cannot save file"}
 
 ## File Management
 
