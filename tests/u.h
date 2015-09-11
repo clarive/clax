@@ -41,17 +41,19 @@ int u_rv;
         printf(COLOR_RED "not ok %d\n" COLOR_OFF, u_tests + u_local_tests); \
         printf("# %s:%d\n", __FILE__, __LINE__);
 
-#define ASSERT(code)                                    \
-    u_local_tests++;                                    \
-    if (code) {                                         \
-        u_rv = 1;                                       \
-                                                        \
-        printf("ok %d\n", u_tests + u_local_tests);     \
-    }                                                   \
-    else {                                              \
-        u_rv = 0;                                       \
-        NOT_OK \
-    }
+#define ASSERT(code)                                        \
+    do {                                                    \
+        u_local_tests++;                                    \
+        if (code) {                                         \
+            u_rv = 1;                                       \
+                                                            \
+            printf("ok %d\n", u_tests + u_local_tests);     \
+        }                                                   \
+        else {                                              \
+            u_rv = 0;                                       \
+            NOT_OK                                          \
+        }                                                   \
+    } while (0);
 
 #define ASSERT_EQ(got, exp)                 \
     do {                                    \

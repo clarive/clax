@@ -2,10 +2,10 @@ PROGRAM=test
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
 CFLAGS=-std=c99 -pedantic -Wall \
-	   -I../contrib/mbedtls -I../contrib/multipart-parser-c -I../contrib/jsmn -I../contrib/inih -I../contrib -I../ \
+	   -I../contrib/mbedtls -I../contrib/multipart-parser-c -I../contrib/jsmn -I../contrib/inih -I../contrib/base64 -I../contrib -I../ \
 	   -D_ALL_SOURCE -D_POSIX_SOURCE -D_XOPEN_SOURCE=700 -D_XOPEN_SOURCE_EXTENDED
 LFLAGS=
-LIBS=../clax_*.o ../popen2.o ../contrib/mbedtls/*.o ../contrib/http_parser/*.o ../contrib/multipart-parser-c/*.o ../contrib/inih/*.o
+LIBS=../clax_*.o ../popen2.o ../contrib/mbedtls/*.o ../contrib/http_parser/*.o ../contrib/multipart-parser-c/*.o ../contrib/inih/*.o ../contrib/base64/*.o
 
 all: lib $(PROGRAM)
 

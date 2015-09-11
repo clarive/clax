@@ -25,6 +25,8 @@
 
 int main(int argc, char *argv[])
 {
+    RUN_TEST(clax_options_parses_basic_auth)
+
     RUN_TEST(clax_http_parse_returns_0_when_need_more)
     RUN_TEST(clax_http_parse_returns_error_when_error)
     RUN_TEST(clax_http_parse_returns_ok_chunks)

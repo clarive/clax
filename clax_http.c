@@ -27,6 +27,7 @@
 
 #include "http_parser/http_parser.h"
 #include "multipart_parser.h"
+#include "base64.h"
 #include "clax.h"
 #include "clax_dispatcher.h"
 #include "clax_http.h"
@@ -49,6 +50,7 @@ struct clax_http_status_message_s clax_http_messages[] = {
     {100, "Continue"},
     {200, "OK"},
     {400, "Bad Request"},
+    {401, "Unauthorized"},
     {404, "Not Found"}
 };
 
@@ -619,6 +621,49 @@ int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_c
         goto error;
     }
     clax_log("ok");
+
+    if (clax_ctx->options->basic_auth_username && clax_ctx->options->basic_auth_password) {
+        char *prefix = "Basic ";
+        char *basic_auth = clax_kv_list_find(&request.headers, "Authorization");
+        if (!basic_auth || strncmp(basic_auth, prefix, strlen(prefix)) != 0) {
+            clax_dispatch_not_authorized(ctx, &request, &response);
+            TRY clax_http_write_response(ctx, send_cb, &response) GOTO;
+            goto error;
+        }
+
+        char *auth = NULL;
+        int ok = base64_decode_alloc(basic_auth + strlen(prefix), strlen(basic_auth) - strlen(prefix), &auth, NULL);
+
+        if (!ok || auth == NULL) {
+            clax_dispatch_not_authorized(ctx, &request, &response);
+            TRY clax_http_write_response(ctx, send_cb, &response) GOTO;
+            goto error;
+        }
+
+        char *sep = strstr(auth, ":");
+        if (sep == NULL) {
+            clax_dispatch_not_authorized(ctx, &request, &response);
+            TRY clax_http_write_response(ctx, send_cb, &response) GOTO;
+            goto error;
+        }
+
+        ok = strlen(clax_ctx->options->basic_auth_username) == sep - auth
+            && strncmp(clax_ctx->options->basic_auth_username, auth, sep - auth) == 0;
+
+        if (ok)
+            ok = strlen(clax_ctx->options->basic_auth_password) == strlen(auth) - (sep - auth) - 1
+                && strncmp(clax_ctx->options->basic_auth_password, sep + 1, strlen(auth) - (sep - auth) - 1) == 0;
+
+        if (!ok) {
+            clax_dispatch_not_authorized(ctx, &request, &response);
+            TRY clax_http_write_response(ctx, send_cb, &response) GOTO;
+            goto error;
+        }
+
+        clax_log("User '%s'", clax_ctx->options->basic_auth_username);
+
+        free(auth);
+    }
 
     if (request.continue_expected) {
         clax_dispatch(clax_ctx, &request, &response);

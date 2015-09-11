@@ -97,6 +97,14 @@ void clax_dispatch_bad_request(clax_ctx_t *clax_ctx, clax_http_request_t *req, c
     clax_big_buf_append_str(&res->body, "Bad request");
 }
 
+void clax_dispatch_not_authorized(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
+{
+    res->status_code = 401;
+    clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
+    clax_kv_list_push(&res->headers, "WWW-Authenticate", "Basic realm=\"clax\"");
+    clax_big_buf_append_str(&res->body, "Authorization required");
+}
+
 void clax_dispatch_ping(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     res->status_code = 200;
