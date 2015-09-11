@@ -141,6 +141,7 @@ void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_
     char buf_pid[15];
     snprintf(buf_pid, sizeof(buf_pid), "%d", pid);
 
+    clax_kv_list_push(&res->headers, "Trailer", "X-Clax-Exit");
     clax_kv_list_push(&res->headers, "X-Clax-PID", buf_pid);
 
     res->body_cb_ctx = &command_ctx;
