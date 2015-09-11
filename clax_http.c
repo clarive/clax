@@ -600,6 +600,37 @@ void clax_http_response_free(clax_http_response_t *response)
         fclose(response->body_fh);
 }
 
+int clax_check_basic_auth(char *header, char *username, char *password)
+{
+    int ok = 0;
+    char *prefix = "Basic ";
+    char *auth = NULL;
+    char *sep;
+
+    ok = header && strlen(header) > strlen(prefix) && strncmp(header, prefix, strlen(prefix)) == 0;
+
+    if (ok)
+        ok = base64_decode_alloc(header + strlen(prefix), strlen(header) - strlen(prefix), &auth, NULL);
+
+    if (ok && auth != NULL) {
+        sep = strstr(auth, ":");
+
+        ok = sep != NULL;
+    }
+
+    if (ok)
+        ok = strlen(username) == sep - auth
+            && strncmp(username, auth, sep - auth) == 0;
+
+    if (ok)
+        ok = strlen(password) == strlen(auth) - (sep - auth) - 1
+            && strncmp(sep + 1, password, strlen(auth) - (sep - auth) - 1) == 0;
+
+    free(auth);
+
+    return ok;
+}
+
 int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_cb, void *ctx) {
     http_parser parser;
     clax_http_request_t request;
@@ -623,46 +654,21 @@ int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_c
     clax_log("ok");
 
     if (clax_ctx->options->basic_auth_username && clax_ctx->options->basic_auth_password) {
-        char *prefix = "Basic ";
-        char *basic_auth = clax_kv_list_find(&request.headers, "Authorization");
-        if (!basic_auth || strncmp(basic_auth, prefix, strlen(prefix)) != 0) {
+        int ok = clax_check_basic_auth(
+                    clax_kv_list_find(&request.headers, "Authorization"),
+                    clax_ctx->options->basic_auth_username,
+                    clax_ctx->options->basic_auth_password
+                    );
+
+        if (ok) {
+            clax_log("User '%s'", clax_ctx->options->basic_auth_username);
+        } else {
+            clax_log("Basic authorization failed");
+
             clax_dispatch_not_authorized(ctx, &request, &response);
             TRY clax_http_write_response(ctx, send_cb, &response) GOTO;
             goto error;
         }
-
-        char *auth = NULL;
-        int ok = base64_decode_alloc(basic_auth + strlen(prefix), strlen(basic_auth) - strlen(prefix), &auth, NULL);
-
-        if (!ok || auth == NULL) {
-            clax_dispatch_not_authorized(ctx, &request, &response);
-            TRY clax_http_write_response(ctx, send_cb, &response) GOTO;
-            goto error;
-        }
-
-        char *sep = strstr(auth, ":");
-        if (sep == NULL) {
-            clax_dispatch_not_authorized(ctx, &request, &response);
-            TRY clax_http_write_response(ctx, send_cb, &response) GOTO;
-            goto error;
-        }
-
-        ok = strlen(clax_ctx->options->basic_auth_username) == sep - auth
-            && strncmp(clax_ctx->options->basic_auth_username, auth, sep - auth) == 0;
-
-        if (ok)
-            ok = strlen(clax_ctx->options->basic_auth_password) == strlen(auth) - (sep - auth) - 1
-                && strncmp(clax_ctx->options->basic_auth_password, sep + 1, strlen(auth) - (sep - auth) - 1) == 0;
-
-        if (!ok) {
-            clax_dispatch_not_authorized(ctx, &request, &response);
-            TRY clax_http_write_response(ctx, send_cb, &response) GOTO;
-            goto error;
-        }
-
-        clax_log("User '%s'", clax_ctx->options->basic_auth_username);
-
-        free(auth);
     }
 
     if (request.continue_expected) {
