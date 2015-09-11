@@ -72,11 +72,12 @@ clax_ctx_t clax_ctx;
 void usage()
 {
     fprintf(stderr,
-            "usage: clax [-n] [-l log_file] [-e entropy_file]\n\n"
+            "usage: clax [options]\n\n"
             "Options:\n\n"
             "   common\n"
             "   ------\n"
             "   -c <config_file>   path to configuration file\n"
+            "   -z                 print default configuration\n"
             "   -r <root>          home directory (required, will chdir to it)\n"
             "   -l <log_file>      path to log file (default: stderr)\n"
             "\n"
@@ -157,7 +158,7 @@ void clax_parse_options(opt *options, int argc, char **argv)
 #endif
 
     opterr = 0;
-    while ((c = getopt(argc, argv, "hnl:e:t:p:r:kc:")) != -1) {
+    while ((c = getopt(argc, argv, "hnl:e:t:p:r:kc:z")) != -1) {
         switch (c) {
         case 'c':
             strncpy(options->config_file, optarg, sizeof(options->config_file));
@@ -183,6 +184,25 @@ void clax_parse_options(opt *options, int argc, char **argv)
             break;
         case 'p':
             strncpy(options->key_file, optarg, sizeof(options->key_file));
+            break;
+        case 'z':
+            fprintf(stderr,
+                    "root = /opt/clarive/clax\n"
+                    "log_file = /opt/clarive/logs/clax.log\n"
+                    "\n"
+                    "[ssl]\n"
+                    "enabled = yes\n"
+                    "cert_file = /opt/clarive/ssl/clax.crt\n"
+                    "key_file = /opt/clarive/ssl/clax.key\n"
+                    "#entropy_file = /opt/clarive/entropy\n"
+                    "\n"
+                    "[http_basic_auth]\n"
+                    "enabled = yes\n"
+                    "username = clax\n"
+                    "password = password\n"
+                   );
+
+            exit(0);
             break;
         case '?':
         case 'h':

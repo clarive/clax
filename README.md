@@ -5,12 +5,14 @@ requests from stdin and write responses to stdout, which makes it suitable for i
 
 # Command-Line Usage
 
-    usage: clax [-n] [-l log_file] [-e entropy_file]
+    usage: clax [options]
 
     Options:
 
        common
        ------
+       -c <config_file>   path to configuration file
+       -z                 print default configuration
        -r <root>          home directory (required, will chdir to it)
        -l <log_file>      path to log file (default: stderr)
 
