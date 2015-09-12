@@ -7,7 +7,7 @@ LIBS=contrib/mbedtls/*.o contrib/jsmn/*.o contrib/http_parser/*.o contrib/multip
 
 all: lib $(PROGRAM)
 
-lib: mbedtls jsmn http_parser multipart_parser_c inih $(OBJECTS)
+lib: mbedtls jsmn http_parser multipart_parser_c inih base64 $(OBJECTS)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS) -o $(PROGRAM)
@@ -35,6 +35,9 @@ http_parser:
 multipart_parser_c:
 	$(MAKE) -C contrib/multipart-parser-c
 
+base64:
+	$(MAKE) -C contrib/base64
+
 tests: lib
 	$(MAKE) -C tests
 
@@ -59,5 +62,6 @@ clean:
 	$(MAKE) -C contrib/http_parser clean
 	$(MAKE) -C contrib/multipart-parser-c clean
 	$(MAKE) -C contrib/inih clean
+	$(MAKE) -C contrib/base64 clean
 	$(MAKE) -C tests clean
 	$(MAKE) -C bench clean
