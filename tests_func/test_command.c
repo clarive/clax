@@ -21,9 +21,9 @@ TEST_START(test_command)
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
 
-    ASSERT(strstr(output, "X-Clax-PID: "))
-    ASSERT(strstr(output, "X-Clax-Exit: 0"))
-    ASSERT(strstr(output, "foo"))
+    ASSERT_MATCHES(output, "X-Clax-PID: \\d+")
+    ASSERT_MATCHES(output, "X-Clax-Exit: 0")
+    ASSERT_MATCHES(output, "foo")
 }
 TEST_END
 
@@ -45,7 +45,7 @@ TEST_START(test_command_failure)
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
 
-    ASSERT(strstr(output, "X-Clax-PID: "))
-    ASSERT(!strstr(output, "X-Clax-Exit: 0"))
+    ASSERT_MATCHES(output, "X-Clax-PID: \\d+")
+    ASSERT_MATCHES(output, "X-Clax-Exit: 0")
 }
 TEST_END

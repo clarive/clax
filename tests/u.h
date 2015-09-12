@@ -32,6 +32,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "slre.h"
+
 int u_tests;
 int u_tests_failed;
 int u_rv;
@@ -154,6 +156,14 @@ int u_rv;
             printf("%02x ", exp[i]);    \
         }                               \
         printf("\n");                   \
+    }
+
+#define ASSERT_MATCHES(got, re)    \
+    ASSERT(slre_match(re, got, strlen(got), NULL, 0, 0))  \
+                                        \
+    if (!u_rv) {                        \
+        printf("# " #got ":\n");        \
+        printf("# not matches " # re "\n");   \
     }
 
 #define TEST_START(name)                    \
