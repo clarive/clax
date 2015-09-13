@@ -24,7 +24,43 @@
 #include "u/u.h"
 
 #include "clax_options.h"
+#include "clax_util.h"
 #include "u_util.h"
+
+TEST_START(clax_options_not_enough_args)
+{
+    opt options;
+
+    clax_options_init(&options);
+
+    char *argv[] = {0};
+    int ret = clax_parse_options(&options, 0, argv);
+
+    ASSERT_EQ(ret, -1);
+
+    clax_options_free(&options);
+}
+TEST_END
+
+TEST_START(clax_options_root_is_required)
+{
+    opt options;
+
+    clax_options_init(&options);
+
+    char *argv[] = {"clax", "-n"};
+    int ret = clax_parse_options(&options, sizeof_array(argv), argv);
+
+    ASSERT_EQ(ret, -1);
+
+    char *argv2[] = {"clax", "-n", "-r", "unknown-root"};
+    int ret2 = clax_parse_options(&options, sizeof_array(argv2), argv2);
+
+    ASSERT_EQ(ret2, -1);
+
+    clax_options_free(&options);
+}
+TEST_END
 
 TEST_START(clax_options_parses_basic_auth)
 {
@@ -33,10 +69,163 @@ TEST_START(clax_options_parses_basic_auth)
     clax_options_init(&options);
 
     char *argv[] = {"clax", "-n", "-r", ".", "-a", "foo:bar"};
-    clax_parse_options(&options, sizeof(argv) / sizeof(char *), argv);
+    int ret = clax_parse_options(&options, sizeof_array(argv), argv);
 
+    ASSERT_EQ(ret, 0);
     ASSERT_STR_EQ(options.basic_auth_username, "foo");
     ASSERT_STR_EQ(options.basic_auth_password, "bar");
+
+    clax_options_free(&options);
+}
+TEST_END
+
+TEST_START(clax_options_parses_basic_auth_invalid)
+{
+    opt options;
+
+    clax_options_init(&options);
+
+    char *argv[] = {"clax", "-n", "-r", ".", "-a", "foobar"};
+    int ret = clax_parse_options(&options, sizeof_array(argv), argv);
+
+    ASSERT_EQ(ret, -1);
+
+    clax_options_free(&options);
+}
+TEST_END
+
+TEST_START(clax_options_parses_no_ssl_options)
+{
+    opt options;
+
+    clax_options_init(&options);
+
+    char *argv[] = {"clax", "-n", "-r", "."};
+    int ret = clax_parse_options(&options, sizeof_array(argv), argv);
+
+    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(options.no_ssl, 1);
+
+    clax_options_free(&options);
+}
+TEST_END
+
+TEST_START(clax_options_parses_ssl_options)
+{
+    opt options;
+
+    clax_options_init(&options);
+
+    char *argv[] = {"clax", "-r", ".", "-t", "ssl/server.crt", "-p", "ssl/server.key"};
+    int ret = clax_parse_options(&options, sizeof_array(argv), argv);
+
+    ASSERT_EQ(ret, 0)
+    ASSERT_EQ(options.no_ssl, 0)
+    ASSERT_EQ(options.no_ssl_verify, 0)
+    ASSERT_STR_EQ(options.cert_file, "ssl/server.crt")
+    ASSERT_STR_EQ(options.key_file, "ssl/server.key")
+
+    clax_options_free(&options);
+}
+TEST_END
+
+TEST_START(clax_options_parses_ssl_options_require_cert_and_key)
+{
+    opt options;
+
+    clax_options_init(&options);
+
+    char *argv[] = {"clax", "-r", "."};
+    int ret = clax_parse_options(&options, sizeof_array(argv), argv);
+
+    ASSERT_EQ(ret, -1)
+
+    char *argv2[] = {"clax", "-r", ".", "-t", "ssl/server.crt"};
+    int ret2 = clax_parse_options(&options, sizeof_array(argv2), argv2);
+
+    ASSERT_EQ(ret2, -1)
+
+    char *argv3[] = {"clax", "-r", ".", "-p", "ssl/server.key"};
+    int ret3 = clax_parse_options(&options, sizeof_array(argv3), argv3);
+
+    clax_options_free(&options);
+}
+TEST_END
+
+TEST_START(clax_options_parses_ssl_options_no_verify)
+{
+    opt options;
+
+    clax_options_init(&options);
+
+    char *argv[] = {"clax", "-r", ".", "-t", "ssl/server.crt", "-p", "ssl/server.key", "-k"};
+    int ret = clax_parse_options(&options, sizeof_array(argv), argv);
+
+    ASSERT_EQ(ret, 0)
+    ASSERT_EQ(options.no_ssl_verify, 1)
+
+    clax_options_free(&options);
+}
+TEST_END
+
+TEST_START(clax_options_parses_ssl_options_entropy_file)
+{
+    opt options;
+
+    clax_options_init(&options);
+
+    char *argv[] = {"clax", "-r", ".", "-t", "ssl/server.crt", "-p", "ssl/server.key", "-e", "ssl/entropy"};
+    int ret = clax_parse_options(&options, sizeof_array(argv), argv);
+
+    ASSERT_EQ(ret, 0)
+    ASSERT_STR_EQ(options.entropy_file, "ssl/entropy")
+
+    clax_options_free(&options);
+}
+TEST_END
+
+TEST_START(clax_options_parses_config)
+{
+    opt options;
+
+    clax_options_init(&options);
+
+    char *argv[] = {"clax", "-c", "config.ini"};
+    int ret = clax_parse_options(&options, sizeof_array(argv), argv);
+
+    ASSERT_EQ(ret, 0)
+    ASSERT_STR_EQ(options.config_file, "config.ini")
+
+    clax_options_free(&options);
+}
+TEST_END
+
+TEST_START(clax_options_returns_error_when_config_not_found)
+{
+    opt options;
+
+    clax_options_init(&options);
+
+    char *argv[] = {"clax", "-c", "unknown.ini"};
+    int ret = clax_parse_options(&options, sizeof_array(argv), argv);
+
+    ASSERT_EQ(ret, -1)
+
+    clax_options_free(&options);
+}
+TEST_END
+
+TEST_START(clax_options_parses_log_file)
+{
+    opt options;
+
+    clax_options_init(&options);
+
+    char *argv[] = {"clax", "-r", ".", "-n", "-l", "/dev/null"};
+    int ret = clax_parse_options(&options, sizeof_array(argv), argv);
+
+    ASSERT_EQ(ret, 0)
+    ASSERT_STR_EQ(options.log_file, "/dev/null")
 
     clax_options_free(&options);
 }

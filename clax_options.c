@@ -23,7 +23,7 @@ void clax_options_free(opt *options)
     free(options->basic_auth_password);
 }
 
-void usage()
+void clax_usage()
 {
     fprintf(stderr,
             "usage: clax [options]\n"
@@ -47,8 +47,6 @@ void usage()
             "   -e <entropy_file>       path to entropy file (needed on some systems)\n"
             "\n"
             );
-
-    exit(255);
 }
 
 int clax_config_handler(void *ctx, const char *section, const char *name, const char *value)
@@ -78,12 +76,15 @@ int clax_config_handler(void *ctx, const char *section, const char *name, const 
     return 1;
 }
 
-void clax_parse_options(opt *options, int argc, char **argv)
+int clax_parse_options(opt *options, int argc, char **argv)
 {
     int c;
 
+    optarg = NULL;
+    optind = opterr = optopt = 0;
+
     if (argc < 2)
-        usage();
+        return -1;
 
 #ifdef MVS
     if (argc > 1)
@@ -91,7 +92,7 @@ void clax_parse_options(opt *options, int argc, char **argv)
 #endif
 
     opterr = 0;
-    while ((c = getopt(argc, argv, "hnl:e:t:p:r:kc:za:")) != -1) {
+    while ((c = getopt(argc, argv, "hnkzl:e:t:p:r:c:a:")) != -1) {
         switch (c) {
         case 'c':
             strncpy(options->config_file, optarg, sizeof(options->config_file));
@@ -101,7 +102,7 @@ void clax_parse_options(opt *options, int argc, char **argv)
             break;
         case 'r':
             /* -1 for the / if its needed */
-            strncpy(options->root, optarg, sizeof(options->root) - 1);
+            strncpy(options->root, optarg, sizeof_struct_member(opt, root) - 1);
             break;
         case 'n':
             options->no_ssl = 1;
@@ -126,7 +127,7 @@ void clax_parse_options(opt *options, int argc, char **argv)
             }
             else {
                 fprintf(stderr, "Error: Invalid username:password pair\n\n");
-                usage();
+                return -1;
             }
             break;
                   }
@@ -151,7 +152,7 @@ void clax_parse_options(opt *options, int argc, char **argv)
         case '?':
         case 'h':
         default:
-            usage();
+            return -1;
         }
     }
 
@@ -159,7 +160,7 @@ void clax_parse_options(opt *options, int argc, char **argv)
         if (ini_parse(options->config_file, clax_config_handler, options) < 0) {
             fprintf(stderr, "Error: can't load '%s\n\n", options->config_file);
 
-            usage();
+            return -1;
         }
     }
 
@@ -167,14 +168,14 @@ void clax_parse_options(opt *options, int argc, char **argv)
         if (!strlen(options->cert_file) || !strlen(options->key_file)) {
             fprintf(stderr, "Error: cert_file and key_file are required\n\n");
 
-            usage();
+            return -1;
         }
     }
 
     if (!strlen(options->root)) {
         fprintf(stderr, "Error: root is required\n\n");
 
-        usage();
+        return -1;
     } else {
         DIR *dir = opendir(options->root);
         if (dir) {
@@ -183,7 +184,7 @@ void clax_parse_options(opt *options, int argc, char **argv)
             if (chdir(options->root) < 0) {
                 fprintf(stderr, "Error: cannot chdir to '%s'\n\n", options->root);
 
-                usage();
+                return -1;
             }
 
             char last = options->root[strlen(options->root) - 1];
@@ -191,15 +192,15 @@ void clax_parse_options(opt *options, int argc, char **argv)
                 strcat(options->root, "/");
             }
         } else if (ENOENT == errno) {
-            fprintf(stderr, "Error: provided root directory does not exist\n\n");
+            fprintf(stderr, "Error: provided root directory does not exist: %s\n\n", options->root);
 
-            usage();
+            return -1;
         } else {
             fprintf(stderr, "Error: cannot open provided root directory\n\n");
 
-            usage();
+            return -1;
         }
     }
 
-    return;
+    return 0;
 }

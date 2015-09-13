@@ -40,6 +40,7 @@ typedef struct {
 
 void clax_options_init(opt *options);
 void clax_options_free(opt *options);
-void clax_parse_options(opt *options, int argc, char **argv);
+void clax_usage();
+int clax_parse_options(opt *options, int argc, char **argv);
 
 #endif

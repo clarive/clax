@@ -343,7 +343,13 @@ int main(int argc, char **argv)
 
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
     clax_options_init(&options);
-    clax_parse_options(&options, argc, argv);
+
+    int ok = clax_parse_options(&options, argc, argv);
+    if (ok < 0) {
+        clax_usage();
+        exit(255);
+    }
+
     clax_ctx.options = &options;
 
     if (options.log_file[0]) {

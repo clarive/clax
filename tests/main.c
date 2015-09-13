@@ -25,7 +25,18 @@
 
 int main(int argc, char *argv[])
 {
+    RUN_TEST(clax_options_not_enough_args)
+    RUN_TEST(clax_options_root_is_required)
     RUN_TEST(clax_options_parses_basic_auth)
+    RUN_TEST(clax_options_parses_basic_auth_invalid)
+    RUN_TEST(clax_options_parses_no_ssl_options)
+    RUN_TEST(clax_options_parses_ssl_options)
+    RUN_TEST(clax_options_parses_ssl_options_require_cert_and_key)
+    RUN_TEST(clax_options_parses_ssl_options_no_verify)
+    RUN_TEST(clax_options_parses_ssl_options_entropy_file)
+    RUN_TEST(clax_options_parses_config)
+    RUN_TEST(clax_options_returns_error_when_config_not_found)
+    RUN_TEST(clax_options_parses_log_file)
 
     RUN_TEST(clax_http_parse_returns_0_when_need_more)
     RUN_TEST(clax_http_parse_returns_error_when_error)
