@@ -331,11 +331,13 @@ size_t clax_http_url_decode(char *str)
 {
     int code;
     char hex[3];
-    size_t len = strlen(str);
-    size_t new_len = len;
+    size_t len;
+    size_t new_len;
 
     if (str == NULL)
         return 0;
+
+    new_len = len = strlen(str);
 
     char *p = str;
 

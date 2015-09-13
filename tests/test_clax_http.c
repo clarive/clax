@@ -353,6 +353,8 @@ TEST_START(clax_http_url_decode_decodes_string_inplace)
 {
     char buf[1024];
 
+    ASSERT_EQ(clax_http_url_decode(NULL), 0);
+
     strcpy(buf, "hello");
     ASSERT_EQ(clax_http_url_decode(buf), 5);
     ASSERT_STR_EQ(buf, "hello")
