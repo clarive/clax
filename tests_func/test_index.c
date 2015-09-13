@@ -2,7 +2,9 @@
 
 #include "util.h"
 
-TEST_START(test_index)
+SUITE_START(index)
+
+TEST_START(index_page)
 {
     int rcount;
     char output[1024];
@@ -13,3 +15,5 @@ TEST_START(test_index)
     ASSERT(util_parse_http_response(output, rcount))
 }
 TEST_END
+
+SUITE_END

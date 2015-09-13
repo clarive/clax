@@ -27,7 +27,9 @@
 #include "clax_util.h"
 #include "u_util.h"
 
-TEST_START(clax_options_not_enough_args)
+SUITE_START(clax_options)
+
+TEST_START(not_enough_args)
 {
     opt options;
 
@@ -42,7 +44,7 @@ TEST_START(clax_options_not_enough_args)
 }
 TEST_END
 
-TEST_START(clax_options_root_is_required)
+TEST_START(root_is_required)
 {
     opt options;
 
@@ -62,7 +64,7 @@ TEST_START(clax_options_root_is_required)
 }
 TEST_END
 
-TEST_START(clax_options_parses_basic_auth)
+TEST_START(parses_basic_auth)
 {
     opt options;
 
@@ -79,7 +81,7 @@ TEST_START(clax_options_parses_basic_auth)
 }
 TEST_END
 
-TEST_START(clax_options_parses_basic_auth_invalid)
+TEST_START(parses_basic_auth_invalid)
 {
     opt options;
 
@@ -94,7 +96,7 @@ TEST_START(clax_options_parses_basic_auth_invalid)
 }
 TEST_END
 
-TEST_START(clax_options_parses_no_ssl_options)
+TEST_START(parses_no_ssl_options)
 {
     opt options;
 
@@ -110,7 +112,7 @@ TEST_START(clax_options_parses_no_ssl_options)
 }
 TEST_END
 
-TEST_START(clax_options_parses_ssl_options)
+TEST_START(parses_ssl_options)
 {
     opt options;
 
@@ -129,7 +131,7 @@ TEST_START(clax_options_parses_ssl_options)
 }
 TEST_END
 
-TEST_START(clax_options_parses_ssl_options_require_cert_and_key)
+TEST_START(parses_ssl_options_require_cert_and_key)
 {
     opt options;
 
@@ -160,7 +162,7 @@ TEST_START(clax_options_parses_ssl_options_require_cert_and_key)
 }
 TEST_END
 
-TEST_START(clax_options_parses_ssl_options_no_verify)
+TEST_START(parses_ssl_options_no_verify)
 {
     opt options;
 
@@ -176,7 +178,7 @@ TEST_START(clax_options_parses_ssl_options_no_verify)
 }
 TEST_END
 
-TEST_START(clax_options_parses_ssl_options_entropy_file)
+TEST_START(parses_ssl_options_entropy_file)
 {
     opt options;
 
@@ -192,7 +194,7 @@ TEST_START(clax_options_parses_ssl_options_entropy_file)
 }
 TEST_END
 
-TEST_START(clax_options_parses_config)
+TEST_START(parses_config)
 {
     opt options;
 
@@ -208,7 +210,7 @@ TEST_START(clax_options_parses_config)
 }
 TEST_END
 
-TEST_START(clax_options_returns_error_when_config_not_found)
+TEST_START(returns_error_when_config_not_found)
 {
     opt options;
 
@@ -223,7 +225,7 @@ TEST_START(clax_options_returns_error_when_config_not_found)
 }
 TEST_END
 
-TEST_START(clax_options_parses_log_file)
+TEST_START(parses_log_file)
 {
     opt options;
 
@@ -238,3 +240,5 @@ TEST_START(clax_options_parses_log_file)
     clax_options_free(&options);
 }
 TEST_END
+
+SUITE_END

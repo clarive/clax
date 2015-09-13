@@ -26,7 +26,9 @@
 
 #include "clax_util.h"
 
-TEST_START(clax_kv_list_default_values)
+SUITE_START(clax_util)
+
+TEST_START(default_values)
 {
     clax_kv_list_t list;
 
@@ -38,7 +40,7 @@ TEST_START(clax_kv_list_default_values)
 }
 TEST_END
 
-TEST_START(clax_kv_list_pushes_kv)
+TEST_START(pushes_kv)
 {
     clax_kv_list_t list;
 
@@ -57,7 +59,7 @@ TEST_START(clax_kv_list_pushes_kv)
 }
 TEST_END
 
-TEST_START(clax_kv_list_pushes_buf_kv)
+TEST_START(pushes_buf_kv)
 {
     clax_kv_list_t list;
 
@@ -84,7 +86,7 @@ TEST_START(clax_kv_list_pushes_buf_kv)
 }
 TEST_END
 
-TEST_START(clax_kv_list_finds_all_kv)
+TEST_START(finds_all_kv)
 {
     size_t start = 0;
     clax_kv_list_t list;
@@ -118,7 +120,7 @@ TEST_START(clax_kv_list_finds_all_kv)
 }
 TEST_END
 
-TEST_START(clax_kv_list_finds_kv)
+TEST_START(finds_kv)
 {
     clax_kv_list_t list;
 
@@ -140,7 +142,7 @@ TEST_START(clax_kv_list_finds_kv)
 }
 TEST_END
 
-TEST_START(clax_kv_list_at_kv)
+TEST_START(at_kv)
 {
     clax_kv_list_t list;
     clax_kv_list_item_t *item;
@@ -172,7 +174,7 @@ TEST_START(clax_kv_list_at_kv)
 }
 TEST_END
 
-TEST_START(clax_kv_list_iter_kv)
+TEST_START(iter_kv)
 {
     clax_kv_list_t list;
     clax_kv_list_item_t *item;
@@ -209,7 +211,7 @@ TEST_START(clax_kv_list_iter_kv)
 }
 TEST_END
 
-TEST_START(clax_kv_list_sets_new_val)
+TEST_START(sets_new_val)
 {
     clax_kv_list_t list;
 
@@ -321,3 +323,5 @@ TEST_START(clax_strjoin_joins_strings)
     free(p);
 }
 TEST_END
+
+SUITE_END

@@ -4,7 +4,9 @@
 
 #include "util.h"
 
-TEST_START(test_basic_auth)
+SUITE_START(basic_auth)
+
+TEST_START(success)
 {
     int rcount;
     char output[1024];
@@ -19,7 +21,7 @@ TEST_START(test_basic_auth)
 }
 TEST_END
 
-TEST_START(test_basic_auth_header_missing)
+TEST_START(missing header)
 {
     int rcount;
     char output[1024];
@@ -33,7 +35,7 @@ TEST_START(test_basic_auth_header_missing)
 }
 TEST_END
 
-TEST_START(test_basic_auth_header_invalid)
+TEST_START(invalid header)
 {
     int rcount;
     char output[1024];
@@ -47,7 +49,7 @@ TEST_START(test_basic_auth_header_invalid)
 }
 TEST_END
 
-TEST_START(test_basic_auth_header_invalid_base64)
+TEST_START(invalid base64 in header)
 {
     int rcount;
     char output[1024];
@@ -61,7 +63,7 @@ TEST_START(test_basic_auth_header_invalid_base64)
 }
 TEST_END
 
-TEST_START(test_basic_auth_no_colon)
+TEST_START(no colon)
 {
     int rcount;
     char output[1024];
@@ -75,7 +77,7 @@ TEST_START(test_basic_auth_no_colon)
 }
 TEST_END
 
-TEST_START(test_basic_auth_wrong_username)
+TEST_START(wrong username)
 {
     int rcount;
     char output[1024];
@@ -89,7 +91,7 @@ TEST_START(test_basic_auth_wrong_username)
 }
 TEST_END
 
-TEST_START(test_basic_auth_wrong_password)
+TEST_START(wrong password)
 {
     int rcount;
     char output[1024];
@@ -102,3 +104,5 @@ TEST_START(test_basic_auth_wrong_password)
     ASSERT_MATCHES(output, "401 Unauthorized");
 }
 TEST_END
+
+SUITE_END

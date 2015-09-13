@@ -9,7 +9,9 @@
 #include "clax_util.h"
 #include "util.h"
 
-TEST_START(test_tree_upload)
+SUITE_START(tree)
+
+TEST_START(upload)
 {
     char output[1024];
     char request[1024];
@@ -46,7 +48,7 @@ TEST_START(test_tree_upload)
 }
 TEST_END
 
-TEST_START(test_tree_upload_with_different_name)
+TEST_START(upload_with_different_name)
 {
     char output[1024];
     char request[1024];
@@ -85,7 +87,7 @@ TEST_START(test_tree_upload_with_different_name)
 }
 TEST_END
 
-TEST_START(test_tree_download)
+TEST_START(download)
 {
     char output[1024];
 
@@ -100,7 +102,7 @@ TEST_START(test_tree_download)
 }
 TEST_END
 
-TEST_START(test_tree_download_not_found)
+TEST_START(download_not_found)
 {
     char output[1024];
 
@@ -112,3 +114,5 @@ TEST_START(test_tree_download_not_found)
     ASSERT_MATCHES(output, "404 Not Found")
 }
 TEST_END
+
+SUITE_END

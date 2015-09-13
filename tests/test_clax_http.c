@@ -30,7 +30,34 @@ int _parse(http_parser *parser, clax_http_request_t *req, const char *data)
     return clax_http_parse(parser, req, data, strlen(data));
 }
 
-TEST_START(clax_http_parse_returns_error_when_error)
+char test_send_cb_buf[1024] = {0};
+size_t test_send_cb_buf_len = 0;
+size_t test_send_cb(void *ctx, const unsigned char *buf, size_t len)
+{
+    memcpy(test_send_cb_buf + test_send_cb_buf_len, buf, len);
+
+    test_send_cb_buf_len += len;
+
+    return len;
+}
+
+size_t clax_http_chunked_va(char *buf, size_t len, ...)
+{
+    va_list a_list;
+    size_t ret;
+
+    va_start(a_list, len);
+
+    ret = clax_http_chunked(buf, len, a_list);
+
+    va_end(a_list);
+
+    return ret;
+}
+
+SUITE_START(clax_http)
+
+TEST_START(parse_returns_error_when_error)
 {
     http_parser parser;
     clax_http_request_t request;
@@ -46,7 +73,7 @@ TEST_START(clax_http_parse_returns_error_when_error)
 }
 TEST_END
 
-TEST_START(clax_http_parse_returns_0_when_need_more)
+TEST_START(parse_returns_0_when_need_more)
 {
     http_parser parser;
     clax_http_request_t request;
@@ -62,7 +89,7 @@ TEST_START(clax_http_parse_returns_0_when_need_more)
 }
 TEST_END
 
-TEST_START(clax_http_parse_returns_ok_chunks)
+TEST_START(parse_returns_ok_chunks)
 {
     http_parser parser;
     clax_http_request_t request;
@@ -100,7 +127,7 @@ TEST_START(clax_http_parse_returns_ok_chunks)
 }
 TEST_END
 
-TEST_START(clax_http_parse_returns_done_when_100_continue)
+TEST_START(parse_returns_done_when_100_continue)
 {
     http_parser parser;
     clax_http_request_t request;
@@ -117,7 +144,7 @@ TEST_START(clax_http_parse_returns_done_when_100_continue)
 }
 TEST_END
 
-TEST_START(clax_http_parse_returns_ok)
+TEST_START(parse_returns_ok)
 {
     http_parser parser;
     clax_http_request_t request;
@@ -132,7 +159,7 @@ TEST_START(clax_http_parse_returns_ok)
 }
 TEST_END
 
-TEST_START(clax_http_parse_returns_error_when_path_has_zeros)
+TEST_START(parse_returns_error_when_path_has_zeros)
 {
     http_parser parser;
     clax_http_request_t request;
@@ -147,7 +174,7 @@ TEST_START(clax_http_parse_returns_error_when_path_has_zeros)
 }
 TEST_END
 
-TEST_START(clax_http_parse_saves_request)
+TEST_START(parse_saves_request)
 {
     http_parser parser;
     clax_http_request_t request;
@@ -170,7 +197,7 @@ TEST_START(clax_http_parse_saves_request)
 }
 TEST_END
 
-TEST_START(clax_http_parse_saves_body)
+TEST_START(parse_saves_body)
 {
     http_parser parser;
     clax_http_request_t request;
@@ -191,7 +218,7 @@ TEST_START(clax_http_parse_saves_body)
 }
 TEST_END
 
-TEST_START(clax_http_parse_parses_query_string)
+TEST_START(parse_parses_query_string)
 {
     http_parser parser;
     clax_http_request_t request;
@@ -218,7 +245,7 @@ TEST_START(clax_http_parse_parses_query_string)
 }
 TEST_END
 
-TEST_START(clax_http_parse_parses_form_body)
+TEST_START(parse_parses_form_body)
 {
     http_parser parser;
     clax_http_request_t request;
@@ -247,7 +274,7 @@ TEST_START(clax_http_parse_parses_form_body)
 }
 TEST_END
 
-TEST_START(clax_http_parse_parses_form_body_with_decoding)
+TEST_START(parse_parses_form_body_with_decoding)
 {
     http_parser parser;
     clax_http_request_t request;
@@ -269,7 +296,7 @@ TEST_START(clax_http_parse_parses_form_body_with_decoding)
 }
 TEST_END
 
-TEST_START(clax_http_parse_parses_multipart_body)
+TEST_START(parse_parses_multipart_body)
 {
     http_parser parser;
     clax_http_request_t request;
@@ -349,7 +376,7 @@ TEST_START(clax_http_parse_parses_multipart_body)
 }
 TEST_END
 
-TEST_START(clax_http_url_decode_decodes_string_inplace)
+TEST_START(url_decode_decodes_string_inplace)
 {
     char buf[1024];
 
@@ -397,19 +424,19 @@ TEST_START(clax_http_url_decode_decodes_string_inplace)
 }
 TEST_END
 
-TEST_START(clax_http_status_message_returns_message)
+TEST_START(status_message_returns_message)
 {
     ASSERT_STR_EQ(clax_http_status_message(200), "OK")
 }
 TEST_END
 
-TEST_START(clax_http_status_message_returns_unknown_message)
+TEST_START(status_message_returns_unknown_message)
 {
     ASSERT_STR_EQ(clax_http_status_message(999), "Unknown")
 }
 TEST_END
 
-TEST_START(clax_http_extract_kv_extracts_val)
+TEST_START(extract_kv_extracts_val)
 {
     const char *val;
     size_t len;
@@ -428,32 +455,7 @@ TEST_START(clax_http_extract_kv_extracts_val)
 }
 TEST_END
 
-char test_send_cb_buf[1024] = {0};
-size_t test_send_cb_buf_len = 0;
-size_t test_send_cb(void *ctx, const unsigned char *buf, size_t len)
-{
-    memcpy(test_send_cb_buf + test_send_cb_buf_len, buf, len);
-
-    test_send_cb_buf_len += len;
-
-    return len;
-}
-
-size_t clax_http_chunked_va(char *buf, size_t len, ...)
-{
-    va_list a_list;
-    size_t ret;
-
-    va_start(a_list, len);
-
-    ret = clax_http_chunked(buf, len, a_list);
-
-    va_end(a_list);
-
-    return ret;
-}
-
-TEST_START(clax_http_chunked_writes_chunks)
+TEST_START(chunked_writes_chunks)
 {
     test_send_cb_buf_len = 0;
 
@@ -475,7 +477,7 @@ TEST_START(clax_http_chunked_writes_chunks)
 }
 TEST_END
 
-TEST_START(clax_http_write_response_writes)
+TEST_START(write_response_writes)
 {
     clax_http_response_t response;
     test_send_cb_buf_len = 0;
@@ -492,7 +494,7 @@ TEST_START(clax_http_write_response_writes)
 }
 TEST_END
 
-TEST_START(clax_http_check_basic_auth_checks_auth)
+TEST_START(check_basic_auth_checks_auth)
 {
     ASSERT_EQ(clax_http_check_basic_auth("Basic Y2xheDpwYXNzd29yZA==", "clax", "password"), 1);
 
@@ -505,3 +507,5 @@ TEST_START(clax_http_check_basic_auth_checks_auth)
     ASSERT_EQ(clax_http_check_basic_auth("Basic Y2xheDpwYXNzd29y", "clax", "password"), 0);
 }
 TEST_END
+
+SUITE_END

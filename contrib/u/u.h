@@ -185,14 +185,15 @@ int u_ok;
         }                                                          \
     } while (0);
 
-#define TEST_START(name)               \
-    void name() {                      \
+#define SUITE_START(name)              \
+    void suite_##name() {              \
         int u_local_tests = 0;         \
         int u_local_tests_failed = 0;  \
+        char *u_suite_name = #name;    \
                                        \
         printf("# %s\n", #name);
 
-#define TEST_END                                                   \
+#define SUITE_END \
         if (!u_local_tests) {                                      \
             printf(COLOR_YELLOW "# no tests\n" COLOR_OFF);         \
         }                                                          \
@@ -214,8 +215,15 @@ int u_ok;
         }                                                          \
     }
 
-#define RUN_TEST(name) \
-    name();
+#define TEST_START(name)                            \
+    do {                                            \
+        printf("# %s: %s\n", u_suite_name, #name);
+
+#define TEST_END \
+    } while (0);
+
+#define RUN_SUITE(name) \
+    suite_##name();
 
 #define DONE_TESTING                                               \
     printf("1..%d (%d)\n", u_tests, u_tests_asserts);              \

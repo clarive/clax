@@ -29,7 +29,9 @@
 #include "u/u.h"
 #include "u_util.h"
 
-TEST_START(clax_big_buf_default_values)
+SUITE_START(clax_big_buf)
+
+TEST_START(default_values)
 {
     clax_big_buf_t bbuf;
 
@@ -41,7 +43,7 @@ TEST_START(clax_big_buf_default_values)
 }
 TEST_END
 
-TEST_START(clax_big_buf_creates_file_when_max_size)
+TEST_START(creates_file_when_max_size)
 {
     clax_big_buf_t bbuf;
 
@@ -70,7 +72,7 @@ TEST_START(clax_big_buf_creates_file_when_max_size)
 }
 TEST_END
 
-TEST_START(clax_big_buf_deletes_file_on_free)
+TEST_START(deletes_file_on_free)
 {
     clax_big_buf_t bbuf;
 
@@ -95,7 +97,7 @@ TEST_START(clax_big_buf_deletes_file_on_free)
 }
 TEST_END
 
-TEST_START(clax_big_buf_writes_memory_to_file)
+TEST_START(writes_memory_to_file)
 {
     clax_big_buf_t bbuf;
 
@@ -127,7 +129,7 @@ TEST_START(clax_big_buf_writes_memory_to_file)
 }
 TEST_END
 
-TEST_START(clax_big_buf_renames_file)
+TEST_START(renames_file)
 {
     clax_big_buf_t bbuf;
 
@@ -159,7 +161,7 @@ TEST_START(clax_big_buf_renames_file)
 }
 TEST_END
 
-TEST_START(clax_big_buf_read_from_memory)
+TEST_START(read_from_memory)
 {
     clax_big_buf_t bbuf;
 
@@ -188,7 +190,7 @@ TEST_START(clax_big_buf_read_from_memory)
 }
 TEST_END
 
-TEST_START(clax_big_buf_read_from_memory_more_than_available)
+TEST_START(read_from_memory_more_than_available)
 {
     clax_big_buf_t bbuf;
 
@@ -207,7 +209,7 @@ TEST_START(clax_big_buf_read_from_memory_more_than_available)
 }
 TEST_END
 
-TEST_START(clax_big_buf_read_from_file)
+TEST_START(read_from_file)
 {
     clax_big_buf_t bbuf;
 
@@ -245,3 +247,5 @@ TEST_START(clax_big_buf_read_from_file)
     rmdir(tmp_dirname);
 }
 TEST_END
+
+SUITE_END

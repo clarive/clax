@@ -30,7 +30,14 @@
 #include "clax_dispatcher.h"
 #include "u_util.h"
 
-TEST_START(clax_dispatch_sets_404_on_unknown_path)
+int clax_dispatcher_match_(const char *path_info, const char *path)
+{
+    return clax_dispatcher_match(path_info, strlen(path_info), path, strlen(path));
+}
+
+SUITE_START(clax_dispatch)
+
+TEST_START(sets_404_on_unknown_path)
 {
     clax_http_request_t request;
     clax_http_response_t response;
@@ -54,7 +61,7 @@ TEST_START(clax_dispatch_sets_404_on_unknown_path)
 }
 TEST_END
 
-TEST_START(clax_dispatch_saves_upload_to_file)
+TEST_START(saves_upload_to_file)
 {
     opt options;
     clax_ctx_t clax_ctx;
@@ -109,7 +116,7 @@ TEST_START(clax_dispatch_saves_upload_to_file)
 }
 TEST_END
 
-TEST_START(clax_dispatch_saves_upload_to_file_with_another_name)
+TEST_START(saves_upload_to_file_with_another_name)
 {
     opt options;
     clax_ctx_t clax_ctx;
@@ -165,7 +172,7 @@ TEST_START(clax_dispatch_saves_upload_to_file_with_another_name)
 }
 TEST_END
 
-TEST_START(clax_dispatch_saves_upload_to_another_dir)
+TEST_START(saves_upload_to_another_dir)
 {
     opt options;
     clax_ctx_t clax_ctx;
@@ -222,7 +229,7 @@ TEST_START(clax_dispatch_saves_upload_to_another_dir)
 }
 TEST_END
 
-TEST_START(clax_dispatch_rejects_upload_if_crc_fails)
+TEST_START(rejects_upload_if_crc_fails)
 {
     opt options;
     clax_ctx_t clax_ctx;
@@ -274,7 +281,7 @@ TEST_START(clax_dispatch_rejects_upload_if_crc_fails)
 }
 TEST_END
 
-TEST_START(clax_dispatch_accepts_upload_with_correct_crc)
+TEST_START(accepts_upload_with_correct_crc)
 {
     opt options;
     clax_ctx_t clax_ctx;
@@ -326,7 +333,7 @@ TEST_START(clax_dispatch_accepts_upload_with_correct_crc)
 }
 TEST_END
 
-TEST_START(clax_dispatch_saves_upload_with_passed_time)
+TEST_START(saves_upload_with_passed_time)
 {
     opt options;
     clax_ctx_t clax_ctx;
@@ -384,7 +391,7 @@ TEST_START(clax_dispatch_saves_upload_with_passed_time)
 }
 TEST_END
 
-TEST_START(clax_dispatch_serves_404_when_file_not_found)
+TEST_START(serves_404_when_file_not_found)
 {
     opt options;
     clax_ctx_t clax_ctx;
@@ -423,7 +430,7 @@ TEST_START(clax_dispatch_serves_404_when_file_not_found)
 }
 TEST_END
 
-TEST_START(clax_dispatch_serves_file_as_attachment)
+TEST_START(serves_file_as_attachment)
 {
     opt options;
     clax_ctx_t clax_ctx;
@@ -471,7 +478,7 @@ TEST_START(clax_dispatch_serves_file_as_attachment)
 }
 TEST_END
 
-TEST_START(clax_dispatch_returns_bad_request_when_wrong_params)
+TEST_START(returns_bad_request_when_wrong_params)
 {
     opt options;
     clax_ctx_t clax_ctx;
@@ -497,12 +504,7 @@ TEST_START(clax_dispatch_returns_bad_request_when_wrong_params)
 }
 TEST_END
 
-int clax_dispatcher_match_(const char *path_info, const char *path)
-{
-    return clax_dispatcher_match(path_info, strlen(path_info), path, strlen(path));
-}
-
-TEST_START(clax_dispatch_match_matches_paths)
+TEST_START(match_matches_paths)
 {
     ASSERT_EQ(clax_dispatcher_match_("/foo", "/bar"), 0)
     ASSERT_EQ(clax_dispatcher_match_("/foo", "/foo"), 4)
@@ -513,3 +515,5 @@ TEST_START(clax_dispatch_match_matches_paths)
     ASSERT_EQ(clax_dispatcher_match_("/foo/bar", "^/foo/"), 5)
 }
 TEST_END
+
+SUITE_END

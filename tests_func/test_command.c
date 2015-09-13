@@ -4,7 +4,9 @@
 
 #include "util.h"
 
-TEST_START(test_command)
+SUITE_START(command)
+
+TEST_START(simple command)
 {
     char output[1024];
     char request[1024];
@@ -28,7 +30,7 @@ TEST_START(test_command)
 }
 TEST_END
 
-TEST_START(test_command_failure)
+TEST_START(command failure)
 {
     char output[1024];
     char request[1024];
@@ -50,3 +52,5 @@ TEST_START(test_command_failure)
     ASSERT_MATCHES(output, "X-Clax-Exit: 0")
 }
 TEST_END
+
+SUITE_END

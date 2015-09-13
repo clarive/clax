@@ -51,7 +51,9 @@ int command_vaargs_cb(char *buf, size_t len, va_list a_list)
     return 0;
 }
 
-TEST_START(clax_command_start_runs_command)
+SUITE_START(clax_command)
+
+TEST_START(start_runs_command)
 {
     command_ctx_t ctx = {.command="echo 'bar'"};
 
@@ -62,7 +64,7 @@ TEST_START(clax_command_start_runs_command)
 }
 TEST_END
 
-TEST_START(clax_command_start_returns_error)
+TEST_START(start_returns_error)
 {
     command_ctx_t ctx = {.command="unknown-command 2>&1 > /dev/null"};
 
@@ -74,7 +76,7 @@ TEST_START(clax_command_start_returns_error)
 }
 TEST_END
 
-TEST_START(clax_command_read_reads_output)
+TEST_START(read_reads_output)
 {
     command_ctx_t ctx = {.command="echo 'bar'"};
 
@@ -89,7 +91,7 @@ TEST_START(clax_command_read_reads_output)
 }
 TEST_END
 
-TEST_START(clax_command_runs_command_vaargs)
+TEST_START(runs_command_vaargs)
 {
     command_ctx_t ctx = {.command="echo 'bar'"};
 
@@ -102,3 +104,5 @@ TEST_START(clax_command_runs_command_vaargs)
     ASSERT_STR_EQ(context, "context");
 }
 TEST_END
+
+SUITE_END
