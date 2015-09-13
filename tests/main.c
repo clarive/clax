@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     RUN_SUITE(clax_command)
     RUN_SUITE(clax_dispatch)
     RUN_SUITE(clax_http)
-    RUN_SUITE(clax_http_multipart)
+    RUN_SUITE(clax_http_multipart_list)
     RUN_SUITE(clax_options)
     RUN_SUITE(clax_util)
 

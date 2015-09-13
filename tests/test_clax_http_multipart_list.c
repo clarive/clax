@@ -26,9 +26,9 @@
 
 #include "clax_http_multipart.h"
 
-SUITE_START(clax_http_multipart)
+SUITE_START(clax_http_multipart_list)
 
-TEST_START(list_default_values)
+TEST_START(default_values)
 {
     clax_http_multipart_list_t list;
 
@@ -40,7 +40,7 @@ TEST_START(list_default_values)
 }
 TEST_END
 
-TEST_START(list_pushes_multipart)
+TEST_START(pushes_multipart)
 {
     clax_http_multipart_list_t list;
 
@@ -59,7 +59,7 @@ TEST_START(list_pushes_multipart)
 }
 TEST_END
 
-TEST_START(list_returns_item_at_position)
+TEST_START(returns_item_at_position)
 {
     clax_http_multipart_list_t list;
 
@@ -80,7 +80,7 @@ TEST_START(list_returns_item_at_position)
 }
 TEST_END
 
-TEST_START(list_returns_last_item)
+TEST_START(returns_last_item)
 {
     clax_http_multipart_list_t list;
 
