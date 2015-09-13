@@ -1,7 +1,7 @@
 PROGRAM=test
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
-CFLAGS=-std=c99 -pedantic -Wall \
+CFLAGS=-std=c99 -pedantic -Wall -O0\
 	   -I../contrib/mbedtls \
 	   -I../contrib/multipart-parser-c \
 	   -I../contrib/jsmn \
@@ -31,7 +31,7 @@ depend: .depend
 	rm -rf ./.depend
 	$(CC) $(CFLAGS) -MM $^ > ./.depend
 
-include .depend
+-include .depend
 
 lib:
 	$(MAKE) -C ../ lib
@@ -42,6 +42,11 @@ check: $(PROGRAM)
 check-valgrind: $(PROGRAM)
 	valgrind -v --leak-check=full --show-leak-kinds=all ./test
 
+check-coverage:
+	$(MAKE) clean
+	$(MAKE) CFLAGS="-fprofile-arcs -ftest-coverage -O0 $(CFLAGS)" check
+
 clean:
 	rm -f $(PROGRAM) $(OBJECTS)
+	rm -f *.gcno *.gcda
 	rm -f .depend

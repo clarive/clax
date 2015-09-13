@@ -1,9 +1,23 @@
 PROGRAM=clax
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
-CFLAGS=-std=gnu99 -pedantic -Wall -Icontrib/mbedtls -Icontrib/multipart-parser-c -Icontrib/jsmn -Icontib/inih -Icontrib/base64 -Icontrib -D_ALL_SOURCE -D_POSIX_SOURCE -D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED
+COVERAGE_GRAPH=$(SOURCES:.c=.gcno)
+COVERAGE_DATA=$(SOURCES:.c=.gcda)
+CFLAGS=-std=gnu99 -pedantic -Wall \
+	   -Icontrib/mbedtls \
+	   -Icontrib/multipart-parser-c \
+	   -Icontrib/jsmn \
+	   -Icontrib/inih \
+	   -Icontrib/base64 \
+	   -Icontrib \
+	   -D_ALL_SOURCE -D_POSIX_SOURCE -D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED
 LFLAGS=
-LIBS=contrib/mbedtls/*.o contrib/jsmn/*.o contrib/http_parser/*.o contrib/multipart-parser-c/*.o contrib/inih/*.o contrib/base64/*.o
+LIBS=contrib/mbedtls/*.o \
+	 contrib/jsmn/*.o \
+	 contrib/http_parser/*.o \
+	 contrib/multipart-parser-c/*.o \
+	 contrib/inih/*.o \
+	 contrib/base64/*.o
 
 all: lib $(PROGRAM)
 
@@ -18,7 +32,7 @@ depend: .depend
 	rm -rf ./.depend
 	$(CC) $(CFLAGS) -MM $^ > ./.depend
 
-include .depend
+-include .depend
 
 inih:
 	$(MAKE) -C contrib/inih
@@ -46,6 +60,9 @@ tests_func: lib
 
 check: tests
 	$(MAKE) -C tests check
+
+check-all: tests
+	$(MAKE) -C tests check
 	$(MAKE) -C tests_func check
 
 check-valgrind: tests
@@ -54,14 +71,40 @@ check-valgrind: tests
 bench: lib
 	$(MAKE) -C bench bench
 
+check-coverage: coverage-prepare
+	$(MAKE) -C tests check-coverage
+	$(MAKE) coverage-report
+
+check-coverage-all: coverage-prepare
+	$(MAKE) -C tests check-coverage
+	$(MAKE) -C tests_func check-coverage
+	$(MAKE) coverage-report
+
+coverage-report:
+	lcov --no-external -c -d . -o coverage/coverage-test.info
+	lcov -a coverage/coverage-base.info -a coverage/coverage-test.info -o coverage/coverage.info
+	genhtml coverage/coverage.info -o coverage
+
+coverage-prepare:
+	$(MAKE) clean
+	$(MAKE) CFLAGS="-fprofile-arcs -ftest-coverage -O0 $(CFLAGS)"
+	mkdir coverage
+	lcov --no-external -c -i -d . -o coverage/coverage-base.info
+
 clean:
 	rm -f $(PROGRAM) $(OBJECTS)
 	rm -f .depend
+	rm -f *.gcno *.gcda
+	rm -rf coverage
+	$(MAKE) -C tests clean
+	$(MAKE) -C tests_func clean
+	$(MAKE) -C bench clean
+
+distclean:
+	$(MAKE) clean
 	$(MAKE) -C contrib/mbedtls clean
 	$(MAKE) -C contrib/jsmn clean
 	$(MAKE) -C contrib/http_parser clean
 	$(MAKE) -C contrib/multipart-parser-c clean
 	$(MAKE) -C contrib/inih clean
 	$(MAKE) -C contrib/base64 clean
-	$(MAKE) -C tests clean
-	$(MAKE) -C bench clean

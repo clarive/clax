@@ -33,7 +33,7 @@ depend: .depend
 	rm -rf ./.depend
 	$(CC) $(CFLAGS) -MM $^ > ./.depend
 
-include .depend
+-include .depend
 
 lib:
 	$(MAKE) -C ../ lib
@@ -41,6 +41,11 @@ lib:
 check: $(PROGRAM)
 	./test
 
+check-coverage:
+	$(MAKE) clean
+	$(MAKE) CFLAGS="-fprofile-arcs -ftest-coverage -O0 $(CFLAGS)" check
+
 clean:
 	rm -f $(PROGRAM) $(OBJECTS)
+	rm -f *.gcno *.gcda
 	rm -f .depend

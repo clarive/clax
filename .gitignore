@@ -1,7 +1,14 @@
 clax
 *.o
 *.a
-tests/test
 .depend
 tests/.depend
+tests/test
+tests_func/.depend
+tests_func/test
 *.swp
+
+# Coverage
+*.gcda
+*.gcno
+coverage/
