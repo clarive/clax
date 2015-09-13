@@ -140,13 +140,21 @@ TEST_START(clax_options_parses_ssl_options_require_cert_and_key)
 
     ASSERT_EQ(ret, -1)
 
+    clax_options_free(&options);
+    clax_options_init(&options);
+
     char *argv2[] = {"clax", "-r", ".", "-t", "ssl/server.crt"};
     int ret2 = clax_parse_options(&options, sizeof_array(argv2), argv2);
 
     ASSERT_EQ(ret2, -1)
 
+    clax_options_free(&options);
+    clax_options_init(&options);
+
     char *argv3[] = {"clax", "-r", ".", "-p", "ssl/server.key"};
     int ret3 = clax_parse_options(&options, sizeof_array(argv3), argv3);
+
+    ASSERT_EQ(ret3, -1)
 
     clax_options_free(&options);
 }
