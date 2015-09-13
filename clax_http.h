@@ -25,8 +25,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include "http_parser/http_parser.h"
-#include "multipart_parser.h"
+#include "http-parser/http_parser.h"
+#include "multipart-parser-c/multipart_parser.h"
 #include "clax.h"
 #include "clax_util.h"
 #include "clax_http_multipart.h"

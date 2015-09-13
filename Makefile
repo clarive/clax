@@ -4,24 +4,14 @@ OBJECTS=$(SOURCES:.c=.o)
 COVERAGE_GRAPH=$(SOURCES:.c=.gcno)
 COVERAGE_DATA=$(SOURCES:.c=.gcda)
 CFLAGS=-std=gnu99 -pedantic -Wall \
-	   -Icontrib/mbedtls \
-	   -Icontrib/multipart-parser-c \
-	   -Icontrib/jsmn \
-	   -Icontrib/inih \
-	   -Icontrib/base64 \
 	   -Icontrib \
 	   -D_ALL_SOURCE -D_POSIX_SOURCE -D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED
 LFLAGS=
-LIBS=contrib/mbedtls/*.o \
-	 contrib/jsmn/*.o \
-	 contrib/http_parser/*.o \
-	 contrib/multipart-parser-c/*.o \
-	 contrib/inih/*.o \
-	 contrib/base64/*.o
+LIBS=contrib/*/*.o
 
 all: lib $(PROGRAM)
 
-lib: mbedtls jsmn http_parser multipart_parser_c inih base64 $(OBJECTS)
+lib: mbedtls jsmn http-parser multipart-parser-c inih base64 $(OBJECTS)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS) -o $(PROGRAM)
@@ -43,10 +33,10 @@ jsmn:
 mbedtls:
 	$(MAKE) -C contrib/mbedtls
 
-http_parser:
-	$(MAKE) -C contrib/http_parser package
+http-parser:
+	$(MAKE) -C contrib/http-parser package
 
-multipart_parser_c:
+multipart-parser-c:
 	$(MAKE) -C contrib/multipart-parser-c
 
 base64:
@@ -61,7 +51,7 @@ tests_func: lib
 check: tests
 	$(MAKE) -C tests check
 
-check-all: tests
+check-all: tests $(PROGRAM)
 	$(MAKE) -C tests check
 	$(MAKE) -C tests_func check
 

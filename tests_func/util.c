@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <ftw.h>
 
-#include "http_parser/http_parser.h"
+#include "http-parser/http_parser.h"
 #include "popen2.h"
 #include "util.h"
 

@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "slre.h"
+#include "slre/slre.h"
 
 int u_tests;
 int u_tests_failed;

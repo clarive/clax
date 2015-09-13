@@ -25,9 +25,9 @@
 #include <stdarg.h>
 #include <unistd.h>
 
-#include "http_parser/http_parser.h"
-#include "multipart_parser.h"
-#include "base64.h"
+#include "http-parser/http_parser.h"
+#include "multipart-parser-c/multipart_parser.h"
+#include "base64/base64.h"
 #include "clax.h"
 #include "clax_dispatcher.h"
 #include "clax_http.h"
