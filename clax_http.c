@@ -601,17 +601,19 @@ void clax_http_response_free(clax_http_response_t *response)
         fclose(response->body_fh);
 }
 
-int clax_check_basic_auth(char *header, char *username, char *password)
+int clax_http_check_basic_auth(char *header, char *username, char *password)
 {
     int ok = 0;
     char *prefix = "Basic ";
+    size_t prefix_len = strlen(prefix);
     char *auth = NULL;
+    size_t auth_len = 0;
     char *sep;
 
-    ok = header && strlen(header) > strlen(prefix) && strncmp(header, prefix, strlen(prefix)) == 0;
+    ok = header && strlen(header) > prefix_len && strncmp(header, prefix, prefix_len) == 0;
 
     if (ok)
-        ok = base64_decode_alloc(header + strlen(prefix), strlen(header) - strlen(prefix), &auth, NULL);
+        ok = base64_decode_alloc(header + prefix_len, strlen(header) - prefix_len, &auth, &auth_len);
 
     if (ok && auth != NULL) {
         sep = strstr(auth, ":");
@@ -619,13 +621,17 @@ int clax_check_basic_auth(char *header, char *username, char *password)
         ok = sep != NULL;
     }
 
-    if (ok)
-        ok = strlen(username) == sep - auth
-            && strncmp(username, auth, sep - auth) == 0;
+    if (ok) {
+        size_t username_len = sep - auth;
+        ok = strlen(username) == username_len
+            && strncmp(username, auth, username_len) == 0;
+    }
 
-    if (ok)
-        ok = strlen(password) == strlen(auth) - (sep - auth) - 1
-            && strncmp(sep + 1, password, strlen(auth) - (sep - auth) - 1) == 0;
+    if (ok) {
+        size_t password_len = auth_len - (sep - auth) - 1;
+        ok = strlen(password) == password_len
+            && strncmp(sep + 1, password, password_len) == 0;
+    }
 
     free(auth);
 
@@ -655,7 +661,7 @@ int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_c
     clax_log("ok");
 
     if (clax_ctx->options->basic_auth_username && clax_ctx->options->basic_auth_password) {
-        int ok = clax_check_basic_auth(
+        int ok = clax_http_check_basic_auth(
                     clax_kv_list_find(&request.headers, "Authorization"),
                     clax_ctx->options->basic_auth_username,
                     clax_ctx->options->basic_auth_password

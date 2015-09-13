@@ -474,3 +474,17 @@ TEST_START(clax_http_chunked_writes_chunks)
     ASSERT_BUF_EQ(test_send_cb_buf, "0\r\nFoo: bar\r\nBar: baz\r\n\r\n", 25);
 }
 TEST_END
+
+TEST_START(clax_http_check_basic_auth_checks_auth)
+{
+    ASSERT_EQ(clax_http_check_basic_auth("Basic Y2xheDpwYXNzd29yZA==", "clax", "password"), 1);
+
+    ASSERT_EQ(clax_http_check_basic_auth(NULL, "clax", "password"), 0);
+    ASSERT_EQ(clax_http_check_basic_auth("", "clax", "password"), 0);
+    ASSERT_EQ(clax_http_check_basic_auth("invalid", "clax", "password"), 0);
+    ASSERT_EQ(clax_http_check_basic_auth("Basic invalid", "clax", "password"), 0);
+    ASSERT_EQ(clax_http_check_basic_auth("Basic Zm9vYmFy", "clax", "password"), 0);
+    ASSERT_EQ(clax_http_check_basic_auth("Basic Y2xhOnBhc3N3b3Jk", "clax", "password"), 0);
+    ASSERT_EQ(clax_http_check_basic_auth("Basic Y2xheDpwYXNzd29y", "clax", "password"), 0);
+}
+TEST_END

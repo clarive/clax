@@ -93,4 +93,5 @@ int clax_http_read_parse(void *ctx, recv_cb_t recv_cb, http_parser *parser, clax
 int clax_http_parse(http_parser *parser, clax_http_request_t *request, const char *buf, size_t len);
 const char *clax_http_status_message(int code);
 size_t clax_http_url_decode(char *str);
+int clax_http_check_basic_auth(char *header, char *username, char *password);
 #endif

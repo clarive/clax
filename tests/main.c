@@ -61,6 +61,8 @@ int main(int argc, char *argv[])
     RUN_TEST(clax_http_multipart_list_returns_item_at_position)
     RUN_TEST(clax_http_multipart_list_returns_last_item)
 
+    RUN_TEST(clax_http_check_basic_auth_checks_auth)
+
     RUN_TEST(clax_dispatch_sets_404_on_unknown_path)
     RUN_TEST(clax_dispatch_saves_upload_to_file)
     RUN_TEST(clax_dispatch_saves_upload_to_file_with_another_name)
