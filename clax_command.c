@@ -143,10 +143,9 @@ int clax_command_read(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list
             break;
         }
 
-        ret = chunk_cb(buf, ret, a_list);
-        if (ret < 0) {
-            clax_log("Returning chunk failed. Client must be disconnected");
-        }
+        /* We ignore errors here, even if the client disconnects we have to
+         * continue running the command */
+        chunk_cb(buf, ret, a_list);
     };
 
     return clax_command_close(ctx);

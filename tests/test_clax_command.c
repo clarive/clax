@@ -20,11 +20,22 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/time.h>
+#include <time.h>
 
 #include "u/u.h"
 
 #include "clax_command.h"
 #include "clax_http.h"
+
+double get_time()
+{
+    struct timeval t;
+    gettimeofday(&t, NULL);
+    return t.tv_sec + t.tv_usec*1e-6;
+}
 
 char output[1024];
 size_t output_len = 0;
@@ -102,6 +113,24 @@ TEST_START(runs_command_vaargs)
     clax_command_close(&ctx);
 
     ASSERT_STR_EQ(context, "context");
+}
+TEST_END
+
+TEST_START(kills command after timeout)
+{
+    command_ctx_t ctx = {.command = "sleep 5", .timeout = 1};
+
+    double start = get_time();
+
+    clax_command_start(&ctx);
+
+    clax_command_read_va(&ctx, command_vaargs_cb);
+
+    clax_command_close(&ctx);
+
+    double end = get_time();
+
+    ASSERT(end - start < 5)
 }
 TEST_END
 
