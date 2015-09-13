@@ -71,15 +71,15 @@ check-coverage-all: coverage-prepare
 	$(MAKE) coverage-report
 
 coverage-report:
-	lcov --no-external -c -d . -o coverage/coverage-test.info
-	lcov -a coverage/coverage-base.info -a coverage/coverage-test.info -o coverage/coverage.info
-	genhtml coverage/coverage.info -o coverage
+	lcov --rc lcov_branch_coverage=1 --no-external -c -d . -o coverage/coverage-test.info
+	lcov --rc lcov_branch_coverage=1 -a coverage/coverage-base.info -a coverage/coverage-test.info -o coverage/coverage.info
+	genhtml --branch-coverage coverage/coverage.info -o coverage
 
 coverage-prepare:
 	$(MAKE) clean
 	$(MAKE) CFLAGS="-fprofile-arcs -ftest-coverage -O0 $(CFLAGS)"
 	mkdir coverage
-	lcov --no-external -c -i -d . -o coverage/coverage-base.info
+	lcov --rc lcov_branch_coverage=1 --no-external -c -i -d . -o coverage/coverage-base.info
 
 clean:
 	rm -f $(PROGRAM) $(OBJECTS)
