@@ -38,6 +38,7 @@ int u_tests;
 int u_tests_failed;
 int u_tests_asserts;
 int u_tests_asserts_failed;
+int u_warnings;
 int u_ok;
 
 #define NOT_OK                                                         \
@@ -194,7 +195,18 @@ int u_ok;
         printf("# %s\n", #name);
 
 #define SUITE_END \
+    }
+
+#define TEST_START(name)                            \
+    do {                                            \
+        u_local_tests = 0;                          \
+        u_local_tests_failed = 0;                   \
+                                                    \
+        printf("# %s: %s\n", u_suite_name, #name);
+
+#define TEST_END \
         if (!u_local_tests) {                                      \
+            u_warnings++;                                          \
             printf(COLOR_YELLOW "# no tests\n" COLOR_OFF);         \
         }                                                          \
         else {                                                     \
@@ -213,13 +225,6 @@ int u_ok;
                 printf("ok %d\n", u_tests);                        \
             }                                                      \
         }                                                          \
-    }
-
-#define TEST_START(name)                            \
-    do {                                            \
-        printf("# %s: %s\n", u_suite_name, #name);
-
-#define TEST_END \
     } while (0);
 
 #define RUN_SUITE(name) \
@@ -243,7 +248,11 @@ int u_ok;
                                                                    \
         exit(255);                                                 \
     } else {                                                       \
-        printf(COLOR_GREEN "SUCCESS\n" COLOR_OFF);                 \
+        if (u_warnings) {                                          \
+            printf(COLOR_YELLOW "SUCCESS (warnings)\n" COLOR_OFF); \
+        } else {                                                   \
+            printf(COLOR_GREEN "SUCCESS\n" COLOR_OFF);             \
+        }                                                          \
     }                                                              \
                                                                    \
     exit(0);
