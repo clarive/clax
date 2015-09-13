@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
     RUN_TEST(clax_http_url_decode_decodes_string_inplace)
     RUN_TEST(clax_http_parse_returns_done_when_100_continue)
     RUN_TEST(clax_http_chunked_writes_chunks)
+    RUN_TEST(clax_http_write_response_writes)
 
     RUN_TEST(clax_http_status_message_returns_message)
     RUN_TEST(clax_http_status_message_returns_unknown_message)

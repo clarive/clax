@@ -494,7 +494,7 @@ int clax_http_read_parse(void *ctx, recv_cb_t recv_cb, http_parser *parser, clax
 
 int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t *response)
 {
-    char buf[1024];
+    char buf[4];
 
     const char *status_message = clax_http_status_message(response->status_code);
 
@@ -516,7 +516,7 @@ int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t 
     if (response->body.len) {
         size_t rcount;
         size_t offset;
-        unsigned char buf[255];
+        unsigned char buf[1024];
 
         TRY send_cb(ctx, (const unsigned char *)"Content-Length: ", 16) GOTO;
         sprintf((char *)buf, "%d\r\n\r\n", (int)response->body.len);

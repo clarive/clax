@@ -475,6 +475,23 @@ TEST_START(clax_http_chunked_writes_chunks)
 }
 TEST_END
 
+TEST_START(clax_http_write_response_writes)
+{
+    clax_http_response_t response;
+    test_send_cb_buf_len = 0;
+
+    clax_http_response_init(&response, NULL, 0);
+
+    response.status_code = 200;
+    clax_http_write_response(NULL, test_send_cb, &response);
+
+    ASSERT_EQ(test_send_cb_buf_len, 19);
+    ASSERT_BUF_EQ(test_send_cb_buf, "HTTP/1.1 200 OK\r\n\r\n", 19);
+
+    clax_http_response_free(&response);
+}
+TEST_END
+
 TEST_START(clax_http_check_basic_auth_checks_auth)
 {
     ASSERT_EQ(clax_http_check_basic_auth("Basic Y2xheDpwYXNzd29yZA==", "clax", "password"), 1);
