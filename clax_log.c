@@ -55,7 +55,6 @@ void clax_log_(const char *file, int line, const char *func_, char *fmt, ...)
         strftime(timestr, sizeof(timestr), "%Y-%m-%d %T", timeinfo);
 
         fprintf(stderr, "%s:%d:%s:%d:%s(): %s\n", timestr, getpid(), file, line, func, cp);
-
     }
     va_end(args);
     free(cp);

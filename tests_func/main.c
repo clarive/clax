@@ -6,6 +6,8 @@
 
 int main(void)
 {
+    START_TESTING
+
     RUN_SUITE(index)
     RUN_SUITE(basic_auth)
     RUN_SUITE(tree)

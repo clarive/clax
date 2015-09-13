@@ -19,12 +19,15 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+
 #include "u/u.h"
 
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 
 int main(int argc, char *argv[])
 {
+    START_TESTING
+
     RUN_SUITE(clax_big_buf)
     RUN_SUITE(clax_command)
     RUN_SUITE(clax_dispatch)

@@ -225,7 +225,12 @@ int u_ok;
 #define RUN_SUITE(name) \
     suite_##name();
 
+#define START_TESTING \
+    FILE *u_devnull = fopen("/dev/null", "wb"); \
+    dup2(fileno(u_devnull), 2);
+
 #define DONE_TESTING                                               \
+    fclose(u_devnull);                                             \
     printf("1..%d (%d)\n", u_tests, u_tests_asserts);              \
                                                                    \
     if (u_tests_failed) {                                          \
