@@ -19,7 +19,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "u.h"
+#include "u/u.h"
 
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 

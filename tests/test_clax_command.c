@@ -20,9 +20,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+
+#include "u/u.h"
+
 #include "clax_command.h"
 #include "clax_http.h"
-#include "u.h"
 
 char output[1024];
 size_t output_len = 0;

@@ -24,9 +24,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "u/u.h"
+
 #include "clax.h"
 #include "clax_dispatcher.h"
-#include "u.h"
 #include "u_util.h"
 
 TEST_START(clax_dispatch_sets_404_on_unknown_path)
@@ -459,7 +460,7 @@ TEST_START(clax_dispatch_serves_file_as_attachment)
     clax_dispatch(&clax_ctx, &request, &response);
 
     ASSERT_EQ(response.status_code, 200)
-    ASSERT(clax_kv_list_find(&response.headers, "Last-Modified"))
+    ASSERT_NOT_NULL(clax_kv_list_find(&response.headers, "Last-Modified"))
 
     chdir(cwd);
     rmdir(tmp_dirname);

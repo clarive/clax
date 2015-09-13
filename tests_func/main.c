@@ -1,4 +1,5 @@
-#include "u.h"
+#include "u/u.h"
+
 #include "util.h"
 
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"

@@ -4,7 +4,6 @@ OBJECTS=$(SOURCES:.c=.o)
 CFLAGS=-std=c99 -pedantic -Wall \
 	   -I../contrib \
 	   -I../ \
-	   -I../tests/ \
 	   -D_ALL_SOURCE -D_POSIX_SOURCE -D_XOPEN_SOURCE=700 -D_XOPEN_SOURCE_EXTENDED
 LFLAGS=
 LIBS=../clax_*.o \

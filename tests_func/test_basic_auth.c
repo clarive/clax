@@ -1,6 +1,7 @@
 #include <string.h>
 
-#include "u.h"
+#include "u/u.h"
+
 #include "util.h"
 
 TEST_START(test_basic_auth)
@@ -84,7 +85,7 @@ TEST_START(test_basic_auth_wrong_username)
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
 
-    ASSERT_NOT_NULL(strstr(output, "401 Unauthorized"));
+    ASSERT_MATCHES(output, "401 Unauthorized");
 }
 TEST_END
 
@@ -98,6 +99,6 @@ TEST_START(test_basic_auth_wrong_password)
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
 
-    ASSERT(strstr(output, "401 Unauthorized"));
+    ASSERT_MATCHES(output, "401 Unauthorized");
 }
 TEST_END

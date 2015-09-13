@@ -21,8 +21,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "u/u.h"
+
 #include "clax_options.h"
-#include "u.h"
 #include "u_util.h"
 
 TEST_START(clax_options_parses_basic_auth)

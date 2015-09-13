@@ -22,8 +22,9 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "u/u.h"
+
 #include "clax_util.h"
-#include "u.h"
 
 TEST_START(clax_kv_list_default_values)
 {

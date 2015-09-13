@@ -22,8 +22,9 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "u/u.h"
+
 #include "clax_http_multipart.h"
-#include "u.h"
 
 TEST_START(clax_http_multipart_list_default_values)
 {

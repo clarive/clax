@@ -21,8 +21,9 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "u/u.h"
+
 #include "clax_http.h"
-#include "u.h"
 
 int _parse(http_parser *parser, clax_http_request_t *req, const char *data)
 {

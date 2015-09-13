@@ -4,8 +4,9 @@
 #include <fcntl.h>
 #include <sys/stat.h> /* stat */
 
+#include "u/u.h"
+
 #include "clax_util.h"
-#include "u.h"
 #include "util.h"
 
 TEST_START(test_tree_upload)
@@ -72,7 +73,7 @@ TEST_START(test_tree_upload_with_different_name)
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
 
-    ASSERT(strstr(output, "200 OK"))
+    ASSERT_MATCHES(output, "200 OK")
 
     struct stat st;
     char *fpath = clax_strjoin("/", tmpdir, "another-name", NULL);
@@ -93,9 +94,9 @@ TEST_START(test_tree_download)
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
 
-    ASSERT(strstr(output, "200 OK"))
-    ASSERT(strstr(output, "Content-Disposition: attachment; filename=\"main.c\""))
-    ASSERT(strstr(output, "Last-Modified: "))
+    ASSERT_MATCHES(output, "200 OK")
+    ASSERT_MATCHES(output, "Content-Disposition: attachment; filename=\"main.c\"")
+    ASSERT_MATCHES(output, "Last-Modified: ")
 }
 TEST_END
 
@@ -108,6 +109,6 @@ TEST_START(test_tree_download_not_found)
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
 
-    ASSERT(strstr(output, "404 Not Found"))
+    ASSERT_MATCHES(output, "404 Not Found")
 }
 TEST_END

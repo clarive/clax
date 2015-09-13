@@ -26,7 +26,7 @@
 #include <sys/types.h>
 
 #include "clax_big_buf.h"
-#include "u.h"
+#include "u/u.h"
 #include "u_util.h"
 
 TEST_START(clax_big_buf_default_values)
@@ -35,7 +35,7 @@ TEST_START(clax_big_buf_default_values)
 
     clax_big_buf_init(&bbuf, "/tmp", 1024);
 
-    ASSERT_EQ(bbuf.len, 0);
+    ASSERT_EQ(bbuf.len, 0)
 
     clax_big_buf_free(&bbuf);
 }

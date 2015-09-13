@@ -1,6 +1,7 @@
 #include <string.h>
 
-#include "u.h"
+#include "u/u.h"
+
 #include "util.h"
 
 TEST_START(test_command)

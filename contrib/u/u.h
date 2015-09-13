@@ -36,68 +36,79 @@
 
 int u_tests;
 int u_tests_failed;
-int u_rv;
+int u_tests_asserts;
+int u_tests_asserts_failed;
+int u_ok;
 
 #define NOT_OK                                                              \
-        u_tests_failed++;                                                   \
-        printf(COLOR_RED "not ok %d\n" COLOR_OFF, u_tests + u_local_tests); \
-        printf("# %s:%d\n", __FILE__, __LINE__);
+        u_tests_asserts_failed++;                                                   \
+        u_local_tests_failed++;  \
+        printf("    # %s:%d\n", __FILE__, __LINE__);\
+        printf(COLOR_RED "    not ok %d\n" COLOR_OFF, u_local_tests);
 
-#define ASSERT(code)                                        \
+#define _ASSERT(code)                                        \
     do {                                                    \
         u_local_tests++;                                    \
         if (code) {                                         \
-            u_rv = 1;                                       \
-                                                            \
-            printf("ok %d\n", u_tests + u_local_tests);     \
+            u_ok = 1;                                       \
         }                                                   \
         else {                                              \
-            u_rv = 0;                                       \
+            u_ok = 0;                                       \
             NOT_OK                                          \
         }                                                   \
+    } while (0);
+
+#define ASSERT(code)                                        \
+    do { \
+        _ASSERT(code) \
+        if (!u_ok) {                        \
+            printf("    # " #code ":\n");        \
+            printf("    #   exp: TRUE\n");   \
+            printf("    #   got: %d\n", code); \
+        } \
     } while (0);
 
 #define ASSERT_EQ(got, exp)                 \
     do {                                    \
         int got_i = (int)got;               \
-        ASSERT(got_i == exp)                \
+        _ASSERT(got_i == exp)                \
                                             \
-        if (!u_rv) {                        \
-            printf("# " #got ":\n");        \
-            printf("#   got: %d\n", got_i); \
-            printf("#   exp: %d\n", exp);   \
+        if (!u_ok) {                        \
+            printf("    # " #got ":\n");        \
+            printf("    #   exp: %d\n", exp);   \
+            printf("    #   got: %d\n", got_i); \
         }                                   \
     } while (0);
 
 #define ASSERT_NOT_EQ(got, exp)                 \
     do {                                    \
         int i = (int)got;                   \
-        ASSERT(got != exp)                  \
+        _ASSERT(got != exp)                  \
                                             \
-        if (!u_rv) {                        \
-            printf("# " #got ":\n");        \
-            printf("#   got: %d\n", i);     \
-            printf("#   exp: != %d\n", exp);   \
+        if (!u_ok) {                        \
+            printf("    # " #got ":\n");        \
+            printf("    #   exp: != %d\n", exp);   \
+            printf("    #   got: %d\n", i);     \
         }                                   \
     } while (0);
 
 #define ASSERT_NULL(got)                 \
     do {                                    \
-        ASSERT(got == NULL)                  \
+        _ASSERT(got == NULL)                  \
                                             \
-        if (!u_rv) {                        \
-            printf("# " #got ":\n");        \
-            printf("#   exp: NULL\n");   \
+        if (!u_ok) {                        \
+            printf("    # " #got ":\n");        \
+            printf("    #   exp: NULL\n");   \
         }                                   \
     } while (0);
 
 #define ASSERT_NOT_NULL(got)                 \
     do {                                    \
-        ASSERT(got != NULL)                  \
+        _ASSERT(got != NULL)                  \
                                             \
-        if (!u_rv) {                        \
-            printf("# " #got ":\n");        \
-            printf("#   exp: NOT NULL\n");   \
+        if (!u_ok) {                        \
+            printf("    # " #got ":\n");        \
+            printf("    #   exp: NOT NULL\n");   \
         }                                   \
     } while (0);
 
@@ -105,19 +116,19 @@ int u_rv;
     do {                                        \
         char *__got = (char *)got;              \
         if (__got != NULL) {                    \
-            ASSERT(strcmp(__got, exp) == 0)     \
+            _ASSERT(strcmp(__got, exp) == 0)     \
                                                 \
-            if (!u_rv) {                        \
-                printf("# " #got ":\n");        \
-                printf("#   got: '%s'\n", __got);   \
-                printf("#   exp: '%s'\n", exp); \
+            if (!u_ok) {                        \
+                printf("    # " #got ":\n");        \
+                printf("    #   exp: '%s'\n", exp); \
+                printf("    #   got: '%s'\n", __got);   \
             }                                   \
         } else {                                \
             u_local_tests++;                    \
             NOT_OK                              \
-            printf("# " #got ":\n");            \
-            printf("#   got: NULL\n");          \
-            printf("#   exp: '%s'\n", exp);     \
+            printf("    # " #got ":\n");            \
+            printf("    #   exp: '%s'\n", exp);     \
+            printf("    #   got: NULL\n");          \
         }                                       \
     } while (0);
 
@@ -125,50 +136,51 @@ int u_rv;
     do {                                        \
         char *p = (char *)got;                  \
         if (p != NULL) {                        \
-            ASSERT(strncmp(p, exp, len) == 0)   \
+            _ASSERT(strncmp(p, exp, len) == 0)   \
                                                 \
-            if (!u_rv) {                        \
-                printf("# " #got ":\n");        \
-                printf("#   got: '%s'\n", p);   \
-                printf("#   exp: '%s'\n", exp); \
+            if (!u_ok) {                        \
+                printf("    # " #got ":\n");        \
+                printf("    #   exp: '%s'\n", exp); \
+                printf("    #   got: '%s'\n", p);   \
             }                                   \
         } else {                                \
             u_local_tests++;                    \
             NOT_OK                              \
-            printf("# " #got ":\n");            \
-            printf("#   got: NULL\n");          \
-            printf("#   exp: '%s'\n", exp);     \
+            printf("    # " #got ":\n");            \
+            printf("    #   exp: '%s'\n", exp);     \
+            printf("    #   got: NULL\n");          \
         }                                       \
     } while (0);
 
 #define ASSERT_BUF_EQ(got, exp, len)    \
-    ASSERT(memcmp(got, exp, len) == 0)  \
+    _ASSERT(memcmp(got, exp, len) == 0)  \
                                         \
-    if (!u_rv) {                        \
-        printf("# " #got ":\n");        \
-        printf("#   got: ");            \
-        for (int i = 0; i < len; i++) { \
-            printf("%02x ", got[i]);    \
-        }                               \
-        printf("\n");                   \
-        printf("#   exp: ");            \
+    if (!u_ok) {                        \
+        printf("    # " #got ":\n");        \
+        printf("    #   exp: ");            \
         for (int i = 0; i < len; i++) { \
             printf("%02x ", exp[i]);    \
+        }                               \
+        printf("\n");                   \
+        printf("    #   got: ");            \
+        for (int i = 0; i < len; i++) { \
+            printf("%02x ", got[i]);    \
         }                               \
         printf("\n");                   \
     }
 
 #define ASSERT_MATCHES(got, re)    \
-    ASSERT(slre_match(re, got, strlen(got), NULL, 0, 0))  \
+    _ASSERT(slre_match(re, got, strlen(got), NULL, 0, 0))  \
                                         \
-    if (!u_rv) {                        \
-        printf("# " #got ":\n");        \
-        printf("# not matches " # re "\n");   \
+    if (!u_ok) {                        \
+        printf("    # " #got ":\n");        \
+        printf("    # not matches " # re "\n");   \
     }
 
 #define TEST_START(name)                    \
     void name() {                           \
         int u_local_tests = 0;              \
+        int u_local_tests_failed = 0;              \
                                             \
         printf("# %s\n", #name);
 
@@ -177,7 +189,16 @@ int u_rv;
             printf(COLOR_YELLOW "# no tests\n" COLOR_OFF);         \
         }                                   \
         else {                              \
-            u_tests += u_local_tests;       \
+            u_tests++; \
+            u_tests_asserts += u_local_tests;       \
+\
+            if (u_local_tests_failed) { \
+                u_tests_failed++;                                                   \
+                printf(COLOR_RED "not ok %d (%d/%d)\n" COLOR_OFF, u_tests, u_local_tests_failed, u_local_tests); \
+                printf("# %s:%d\n", __FILE__, __LINE__); \
+            } else { \
+                printf("ok %d\n", u_tests); \
+            } \
         }                                   \
     }
 
@@ -185,11 +206,11 @@ int u_rv;
     name();
 
 #define DONE_TESTING                                             \
-    printf("1..%d\n", u_tests);                                  \
+    printf("1..%d (%d)\n", u_tests, u_tests_asserts);                                  \
                                                                  \
     if (u_tests_failed) {                                        \
         printf(COLOR_RED "FAILED tests\n" COLOR_OFF);                                \
-        printf(COLOR_RED "Failed %d/%d tests\n" COLOR_OFF, u_tests_failed, u_tests); \
+        printf(COLOR_RED "Failed %d/%d (%d/%d) tests\n" COLOR_OFF, u_tests_failed, u_tests, u_tests_asserts_failed, u_tests_asserts); \
                                                                  \
         exit(255);                                               \
     } else {                                                     \
