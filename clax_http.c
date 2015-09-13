@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <unistd.h>
@@ -729,7 +728,7 @@ const char *clax_http_extract_kv(const char *str, const char *key, size_t *len)
     if (*p++ != '=') return NULL;
     if (*p++ != '"') return NULL;
 
-    q = index(p, '"');
+    q = strchr(p, '"');
     if (!q) return NULL;
 
     *len = q - p;

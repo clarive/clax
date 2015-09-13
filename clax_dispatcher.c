@@ -20,12 +20,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-#include <unistd.h>
 #include <libgen.h> /* basename */
+#include <fcntl.h>
+#include <sys/types.h>
 #include <sys/stat.h> /* stat */
+#include <unistd.h>
 #include <time.h>
 #include <utime.h>
-#include <fcntl.h>
 
 #include "clax.h"
 #include "clax_http.h"
