@@ -3,7 +3,8 @@ SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
 CFLAGS=-std=gnu99 -pedantic -Wall \
 	   -I../contrib \
-	   -I../
+	   -I../ \
+	   -D_XOPEN_SOURCE=700
 LFLAGS=
 LIBS=../clax_*.o \
 	 ../popen2.o \
