@@ -3,13 +3,14 @@ SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
 CFLAGS=-std=gnu99 -pedantic -Wall -O0\
 	   -I../contrib -I../ \
-	   -D_ALL_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
+	   -D_ALL_SOURCE
 LFLAGS=
 LIBS=../clax_*.o \
 	 ../popen2.o \
 	 ../contrib/*/*.o
 
 ifeq ($(WINDOWS),1)
+	PROGRAM=test.exe
 	LIBS+=-lws2_32
 else
 endif
@@ -31,10 +32,10 @@ lib:
 	$(MAKE) -C ../ lib
 
 check: $(PROGRAM)
-	./test
+	./$(PROGRAM)
 
 check-valgrind: $(PROGRAM)
-	valgrind -v --leak-check=full --show-leak-kinds=all ./test
+	valgrind -v --leak-check=full --show-leak-kinds=all ./$(PROGRAM)
 
 check-coverage:
 	$(MAKE) clean

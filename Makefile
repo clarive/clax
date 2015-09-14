@@ -10,6 +10,7 @@ LFLAGS=
 LIBS=contrib/*/*.o
 
 ifeq ($(WINDOWS),1)
+	PROGRAM=clax.exe
 	LIBS+=-lws2_32
 else
 endif
@@ -91,6 +92,7 @@ coverage-prepare:
 
 clean:
 	rm -f $(PROGRAM) $(OBJECTS)
+	rm -f *.exe
 	rm -f .depend
 	rm -f *.gcno *.gcda
 	rm -rf coverage
