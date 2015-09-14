@@ -39,12 +39,94 @@
 
 int popen2(const char *cmdline, popen2_t *child)
 {
+    SECURITY_ATTRIBUTES saAttr;
+
+    HANDLE pipe_in_write = NULL;
+    HANDLE pipe_out_read = NULL;
+
+    HANDLE pipe_in_read = NULL;
+    HANDLE pipe_out_write = NULL;
+
+    saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    saAttr.bInheritHandle = TRUE;
+    saAttr.lpSecurityDescriptor = NULL;
+
+    if (!CreatePipe(&pipe_out_read, &pipe_out_write, &saAttr, 0))
+        return -1;
+
+    if (!SetHandleInformation(pipe_out_read, HANDLE_FLAG_INHERIT, 0))
+        return -1;
+
+    if (!CreatePipe(&pipe_in_read, &pipe_in_write, &saAttr, 0))
+        return -1;
+
+    if (!SetHandleInformation(pipe_in_write, HANDLE_FLAG_INHERIT, 0))
+        return -1;
+
+   PROCESS_INFORMATION piProcInfo;
+   STARTUPINFO siStartInfo;
+   BOOL bSuccess = FALSE;
+
+   ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+
+   ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+   siStartInfo.cb = sizeof(STARTUPINFO);
+   siStartInfo.hStdError = pipe_out_write;
+   siStartInfo.hStdOutput = pipe_out_write;
+   siStartInfo.hStdInput = pipe_in_read;
+   siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+   bSuccess = CreateProcess(NULL,
+      cmdline,
+      NULL,
+      NULL,
+      TRUE,
+      CREATE_NO_WINDOW,
+      NULL,
+      NULL,
+      &siStartInfo,
+      &piProcInfo);
+
+    if (!bSuccess) {
+        return -1;
+    }
+
+    CloseHandle(piProcInfo.hProcess);
+    CloseHandle(piProcInfo.hThread);
+
+    CloseHandle(pipe_out_write);
+    CloseHandle(pipe_in_read);
+
+    int in = _open_osfhandle((intptr_t)pipe_in_write, _O_WRONLY);
+    int out = _open_osfhandle((intptr_t)pipe_out_read, _O_RDONLY);
+
+    child->pid = piProcInfo.dwProcessId;
+    child->in = in;
+    child->out = out;
+
     return 0;
 }
 
 int pclose2(popen2_t *child)
 {
-    return 0;
+    _close(child->in);
+    _close(child->out);
+
+    HANDLE hProcess = OpenProcess(SYNCHRONIZE, FALSE, child->pid);
+
+    int exit_code = 0;
+
+    switch (WaitForSingleObject(hProcess, INFINITE)) {
+    case WAIT_OBJECT_0:
+        GetExitCodeProcess(hProcess, &exit_code);
+        return exit_code;
+    case WAIT_TIMEOUT:
+        return 255;
+    default:
+        return 255;
+    }
+
+    return exit_code;
 }
 
 #else
