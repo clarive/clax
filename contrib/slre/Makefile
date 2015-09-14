@@ -1,6 +1,6 @@
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
-CFLAGS=-std=c99 -pedantic -Wall
+CFLAGS=-std=gnu99 -pedantic -Wall
 LFLAGS=
 
 all: $(OBJECTS)

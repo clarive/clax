@@ -25,7 +25,7 @@
 #include <signal.h>
 #include <errno.h>
 
-#if defined(_WIN32)
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -44,6 +44,7 @@
 #include "clax_http.h"
 #include "clax_log.h"
 #include "clax_util.h"
+#include "clax_platform.h"
 
 #define DEBUG_LEVEL 0
 

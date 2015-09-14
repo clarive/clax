@@ -33,9 +33,10 @@
 #include "clax_log.h"
 #include "clax_command.h"
 #include "clax_big_buf.h"
-#include "clax_util.h"
 #include "clax_crc32.h"
 #include "clax_dispatcher.h"
+#include "clax_util.h"
+#include "clax_platform.h"
 
 static command_ctx_t command_ctx;
 
@@ -166,6 +167,7 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
     char last_modified_buf[30];
     struct stat st;
     struct tm last_modified_time;
+    struct tm *last_modified_time_p;
 
     if (stat(file, &st) != 0 || !(st.st_mode & S_IFREG)) {
         clax_dispatch_not_found(clax_ctx, req, res);
@@ -192,8 +194,9 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
     clax_kv_list_push(&res->headers, "Pragma", "no-cache");
     clax_kv_list_push(&res->headers, "Content-Length", buf);
 
-    gmtime_r(&st.st_mtime, &last_modified_time);
-    strftime(last_modified_buf, sizeof(last_modified_buf), "%a, %d %b %Y %T GMT", &last_modified_time);
+    last_modified_time_p = gmtime_r(&st.st_mtime, &last_modified_time);
+
+    strftime(last_modified_buf, sizeof(last_modified_buf), "%a, %d %b %Y %H:%M:%S GMT", last_modified_time_p);
     clax_kv_list_push(&res->headers, "Last-Modified", last_modified_buf);
 
     if (req->method == HTTP_GET)

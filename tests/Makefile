@@ -1,13 +1,18 @@
 PROGRAM=test
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
-CFLAGS=-std=c99 -pedantic -Wall -O0\
+CFLAGS=-std=gnu99 -pedantic -Wall -O0\
 	   -I../contrib -I../ \
-	   -D_ALL_SOURCE -D_POSIX_SOURCE -D_XOPEN_SOURCE=700 -D_XOPEN_SOURCE_EXTENDED
+	   -D_ALL_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
 LFLAGS=
 LIBS=../clax_*.o \
 	 ../popen2.o \
 	 ../contrib/*/*.o
+
+ifeq ($(WINDOWS),1)
+	LIBS+=-lws2_32
+else
+endif
 
 all: lib $(PROGRAM)
 

@@ -22,12 +22,32 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+#if defined(_WIN32)
+#include <windows.h>
+#else
 #include <sys/wait.h>
+
+#endif
 
 #include "popen2.h"
 
 #define READ 0
 #define WRITE 1
+
+#if defined(_WIN32)
+
+int popen2(const char *cmdline, popen2_t *child)
+{
+    return 0;
+}
+
+int pclose2(popen2_t *child)
+{
+    return 0;
+}
+
+#else
 
 int popen2(const char *cmdline, popen2_t *child)
 {
@@ -79,3 +99,5 @@ int pclose2(popen2_t *child)
 
     return (pid == -1 ? -1 : pstat / 256);
 }
+
+#endif

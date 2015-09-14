@@ -52,7 +52,7 @@ void clax_log_(const char *file, int line, const char *func_, char *fmt, ...)
     cp = (char *)calloc(size, sizeof(char));
     if (cp != NULL && vsnprintf(cp, size, fmt, args) > 0) {
         char timestr[255];
-        strftime(timestr, sizeof(timestr), "%Y-%m-%d %T", timeinfo);
+        strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S", timeinfo);
 
         fprintf(stderr, "%s:%d:%s:%d:%s(): %s\n", timestr, getpid(), file, line, func, cp);
     }

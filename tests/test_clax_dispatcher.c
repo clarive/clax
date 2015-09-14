@@ -23,11 +23,13 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 
 #include "u/u.h"
 
 #include "clax.h"
 #include "clax_dispatcher.h"
+#include "clax_util.h"
 #include "u_util.h"
 
 int clax_dispatcher_match_(const char *path_info, const char *path)
@@ -376,10 +378,12 @@ TEST_START(saves_upload_with_passed_time)
     strcat(fpath, "foobar");
 
     struct stat st;
+    struct tm last_modified_time;
 
     stat(fpath, &st);
 
-    ASSERT_EQ(st.st_mtim.tv_sec, 1234567890);
+    localtime_r(&st.st_mtime, &last_modified_time);
+    ASSERT_EQ(mktime(&last_modified_time), 1234567890);
 
     unlink(fpath);
     chdir(cwd);

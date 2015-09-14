@@ -17,15 +17,35 @@
  *  along with Clax.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _U_UTIL_H
-#define _U_UTIL_H
+#include <string.h>
+#include <stdlib.h>
+
+#include "clax_util.h"
 
 #if defined(_WIN32)
-#define mkdir(path, mode) _mkdir(path)
-#define mkdtemp(path) _mktemp(path)
-#endif
 
-size_t slurp_file(char *fname, char *buf, size_t len);
-int is_dir_empty(char *dirname);
+#include <windows.h>
 
+char *strndup(const char *str, size_t max_len)
+{
+    size_t len = MIN(strlen(str), max_len);
+
+    char *p = malloc(len + 1);
+    strncpy(p, str, len);
+    return p;
+}
+
+int mkstemp(char *template)
+{
+    char filename[MAX_PATH];
+    GetTempFileName(".", template, 0, filename);
+
+    return open((const char *)filename, O_RDONLY);
+}
+
+unsigned int sleep(unsigned int seconds)
+{
+    Sleep(seconds * 1000);
+    return 0;
+}
 #endif

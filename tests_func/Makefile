@@ -1,10 +1,9 @@
 PROGRAM=test
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
-CFLAGS=-std=c99 -pedantic -Wall \
+CFLAGS=-std=gnu99 -pedantic -Wall \
 	   -I../contrib \
-	   -I../ \
-	   -D_ALL_SOURCE -D_POSIX_SOURCE -D_XOPEN_SOURCE=700 -D_XOPEN_SOURCE_EXTENDED
+	   -I../
 LFLAGS=
 LIBS=../clax_*.o \
 	 ../popen2.o \

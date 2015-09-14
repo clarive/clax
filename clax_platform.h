@@ -17,15 +17,31 @@
  *  along with Clax.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _U_UTIL_H
-#define _U_UTIL_H
+#ifndef CLAX_PLATFORM_H
+#define CLAX_PLATFORM_H
 
 #if defined(_WIN32)
-#define mkdir(path, mode) _mkdir(path)
-#define mkdtemp(path) _mktemp(path)
+
+char *strndup(const char *str, size_t max_len);
+int mkstemp(char *template);
+unsigned int sleep(unsigned int seconds);
+
+#if defined(__MINGW64_VERSION_MAJOR)
+# if defined(_USE_32BIT_TIME_T)
+#  define gmtime_s _gmtime32_s
+# else
+#  define gmtime_s _gmtime64_s
+# endif
+#elif defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
+# define gmtime_r(tp, tm) (gmtime((tp)))
+# define localtime_r(tp, tm) (localtime((tp)))
 #endif
 
-size_t slurp_file(char *fname, char *buf, size_t len);
-int is_dir_empty(char *dirname);
+#if defined(_MSC_VER) || defined(__MINGW64_VERSION_MAJOR)
+# define gmtime_r(tp, tm) ((gmtime_s((tm), (tp)) == 0) ? (tm) : NULL)
+# define localtime_r(tp, tm) ((localtime_s((tm), (tp)) == 0) ? (tm) : NULL)
+#endif
+
+#endif
 
 #endif

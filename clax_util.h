@@ -22,6 +22,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
+#include <fcntl.h>
 
 #define sizeof_array(array) sizeof(array) / sizeof(array[0])
 #define sizeof_struct_member(type, member) sizeof(((type *)0)->member)

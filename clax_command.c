@@ -36,7 +36,10 @@ volatile int alarm_fired = 0;
 
 void clax_command_timeout()
 {
+#if defined(_WIN32)
+#else
     signal(SIGALRM, SIG_IGN);
+#endif
 
     alarm_fired = 1;
 }
@@ -45,6 +48,8 @@ void clax_kill_kid(popen2_t *kid)
 {
     int ret;
 
+#if defined(_WIN32)
+#else
     clax_log("Killing pgroup=%d", -kid->pid);
     ret = kill(-kid->pid, SIGTERM);
     if (ret != 0)
@@ -54,6 +59,7 @@ void clax_kill_kid(popen2_t *kid)
     ret = kill(kid->pid, SIGTERM);
     if (ret != 0)
         kill(kid->pid, SIGKILL);
+#endif
 }
 
 int clax_command_start(command_ctx_t *ctx)
@@ -105,9 +111,12 @@ int clax_command_read(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list
     if (timeout) {
         clax_log("Setting command timeout=%d", timeout);
 
+#if defined(_WIN32)
+#else
         alarm_fired = 0;
         signal(SIGALRM, clax_command_timeout);
         alarm(timeout);
+#endif
     }
 
     while(1) {
@@ -136,10 +145,13 @@ int clax_command_read(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list
             break;
         }
 
+#if defined(_WIN32)
+#else
         if (kill(kid->pid, 0) != 0) {
             clax_log("Command unexpectedty exited");
             break;
         }
+#endif
 
         /* We ignore errors here, even if the client disconnects we have to
          * continue running the command */

@@ -5,12 +5,12 @@ COVERAGE_GRAPH=$(SOURCES:.c=.gcno)
 COVERAGE_DATA=$(SOURCES:.c=.gcda)
 CFLAGS=-std=gnu99 -pedantic -Wall \
 	   -Icontrib \
-	   -D_ALL_SOURCE -D_POSIX_SOURCE -D_XOPEN_SOURCE=700 -D_XOPEN_SOURCE_EXTENDED
+	   -D_ALL_SOURCE
 LFLAGS=
 LIBS=contrib/*/*.o
 
 ifeq ($(WINDOWS),1)
-	LIBS="$(LIBS) -lws2_32";
+	LIBS+=-lws2_32
 else
 endif
 
@@ -106,3 +106,4 @@ distclean:
 	$(MAKE) -C contrib/multipart-parser-c clean
 	$(MAKE) -C contrib/inih clean
 	$(MAKE) -C contrib/base64 clean
+	$(MAKE) -C contrib/slre clean
