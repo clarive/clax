@@ -9,9 +9,14 @@ CFLAGS=-std=gnu99 -pedantic -Wall \
 LFLAGS=
 LIBS=contrib/*/*.o
 
+ifeq ($(WINDOWS),1)
+	LIBS="$(LIBS) -lws2_32";
+else
+endif
+
 all: lib $(PROGRAM)
 
-lib: mbedtls jsmn http-parser multipart-parser-c inih base64 $(OBJECTS)
+lib: mbedtls jsmn http-parser multipart-parser-c inih base64 slre $(OBJECTS)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS) -o $(PROGRAM)
@@ -41,6 +46,9 @@ multipart-parser-c:
 
 base64:
 	$(MAKE) -C contrib/base64
+
+slre:
+	$(MAKE) -C contrib/slre
 
 tests: lib
 	$(MAKE) -C tests
