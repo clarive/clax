@@ -21,8 +21,8 @@
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <sys/wait.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #include "popen2.h"
 
@@ -62,6 +62,8 @@ int popen2(const char *cmdline, popen2_t *child)
     child->pid = pid;
     child->in = pipe_stdin[WRITE];
     child->out = pipe_stdout[READ];
+
+    fcntl(child->out, F_SETFL, (fcntl(child->out, F_GETFL, 0) | O_NONBLOCK));
 
     return 0;
 }

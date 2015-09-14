@@ -102,8 +102,6 @@ int clax_command_read(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list
 
     va_copy(a_list, a_list_);
 
-    fcntl(kid->out, F_SETFL, (fcntl(kid->out, F_GETFL, 0) | O_NONBLOCK));
-
     if (timeout) {
         clax_log("Setting command timeout=%d", timeout);
 

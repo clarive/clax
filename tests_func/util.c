@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <ftw.h>
+#include <errno.h>
 
 #include "http-parser/http_parser.h"
 #include "popen2.h"
@@ -43,10 +44,23 @@ int execute(char *command, char *request, char *obuf, size_t olen)
         return -1;
     }
 
-    write(ctx.in, request, strlen(request));
-
     int offset = 0;
-    while ((ret = read(ctx.out, obuf + offset, olen - offset)) > 0) {
+    size_t request_len = strlen(request);
+    while ((ret = write(ctx.in, request + offset, request_len - offset)) > 0) {
+        offset += ret;
+    }
+
+    offset = 0;
+    while (1) {
+        ret = read(ctx.out, obuf + offset, olen - offset);
+
+        if (ret == 0)
+            break;
+
+        if (ret < 0 && errno == EAGAIN) {
+            continue;
+        }
+
         offset += ret;
     }
     obuf[offset] = 0;
