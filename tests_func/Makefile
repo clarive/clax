@@ -3,12 +3,13 @@ SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
 CFLAGS=-std=gnu99 -pedantic -Wall \
 	   -I../contrib \
-	   -I../ \
-	   -D_XOPEN_SOURCE=700
+	   -I../tests/ \
+	   -I../
 LFLAGS=
 LIBS=../clax_*.o \
 	 ../popen2.o \
-	 ../contrib/*/*.o
+	 ../contrib/*/*.o \
+	 ../tests/u_util.o
 
 all: lib $(PROGRAM)
 

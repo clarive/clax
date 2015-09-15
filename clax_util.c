@@ -20,9 +20,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <unistd.h>
 
 #ifdef _WIN32
 # include <windows.h>
+#else
+# include <sys/stat.h>
+# include <sys/types.h>
 #endif
 
 #include "clax_util.h"

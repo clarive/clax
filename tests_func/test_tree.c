@@ -28,7 +28,7 @@ TEST_START(upload)
             "\r\n"
             "%s", (int)strlen(body), body);
 
-    char *tmpdir = mktmpdir();
+    char *tmpdir = clax_mktmpdir_alloc();
 
     char command[1024];
     sprintf(command, "../clax -n -r '%s' -l /dev/null", tmpdir);
@@ -44,7 +44,6 @@ TEST_START(upload)
 
     free(fpath);
     rmrf(tmpdir);
-    free(tmpdir);
 }
 TEST_END
 
@@ -65,7 +64,7 @@ TEST_START(upload_with_different_name)
             "\r\n"
             "%s", (int)strlen(body), body);
 
-    char *tmpdir = mktmpdir();
+    char *tmpdir = clax_mktmpdir_alloc();
 
     char command[1024];
     sprintf(command, "../clax -n -r '%s' -l /dev/null", tmpdir);
@@ -83,7 +82,6 @@ TEST_START(upload_with_different_name)
 
     free(fpath);
     rmrf(tmpdir);
-    free(tmpdir);
 }
 TEST_END
 
