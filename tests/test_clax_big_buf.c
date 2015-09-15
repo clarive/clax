@@ -109,7 +109,7 @@ TEST_START(writes_memory_to_file)
 
     char *fpath = catfile(tmp_dirname, "file");
 
-    clax_big_buf_write_file(&bbuf, fpath);
+    ASSERT_EQ(clax_big_buf_write_file(&bbuf, fpath), 0);
 
     ASSERT_EQ(is_dir_empty(tmp_dirname), 0);
 
@@ -133,13 +133,15 @@ TEST_START(renames_file)
 
     clax_big_buf_init(&bbuf, tmp_dirname, 2);
 
+    ASSERT_EQ(is_dir_empty(tmp_dirname), 1);
+
     clax_big_buf_append(&bbuf, (const unsigned char *)"123", 3);
 
     ASSERT_EQ(is_dir_empty(tmp_dirname), 0);
 
     char *fpath = catfile(tmp_dirname, "file");
 
-    clax_big_buf_write_file(&bbuf, fpath);
+    ASSERT_EQ(clax_big_buf_write_file(&bbuf, fpath), 0);
 
     clax_big_buf_free(&bbuf);
 

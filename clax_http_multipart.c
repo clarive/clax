@@ -25,7 +25,7 @@ void clax_http_multipart_list_init(clax_http_multipart_list_t *list, char *tempd
 {
     memset(list, 0, sizeof(clax_http_multipart_list_t));
 
-    list->tempdir = strdup(tempdir ? tempdir : "/tmp");
+    list->tempdir = strdup(tempdir ? tempdir : ".");
 }
 
 void clax_http_multipart_list_free(clax_http_multipart_list_t *list)

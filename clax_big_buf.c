@@ -66,7 +66,7 @@ int clax_big_buf_append(clax_big_buf_t *bbuf, const unsigned char *buf, size_t l
         if (!bbuf->fh) {
             char *tmpfile = clax_mktmpfile_alloc(bbuf->temp_dir, ".file");
 
-            clax_log("memory is too big, saving to file '%s'", tmpfile);
+            clax_log("Memory is too big, saving to file '%s'", tmpfile);
 
             bbuf->fh = fopen(tmpfile, "wb");
 
@@ -80,7 +80,7 @@ int clax_big_buf_append(clax_big_buf_t *bbuf, const unsigned char *buf, size_t l
             if (bbuf->len) {
                 size_t wcount = fwrite(bbuf->memory, 1, bbuf->len, bbuf->fh);
                 if (wcount != bbuf->len) {
-                    clax_log("Error writing to file");
+                    clax_log("Error writing to file '%s': %s", tmpfile, strerror(errno));
                     return -1;
                 }
 
@@ -93,7 +93,7 @@ int clax_big_buf_append(clax_big_buf_t *bbuf, const unsigned char *buf, size_t l
 
         size_t wcount = fwrite(buf, 1, len, bbuf->fh);
         if (wcount != len) {
-            clax_log("Error writing to file");
+            clax_log("Error writing to file '%s': %s", bbuf->fpath, strerror(errno));
             return -1;
         }
 
@@ -109,8 +109,19 @@ int clax_big_buf_append(clax_big_buf_t *bbuf, const unsigned char *buf, size_t l
 int clax_big_buf_write_file(clax_big_buf_t *bbuf, char *fpath)
 {
     if (bbuf->fpath && strlen(bbuf->fpath)) {
-        clax_log("Renaming to file '%s' -> '%s'", bbuf->fpath, fpath);
-        return rename(bbuf->fpath, fpath);
+        clax_log("Renaming '%s' -> '%s'", bbuf->fpath, fpath);
+
+        /* TODO: after files is closed big_buf is unusable, this has to be handled somehow */
+        fclose(bbuf->fh);
+        bbfu->fh = NULL;
+
+        int ret = rename(bbuf->fpath, fpath);
+
+        if (ret < 0) {
+            clax_log("Renaming '%s' -> '%s' failed: %s'", bbuf->fpath, fpath, strerror(errno));
+        }
+
+        return ret;
     }
     else {
         clax_log("Saving to file '%s'", fpath);
@@ -124,7 +135,9 @@ int clax_big_buf_write_file(clax_big_buf_t *bbuf, char *fpath)
             return -1;
         }
 
-        fwrite(bbuf->memory, 1, bbuf->len, fh);
+        if (fwrite(bbuf->memory, 1, bbuf->len, fh) != bbuf->len) {
+            clax_log("Saving to file '%s' failed: %s", fpath, strerror(errno));
+        }
 
         fclose(fh);
 
