@@ -113,7 +113,7 @@ int clax_big_buf_write_file(clax_big_buf_t *bbuf, char *fpath)
 
         /* TODO: after files is closed big_buf is unusable, this has to be handled somehow */
         fclose(bbuf->fh);
-        bbfu->fh = NULL;
+        bbuf->fh = NULL;
 
         int ret = rename(bbuf->fpath, fpath);
 
