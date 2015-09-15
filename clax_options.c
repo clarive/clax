@@ -8,6 +8,7 @@
 #include "inih/ini.h"
 #include "clax_options.h"
 #include "clax_util.h"
+#include "clax_platform.h"
 
 extern char *optarg;
 extern int opterr;

@@ -324,4 +324,14 @@ TEST_START(clax_strjoin_joins_strings)
 }
 TEST_END
 
+TEST_START(htol converts hex to integer)
+{
+    ASSERT_EQ(clax_htol(""), 0);
+    ASSERT_EQ(clax_htol("0"), 0);
+    ASSERT_EQ(clax_htol("1"), 1);
+    ASSERT_EQ(clax_htol("a"), 10);
+    ASSERT_EQ(clax_htol("ff"), 255);
+}
+TEST_END
+
 SUITE_END

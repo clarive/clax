@@ -27,6 +27,7 @@
 #include <errno.h>
 
 #include "clax_big_buf.h"
+#include "clax_util.h"
 #include "u/u.h"
 #include "u_util.h"
 
@@ -36,7 +37,7 @@ TEST_START(default_values)
 {
     clax_big_buf_t bbuf;
 
-    char *tmp_dirname = mktmpdir();
+    char *tmp_dirname = clax_mktmpdir_alloc();
 
     clax_big_buf_init(&bbuf, tmp_dirname, 1024);
 
@@ -52,7 +53,7 @@ TEST_START(creates_file_when_max_size)
 {
     clax_big_buf_t bbuf;
 
-    char *tmp_dirname = mktmpdir();
+    char *tmp_dirname = clax_mktmpdir_alloc();
 
     clax_big_buf_init(&bbuf, tmp_dirname, 1024);
 
@@ -78,7 +79,7 @@ TEST_START(deletes_file_on_free)
 {
     clax_big_buf_t bbuf;
 
-    char *tmp_dirname = mktmpdir();
+    char *tmp_dirname = clax_mktmpdir_alloc();
 
     clax_big_buf_init(&bbuf, tmp_dirname, 1024);
 
@@ -100,7 +101,7 @@ TEST_START(writes_memory_to_file)
 {
     clax_big_buf_t bbuf;
 
-    char *tmp_dirname = mktmpdir();
+    char *tmp_dirname = clax_mktmpdir_alloc();
 
     clax_big_buf_init(&bbuf, tmp_dirname, 1024);
 
@@ -128,7 +129,7 @@ TEST_START(renames_file)
 {
     clax_big_buf_t bbuf;
 
-    char *tmp_dirname = mktmpdir();
+    char *tmp_dirname = clax_mktmpdir_alloc();
 
     clax_big_buf_init(&bbuf, tmp_dirname, 2);
 
@@ -156,7 +157,7 @@ TEST_START(read_from_memory)
 {
     clax_big_buf_t bbuf;
 
-    char *tmp_dirname = mktmpdir();
+    char *tmp_dirname = clax_mktmpdir_alloc();
 
     clax_big_buf_init(&bbuf, tmp_dirname, 1024);
 
@@ -189,7 +190,7 @@ TEST_START(read_from_memory_more_than_available)
 {
     clax_big_buf_t bbuf;
 
-    char *tmp_dirname = mktmpdir();
+    char *tmp_dirname = clax_mktmpdir_alloc();
 
     clax_big_buf_init(&bbuf, tmp_dirname, 1024);
 
@@ -212,7 +213,7 @@ TEST_START(read_from_file)
 {
     clax_big_buf_t bbuf;
 
-    char *tmp_dirname = mktmpdir();
+    char *tmp_dirname = clax_mktmpdir_alloc();
 
     clax_big_buf_init(&bbuf, tmp_dirname, 2);
 

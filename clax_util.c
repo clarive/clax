@@ -224,9 +224,35 @@ char *clax_strjoin(char *sep, ...)
     return join;
 }
 
-/*char *clax_mktmpdir()*/
-/*{*/
-/*}*/
+int clax_mkdir(char *dirname, int mode)
+{
+    int ret;
+
+#ifdef _WIN32
+    ret = mkdir(dirname);
+#else
+    ret = mkdir(dirname, mode);
+#endif
+
+    return ret;
+}
+
+char *clax_mktmpdir_alloc()
+{
+#ifdef _WIN32
+    char template[] = "tmpdir.XXXXXX";
+
+    char *tmpdir = _mktemp(template);
+#else
+    char template[] = "/tmp/clax.tests.tmpdir.XXXXXX";
+
+    char *tmpdir = mkdtemp(template);
+#endif
+
+    clax_mkdir(tmpdir, 0755);
+
+    return strdup(tmpdir);
+}
 
 char *clax_mktmpfile_alloc(char *tmpdir, char *prefix)
 {
@@ -241,7 +267,6 @@ char *clax_mktmpfile_alloc(char *tmpdir, char *prefix)
 
     fpath = strdup(filename);
 #else
-    char *fpath;
     char *template = "XXXXXX";
     fpath = malloc(strlen(tmpdir) + 1 + strlen(prefix) + strlen(template));
     fpath[0] = 0;
@@ -256,4 +281,29 @@ char *clax_mktmpfile_alloc(char *tmpdir, char *prefix)
 #endif
 
     return fpath;
+}
+
+unsigned long clax_htol(char *buf)
+{
+    unsigned long int res = 0;
+
+    char *p = buf;
+    while (*p) {
+        if (*p >= '0' && *p <= '9') {
+            res += *p - '0';
+        }
+        else if (*p >= 'a' && *p <= 'f') {
+            res += *p - 'a' + 10;
+        }
+        else {
+            return -1;
+        }
+
+        p++;
+
+        if (*p)
+            res <<= 4;
+    }
+
+    return res;
 }

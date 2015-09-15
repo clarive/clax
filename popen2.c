@@ -77,7 +77,7 @@ int popen2(const char *cmdline, popen2_t *child)
    siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 
    bSuccess = CreateProcess(NULL,
-      cmdline,
+      (char *)cmdline,
       NULL,
       NULL,
       TRUE,
@@ -109,12 +109,16 @@ int popen2(const char *cmdline, popen2_t *child)
 
 int pclose2(popen2_t *child)
 {
+    /* Do nothing when nothing was created, otherwise directories are get locked, windows, heh? */
+    if (!child->pid)
+        return 255;
+
     _close(child->in);
     _close(child->out);
 
     HANDLE hProcess = OpenProcess(SYNCHRONIZE, FALSE, child->pid);
 
-    int exit_code = 0;
+    unsigned long int exit_code = 0;
 
     switch (WaitForSingleObject(hProcess, INFINITE)) {
     case WAIT_OBJECT_0:

@@ -73,6 +73,15 @@ int execute(char *command, char *request, char *obuf, size_t olen)
     return offset;
 }
 
+char *mktmpdir()
+{
+    char template[] = "/tmp/clax.tests.tmpdir.XXXXXX";
+    char *tmpdir = mkdtemp(template);
+    mkdir(tmpdir, 0755);
+
+    return strdup(tmpdir);
+}
+
 int unlink_cb(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
     int rv = remove(fpath);
@@ -81,15 +90,6 @@ int unlink_cb(const char *fpath, const struct stat *sb, int typeflag, struct FTW
         perror(fpath);
 
     return rv;
-}
-
-char *mktmpdir()
-{
-    char template[] = "/tmp/clax.tests.tmpdir.XXXXXX";
-    char *tmpdir = mkdtemp(template);
-    mkdir(tmpdir, 0755);
-
-    return strdup(tmpdir);
 }
 
 int rmrf(char *path)

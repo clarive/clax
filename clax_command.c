@@ -27,6 +27,10 @@
 #include <unistd.h>
 #include <signal.h>
 
+#ifdef _WIN32
+# include <windows.h>
+#endif
+
 #include "popen2.h"
 #include "clax_log.h"
 #include "clax_http.h"
@@ -46,10 +50,10 @@ void clax_command_timeout()
 
 void clax_kill_kid(popen2_t *kid)
 {
-    int ret;
-
 #if defined(_WIN32)
 #else
+    int ret = 0;
+
     clax_log("Killing pgroup=%d", -kid->pid);
     ret = kill(-kid->pid, SIGTERM);
     if (ret != 0)
@@ -145,14 +149,6 @@ int clax_command_read(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list
             break;
         }
 
-#if defined(_WIN32)
-#else
-        if (kill(kid->pid, 0) != 0) {
-            clax_log("Command unexpectedty exited");
-            break;
-        }
-#endif
-
         /* We ignore errors here, even if the client disconnects we have to
          * continue running the command */
         chunk_cb(buf, ret, a_list);
@@ -169,4 +165,25 @@ int clax_command_close(command_ctx_t *ctx)
     clax_log("Command finished, exit_code=%d", ret);
 
     return ret;
+}
+
+int clax_command_is_running(command_ctx_t *ctx)
+{
+#if defined(_WIN32)
+    HANDLE hProcess = OpenProcess(SYNCHRONIZE, FALSE, ctx->kid.pid);
+    unsigned long int exit_code;
+
+    if (GetExitCodeProcess(hProcess, &exit_code)) {
+        if (exit_code == STILL_ACTIVE) {
+            return 1;
+        }
+    }
+
+#else
+    if (kill(ctx->kid.pid, 0) == 0) {
+        return 1;
+    }
+#endif
+
+    return 0;
 }

@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "clax_log.h"
 #include "clax_big_buf.h"
@@ -119,6 +120,7 @@ int clax_big_buf_write_file(clax_big_buf_t *bbuf, char *fpath)
         fh = fopen(fpath, "wb");
 
         if (fh == NULL) {
+            clax_log("Error opening file '%s': %s", fpath, strerror(errno));
             return -1;
         }
 

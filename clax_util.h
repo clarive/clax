@@ -63,4 +63,10 @@ void clax_hexdump(unsigned char *buf, size_t len);
 void clax_san_path(char *buf);
 char *clax_strjoin(char *sep, ...);
 
+int clax_mkdir(char *dirname, int mode);
+char *clax_mktmpdir_alloc();
+char *clax_mktmpfile_alloc(char *tmpdir, char *prefix);
+
+unsigned long int clax_htol(char *buf);
+
 #endif

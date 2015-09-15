@@ -32,6 +32,7 @@ char *strndup(const char *str, size_t max_len)
 
     char *p = malloc(len + 1);
     strncpy(p, str, len);
+    p[len] = 0;
     return p;
 }
 

@@ -33,5 +33,6 @@ int clax_command_start(command_ctx_t *ctx);
 int clax_command_read_va(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, ...);
 int clax_command_read(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list a_list);
 int clax_command_close(command_ctx_t *ctx);
+int clax_command_is_running(command_ctx_t *ctx);
 
 #endif

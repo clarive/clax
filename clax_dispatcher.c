@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <libgen.h> /* basename */
 #include <fcntl.h>
@@ -27,6 +28,11 @@
 #include <unistd.h>
 #include <time.h>
 #include <utime.h>
+#include <errno.h>
+
+#ifdef _WIN32
+# include <windows.h>
+#endif
 
 #include "clax.h"
 #include "clax_http.h"
@@ -259,11 +265,11 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
             char *fpath;
 
             if (new_name && strlen(new_name)) {
-                fpath = clax_strjoin("/", clax_ctx->options->root, subdir, new_name, NULL);
+                fpath = clax_strjoin("/", subdir, new_name, NULL);
             }
             else {
                 char *p = strndup(filename, filename_len);
-                fpath = clax_strjoin("/", clax_ctx->options->root, subdir, p, NULL);
+                fpath = clax_strjoin("/", subdir, p, NULL);
                 free(p);
             }
 
@@ -272,39 +278,40 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
             int ret = clax_big_buf_write_file(&multipart->bbuf, fpath);
 
             if (ret < 0) {
+                clax_log("Saving file failed: %s\n", fpath);
                 clax_dispatch_system_error(clax_ctx, req, res);
             }
             else {
                 if (crc32 && strlen(crc32)) {
-                    unsigned long got_crc32 = strtol(crc32, NULL, 16);
+                    unsigned long got_crc32 = clax_htol(crc32);
 
                     int fd = open(fpath, O_RDONLY);
-                    unsigned long real_crc32 = clax_crc32_calc_fd(fd);
+                    unsigned long exp_crc32 = clax_crc32_calc_fd(fd);
                     close(fd);
 
-                    if (got_crc32 != real_crc32) {
-                        clax_log("CRC mismatch %d != %d", got_crc32, real_crc32);
+                    if (got_crc32 != exp_crc32) {
+                        clax_log("CRC mismatch %u != %u (%s)", exp_crc32, got_crc32, crc32);
                         clax_dispatch_bad_request(clax_ctx, req, res);
 
-                        unlink(fpath);
+                        remove(fpath);
                         free(fpath);
 
                         return;
                     } else {
-                        clax_log("CRC ok");
+                        clax_log("CRC ok %u != %u (%s)", exp_crc32, got_crc32, crc32);
                     }
                 }
 
                 if (time && strlen(time)) {
                     int mtime = atol(time);
 
-#ifdef _WIN32
-#else
                     struct utimbuf t;
                     t.actime = mtime;
                     t.modtime = mtime;
-                    utime(fpath, &t);
-#endif
+                    int ok = utime(fpath, &t);
+
+                    if (ok < 0)
+                        clax_log("utime on file '%s' failed: %s", fpath, strerror(errno));
                 }
 
                 res->status_code = 200;

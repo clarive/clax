@@ -32,25 +32,12 @@
 char _catfile[1024];
 char *catfile(char *dir, char *file)
 {
+    _catfile[0] = 0;
     strcpy(_catfile, dir);
     strcat(_catfile, "/");
     strcat(_catfile, file);
 
     return _catfile;
-}
-
-char *mktmpdir()
-{
-#ifdef _WIN32
-    char template[] = "tmpdir.XXXXXX";
-#else
-    char template[] = "/tmp/clax.tests.tmpdir.XXXXXX";
-#endif
-
-    char *tmpdir = mkdtemp(template);
-    mkdir(tmpdir, 0755);
-
-    return strdup(tmpdir);
 }
 
 size_t slurp_file(char *fname, char *buf, size_t len)
@@ -98,6 +85,7 @@ int rmrf(char *path)
     if (dir == NULL) {
         if (errno == ENOTDIR) {
             unlink(path);
+            free(path);
         }
 
         return 0;
@@ -109,14 +97,15 @@ int rmrf(char *path)
         if (strcmp(d->d_name, "..") == 0)
             continue;
 
-        rmrf(catfile(path, d->d_name));
+        char *p =catfile(path, d->d_name);
+        rmrf(strdup(p));
         break;
     }
 
     closedir(dir);
 
-    rmdir(path);
-
+    if (rmdir(path) != 0)
+        printf("Can't cleanup directory '%s': %s", path, strerror(errno));
     free(path);
 
     return 0;
