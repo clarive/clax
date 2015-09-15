@@ -231,8 +231,14 @@ int u_ok;
 #define RUN_SUITE(name) \
     suite_##name();
 
+#ifdef _WIN32
+# define DEVNULL "nul"
+#else
+# define DEVNULL "/dev/null"
+#endif
+
 #define START_TESTING \
-    FILE *u_devnull = fopen("/dev/null", "wb"); \
+    FILE *u_devnull = fopen(DEVNULL, "wb"); \
     dup2(fileno(u_devnull), 2);
 
 #define DONE_TESTING                                               \
