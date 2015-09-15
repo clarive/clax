@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <errno.h>
 
 #include "clax_big_buf.h"
 #include "u/u.h"
@@ -35,11 +36,15 @@ TEST_START(default_values)
 {
     clax_big_buf_t bbuf;
 
-    clax_big_buf_init(&bbuf, "/tmp", 1024);
+    char *tmp_dirname = mktmpdir();
+
+    clax_big_buf_init(&bbuf, tmp_dirname, 1024);
 
     ASSERT_EQ(bbuf.len, 0)
 
     clax_big_buf_free(&bbuf);
+
+    rmrf(tmp_dirname);
 }
 TEST_END
 
@@ -47,10 +52,7 @@ TEST_START(creates_file_when_max_size)
 {
     clax_big_buf_t bbuf;
 
-    char template[] = "/tmp/tmpdir.XXXXXX";
-    char *tmp_dirname = mkdtemp(template);
-
-    mkdir(tmp_dirname, 0755);
+    char *tmp_dirname = mktmpdir();
 
     clax_big_buf_init(&bbuf, tmp_dirname, 1024);
 
@@ -68,7 +70,7 @@ TEST_START(creates_file_when_max_size)
 
     clax_big_buf_free(&bbuf);
 
-    rmdir(tmp_dirname);
+    rmrf(tmp_dirname);
 }
 TEST_END
 
@@ -76,10 +78,7 @@ TEST_START(deletes_file_on_free)
 {
     clax_big_buf_t bbuf;
 
-    char template[] = "/tmp/tmpdir.XXXXXX";
-    char *tmp_dirname = mkdtemp(template);
-
-    mkdir(tmp_dirname, 0755);
+    char *tmp_dirname = mktmpdir();
 
     clax_big_buf_init(&bbuf, tmp_dirname, 1024);
 
@@ -93,7 +92,7 @@ TEST_START(deletes_file_on_free)
 
     ASSERT_EQ(is_dir_empty(tmp_dirname), 1);
 
-    rmdir(tmp_dirname);
+    rmrf(tmp_dirname);
 }
 TEST_END
 
@@ -101,18 +100,14 @@ TEST_START(writes_memory_to_file)
 {
     clax_big_buf_t bbuf;
 
-    char template[] = "/tmp/tmpdir.XXXXXX";
-    char *tmp_dirname = mkdtemp(template);
-
-    mkdir(tmp_dirname, 0755);
+    char *tmp_dirname = mktmpdir();
 
     clax_big_buf_init(&bbuf, tmp_dirname, 1024);
 
     clax_big_buf_append(&bbuf, (const unsigned char *)"123", 3);
 
-    char fpath[1024];
-    strcpy(fpath, tmp_dirname);
-    strcat(fpath, "/file");
+    char *fpath = catfile(tmp_dirname, "file");
+
     clax_big_buf_write_file(&bbuf, fpath);
 
     ASSERT_EQ(is_dir_empty(tmp_dirname), 0);
@@ -125,7 +120,7 @@ TEST_START(writes_memory_to_file)
     slurp_file(fpath, content, sizeof(content));
     ASSERT_BUF_EQ(content, "123", 3);
 
-    rmdir(tmp_dirname);
+    rmrf(tmp_dirname);
 }
 TEST_END
 
@@ -133,10 +128,7 @@ TEST_START(renames_file)
 {
     clax_big_buf_t bbuf;
 
-    char template[] = "/tmp/tmpdir.XXXXXX";
-    char *tmp_dirname = mkdtemp(template);
-
-    mkdir(tmp_dirname, 0755);
+    char *tmp_dirname = mktmpdir();
 
     clax_big_buf_init(&bbuf, tmp_dirname, 2);
 
@@ -144,9 +136,8 @@ TEST_START(renames_file)
 
     ASSERT_EQ(is_dir_empty(tmp_dirname), 0);
 
-    char fpath[1024];
-    strcpy(fpath, tmp_dirname);
-    strcat(fpath, "/file");
+    char *fpath = catfile(tmp_dirname, "file");
+
     clax_big_buf_write_file(&bbuf, fpath);
 
     clax_big_buf_free(&bbuf);
@@ -157,7 +148,7 @@ TEST_START(renames_file)
     slurp_file(fpath, content, sizeof(content));
     ASSERT_BUF_EQ(content, "123", 3);
 
-    rmdir(tmp_dirname);
+    rmrf(tmp_dirname);
 }
 TEST_END
 
@@ -165,7 +156,9 @@ TEST_START(read_from_memory)
 {
     clax_big_buf_t bbuf;
 
-    clax_big_buf_init(&bbuf, "/tmp/", 1024);
+    char *tmp_dirname = mktmpdir();
+
+    clax_big_buf_init(&bbuf, tmp_dirname, 1024);
 
     clax_big_buf_append(&bbuf, (const unsigned char *)"123", 3);
 
@@ -187,6 +180,8 @@ TEST_START(read_from_memory)
     ASSERT_EQ(rcount, 0);
 
     clax_big_buf_free(&bbuf);
+
+    rmrf(tmp_dirname);
 }
 TEST_END
 
@@ -194,7 +189,9 @@ TEST_START(read_from_memory_more_than_available)
 {
     clax_big_buf_t bbuf;
 
-    clax_big_buf_init(&bbuf, "/tmp/", 1024);
+    char *tmp_dirname = mktmpdir();
+
+    clax_big_buf_init(&bbuf, tmp_dirname, 1024);
 
     clax_big_buf_append(&bbuf, (const unsigned char *)"123", 3);
 
@@ -206,6 +203,8 @@ TEST_START(read_from_memory_more_than_available)
     ASSERT_BUF_EQ(buf, "123", 3);
 
     clax_big_buf_free(&bbuf);
+
+    rmrf(tmp_dirname);
 }
 TEST_END
 
@@ -213,10 +212,7 @@ TEST_START(read_from_file)
 {
     clax_big_buf_t bbuf;
 
-    char template[] = "/tmp/tmpdir.XXXXXX";
-    char *tmp_dirname = mkdtemp(template);
-
-    mkdir(tmp_dirname, 0755);
+    char *tmp_dirname = mktmpdir();
 
     clax_big_buf_init(&bbuf, tmp_dirname, 2);
 
@@ -244,7 +240,7 @@ TEST_START(read_from_file)
 
     clax_big_buf_free(&bbuf);
 
-    rmdir(tmp_dirname);
+    rmrf(tmp_dirname);
 }
 TEST_END
 

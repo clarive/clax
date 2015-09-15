@@ -23,7 +23,6 @@
 #if defined(_WIN32)
 
 char *strndup(const char *str, size_t max_len);
-int mkstemp(char *template);
 unsigned int sleep(unsigned int seconds);
 
 #if defined(__MINGW64_VERSION_MAJOR)

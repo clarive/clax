@@ -35,14 +35,6 @@ char *strndup(const char *str, size_t max_len)
     return p;
 }
 
-int mkstemp(char *template)
-{
-    char filename[MAX_PATH];
-    GetTempFileName(".", template, 0, filename);
-
-    return open((const char *)filename, O_RDONLY);
-}
-
 unsigned int sleep(unsigned int seconds)
 {
     Sleep(seconds * 1000);

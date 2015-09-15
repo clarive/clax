@@ -18,10 +18,40 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <errno.h>
 
 #include "u_util.h"
+
+char _catfile[1024];
+char *catfile(char *dir, char *file)
+{
+    strcpy(_catfile, dir);
+    strcat(_catfile, "/");
+    strcat(_catfile, file);
+
+    return _catfile;
+}
+
+char *mktmpdir()
+{
+#ifdef _WIN32
+    char template[] = "tmpdir.XXXXXX";
+#else
+    char template[] = "/tmp/clax.tests.tmpdir.XXXXXX";
+#endif
+
+    char *tmpdir = mkdtemp(template);
+    mkdir(tmpdir, 0755);
+
+    return strdup(tmpdir);
+}
 
 size_t slurp_file(char *fname, char *buf, size_t len)
 {
@@ -40,20 +70,54 @@ size_t slurp_file(char *fname, char *buf, size_t len)
 
 int is_dir_empty(char *dirname)
 {
-    int n = 0;
+    int empty = 1;
     struct dirent *d;
     DIR *dir = opendir(dirname);
+
     if (dir == NULL)
         return 1;
     while ((d = readdir(dir)) != NULL) {
-        if(++n > 2)
-            break;
+        if (strcmp(d->d_name, ".") == 0)
+            continue;
+        if (strcmp(d->d_name, "..") == 0)
+            continue;
+
+        empty = 0;
+        break;
     }
     closedir(dir);
-    if (n <= 2)
-        return 1;
-    else
-        return 0;
+
+    return empty;
 }
 
+int rmrf(char *path)
+{
+    struct dirent *d;
+    DIR *dir = opendir(path);
 
+    if (dir == NULL) {
+        if (errno == ENOTDIR) {
+            unlink(path);
+        }
+
+        return 0;
+    }
+
+    while ((d = readdir(dir)) != NULL) {
+        if (strcmp(d->d_name, ".") == 0)
+            continue;
+        if (strcmp(d->d_name, "..") == 0)
+            continue;
+
+        rmrf(catfile(path, d->d_name));
+        break;
+    }
+
+    closedir(dir);
+
+    rmdir(path);
+
+    free(path);
+
+    return 0;
+}

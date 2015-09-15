@@ -40,17 +40,16 @@ clax_big_buf_t *clax_big_buf_free(clax_big_buf_t *bbuf)
 {
     free(bbuf->memory);
 
+    if (bbuf->fh) {
+        fclose(bbuf->fh);
+    }
+
     if (bbuf->fpath && strlen(bbuf->fpath)) {
-        if (access(bbuf->fpath, F_OK) != -1) {
-            unlink(bbuf->fpath);
-        }
+        unlink(bbuf->fpath);
     }
 
     free(bbuf->temp_dir);
     free(bbuf->fpath);
-    if (bbuf->fh) {
-        fclose(bbuf->fh);
-    }
 
     return bbuf;
 }
@@ -64,25 +63,18 @@ int clax_big_buf_append(clax_big_buf_t *bbuf, const unsigned char *buf, size_t l
 {
     if (bbuf->temp_dir && bbuf->max_size && bbuf->len + len > bbuf->max_size) {
         if (!bbuf->fh) {
-            int fd;
-            const char *template = "/.fileXXXXXX";
-            char fpath[1024] = {0};
-            strncat(fpath, bbuf->temp_dir, sizeof(fpath) - strlen(template));
-            strcat(fpath, template);
-            fd = mkstemp(fpath);
-            if (fd < 0) return -1;
-            close(fd);
+            char *tmpfile = clax_mktmpfile_alloc(bbuf->temp_dir, ".file");
 
-            clax_log("memory is too big, saving to file '%s'", fpath);
+            clax_log("memory is too big, saving to file '%s'", tmpfile);
 
-            bbuf->fh = fopen(fpath, "wb");
+            bbuf->fh = fopen(tmpfile, "wb");
 
             if (bbuf->fh == NULL) {
-                clax_log("Creating file '%s' failed", fpath);
+                clax_log("Creating file '%s' failed", tmpfile);
                 return -1;
             }
 
-            bbuf->fpath = strdup(fpath);
+            bbuf->fpath = strdup(tmpfile);
 
             if (bbuf->len) {
                 size_t wcount = fwrite(bbuf->memory, 1, bbuf->len, bbuf->fh);
@@ -94,6 +86,8 @@ int clax_big_buf_append(clax_big_buf_t *bbuf, const unsigned char *buf, size_t l
                 free(bbuf->memory);
                 bbuf->memory = NULL;
             }
+
+            free(tmpfile);
         }
 
         size_t wcount = fwrite(buf, 1, len, bbuf->fh);

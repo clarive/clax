@@ -21,11 +21,13 @@
 #define _U_UTIL_H
 
 #if defined(_WIN32)
-#define mkdir(path, mode) _mkdir(path)
 #define mkdtemp(path) _mktemp(path)
+#define mkdir(path, mode) mkdir(path)
 #endif
 
+char *mktmpdir();
 size_t slurp_file(char *fname, char *buf, size_t len);
 int is_dir_empty(char *dirname);
+int rmrf(char *dirname);
 
 #endif

@@ -21,6 +21,10 @@
 #include <string.h>
 #include <stdarg.h>
 
+#ifdef _WIN32
+# include <windows.h>
+#endif
+
 #include "clax_util.h"
 
 void clax_kv_list_init(clax_kv_list_t *list)
@@ -218,4 +222,38 @@ char *clax_strjoin(char *sep, ...)
     va_end(a_list);
 
     return join;
+}
+
+/*char *clax_mktmpdir()*/
+/*{*/
+/*}*/
+
+char *clax_mktmpfile_alloc(char *tmpdir, char *prefix)
+{
+    char *fpath = NULL;
+
+#ifdef _WIN32
+    char filename[MAX_PATH];
+    GetTempFileName(tmpdir, prefix, 0, filename);
+
+    /* Replacing \ by / */
+    filename[strlen(tmpdir)] = '/';
+
+    fpath = strdup(filename);
+#else
+    char *fpath;
+    char *template = "XXXXXX";
+    fpath = malloc(strlen(tmpdir) + 1 + strlen(prefix) + strlen(template));
+    fpath[0] = 0;
+
+    strcpy(fpath, tmpdir);
+    strcat(fpath, "/");
+    strcat(fpath, prefix);
+    strcat(fpath, template);
+
+    int fd = mkstemp(fpath);
+    close(fd);
+#endif
+
+    return fpath;
 }
