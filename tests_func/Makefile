@@ -11,6 +11,11 @@ LIBS=../clax_*.o \
 	 ../contrib/*/*.o \
 	 ../tests/u_util.o
 
+ifeq ($(WINDOWS),1)
+	PROGRAM=test.exe
+	LIBS+=-lws2_32
+endif
+
 all: lib $(PROGRAM)
 
 $(PROGRAM): $(OBJECTS)
@@ -25,16 +30,16 @@ depend: .depend
 -include .depend
 
 lib:
-	$(MAKE) -C ../ lib
+	$(MAKE) -C ../
 
 check: $(PROGRAM)
-	./test
+	./$(PROGRAM)
 
 check-coverage:
 	$(MAKE) clean
 	$(MAKE) CFLAGS="-fprofile-arcs -ftest-coverage -O0 $(CFLAGS)" check
 
 clean:
-	rm -f $(PROGRAM) $(OBJECTS)
+	rm -f $(PROGRAM) $(OBJECTS) *.exe
 	rm -f *.gcno *.gcda
 	rm -f .depend

@@ -97,8 +97,8 @@ int popen2(const char *cmdline, popen2_t *child)
     CloseHandle(pipe_out_write);
     CloseHandle(pipe_in_read);
 
-    int in = _open_osfhandle((intptr_t)pipe_in_write, _O_WRONLY);
-    int out = _open_osfhandle((intptr_t)pipe_out_read, _O_RDONLY);
+    int in = _open_osfhandle((intptr_t)pipe_in_write, _O_WRONLY | _O_BINARY);
+    int out = _open_osfhandle((intptr_t)pipe_out_read, _O_RDONLY | _O_BINARY);
 
     child->pid = piProcInfo.dwProcessId;
     child->in = in;

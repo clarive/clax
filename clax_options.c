@@ -159,7 +159,7 @@ int clax_parse_options(opt *options, int argc, char **argv)
 
     if (strlen(options->config_file)) {
         if (ini_parse(options->config_file, clax_config_handler, options) < 0) {
-            fprintf(stderr, "Error: can't load '%s\n\n", options->config_file);
+            fprintf(stderr, "Error: can't load '%s': %s\n\n", options->config_file, strerror(errno));
 
             return -1;
         }

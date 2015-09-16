@@ -27,6 +27,11 @@ int util_parse_http_response(char *buf, size_t len)
       .on_message_complete = util_message_complete_cb
     };
 
+    if (len < 0)
+        return -1;
+
+    http_message_done = 0;
+
     http_parser_init(&parser, HTTP_RESPONSE);
     int ret = http_parser_execute(&parser, &settings, buf, len);
 
@@ -40,13 +45,25 @@ int execute(char *command, char *request, char *obuf, size_t olen)
 
     ret = popen2(command, &ctx);
     if (ret < 0) {
-        fprintf(stderr, "Command failed=%d", ret);
+        fprintf(stderr, "Command '%s' failed=%d", command, ret);
         return -1;
     }
 
     int offset = 0;
     size_t request_len = strlen(request);
-    while ((ret = write(ctx.in, request + offset, request_len - offset)) > 0) {
+    int wcount = 0;
+
+    while (1) {
+        ret = write(ctx.in, request + offset, request_len - offset);
+        wcount += ret;
+
+        if (wcount == request_len)
+            break;
+
+        if (ret < 0 && errno == EAGAIN) {
+            continue;
+        }
+
         offset += ret;
     }
 
@@ -65,8 +82,9 @@ int execute(char *command, char *request, char *obuf, size_t olen)
     }
     obuf[offset] = 0;
 
-    if (pclose2(&ctx) != 0) {
-        fprintf(stderr, "Command failed\n");
+    int exit_code = pclose2(&ctx);
+    if (exit_code != 0) {
+        fprintf(stderr, "Exit code=%d\n", exit_code);
         return -1;
     }
 

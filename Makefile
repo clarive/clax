@@ -54,7 +54,7 @@ slre:
 tests: lib
 	$(MAKE) -C tests
 
-tests_func: lib
+tests_func: tests
 	$(MAKE) -C tests_func
 
 check: tests

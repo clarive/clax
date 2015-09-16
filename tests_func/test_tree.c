@@ -31,7 +31,7 @@ TEST_START(upload)
     char *tmpdir = clax_mktmpdir_alloc();
 
     char command[1024];
-    sprintf(command, "../clax -n -r '%s' -l /dev/null", tmpdir);
+    sprintf(command, CMD " -n -r '%s' -l" DEVNULL, tmpdir);
 
     int rcount = execute(command, request, output, sizeof(output));
 
@@ -67,7 +67,7 @@ TEST_START(upload_with_different_name)
     char *tmpdir = clax_mktmpdir_alloc();
 
     char command[1024];
-    sprintf(command, "../clax -n -r '%s' -l /dev/null", tmpdir);
+    sprintf(command, CMD " -n -r '%s' -l" DEVNULL, tmpdir);
 
     int rcount = execute(command, request, output, sizeof(output));
 
@@ -89,7 +89,7 @@ TEST_START(download)
 {
     char output[1024];
 
-    int rcount = execute("../clax -n -r . -l /dev/null", "GET /tree/main.c\r\n\r\n", output, sizeof(output));
+    int rcount = execute(CMD " -n -r . -l" DEVNULL, "GET /tree/main.c\r\n\r\n", output, sizeof(output));
 
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
@@ -104,7 +104,7 @@ TEST_START(download_not_found)
 {
     char output[1024];
 
-    int rcount = execute("../clax -n -r . -l /dev/null", "GET /tree/unlikely-to-exist\r\n\r\n", output, sizeof(output));
+    int rcount = execute(CMD " -n -r . -l" DEVNULL, "GET /tree/unlikely-to-exist\r\n\r\n", output, sizeof(output));
 
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))

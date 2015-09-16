@@ -29,7 +29,7 @@ depend: .depend
 -include .depend
 
 lib:
-	$(MAKE) -C ../ lib
+	$(MAKE) -C ../
 
 check: $(PROGRAM)
 	./$(PROGRAM)
