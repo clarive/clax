@@ -261,8 +261,8 @@ char *clax_mktmpdir_alloc()
 
 char *clax_mktmpfile_alloc(const char *tmpdir, const char *template)
 {
-    char *tmpdir_ = tmpdir && strlen(tmpdir) ? tmpdir : ".";
-    char *template_ = template && strlen(template) ? template : "XXXXXXXX";
+    const char *tmpdir_ = tmpdir && strlen(tmpdir) ? tmpdir : ".";
+    const char *template_ = template && strlen(template) ? template : "XXXXXXXX";
     char *filename = clax_randstr_template_alloc(template_);
 
     char *fpath = malloc(strlen(tmpdir_) + 1 + strlen(filename) + 1);
@@ -279,7 +279,7 @@ char *clax_randstr_template_alloc(const char *template)
 {
     size_t rand_len = 0;
 
-    char *p = template;
+    const char *p = template;
     while (*p++) {
         if (*p == 'X')
             rand_len++;
@@ -289,10 +289,10 @@ char *clax_randstr_template_alloc(const char *template)
     char *result = clax_strdup(template);
 
     int i = 0;
-    p = result;
-    while (*p++) {
-        if (*p == 'X')
-            *p = rand_str[i++];
+    char *r = result;
+    while (*r++) {
+        if (*r == 'X')
+            *r = rand_str[i++];
     }
 
     free(rand_str);
