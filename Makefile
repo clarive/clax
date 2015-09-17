@@ -12,9 +12,9 @@ ifeq ($(WINDOWS),1)
 	LIBS    += -lws2_32
 	CFLAGS  += -std=gnu99 -pedantic -Wall
 else
-ifeq ($(ZOS),1)
+ifeq ($(MVS),1)
 	CC      =  c99
-	CFLAGS  += -DZOS -D_ALL_SOURCE -D__STRING_CODE_SET__="ISO8859-1"
+	CFLAGS  += -DMVS -D_ALL_SOURCE -D__STRING_CODE_SET__="ISO8859-1"
 	LIBS    += arch/zos/libascii/libascii.a
 else
 	CFLAGS  += -std=gnu99 -pedantic -Wall
@@ -29,7 +29,7 @@ $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS)
 	mv a.out $(PROGRAM)
 
-ifneq ($(ZOS),1)
+ifneq ($(MVS),1)
 depend: .depend
 
 .depend: $(SOURCES)

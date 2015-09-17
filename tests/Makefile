@@ -1,19 +1,24 @@
 PROGRAM=test
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
-CFLAGS=-std=gnu99 -pedantic -Wall -O0\
-	   -I../contrib -I../ \
-	   -D_ALL_SOURCE
+CFLAGS= -I../contrib -I../contrib/mbedtls -I../
 LFLAGS=
-LIBS=../clax_*.o \
-	 ../popen2.o \
-	 ../contrib/*/*.o
+LIBS=../clax_*.o ../popen2.o ../contrib/*/*.o
 
 ifeq ($(WINDOWS),1)
-	PROGRAM=test.exe
-	LIBS+=-lws2_32
+	PROGRAM =  test.exe
+	LIBS    += -lws2_32
+	CFLAGS  += -std=gnu99 -pedantic -Wall
 else
+ifeq ($(MVS),1)
+	CC      =  c99
+	CFLAGS  += -DMVS -D_ALL_SOURCE -D__STRING_CODE_SET__="ISO8859-1"
+	LIBS    += ../arch/zos/libascii/libascii.a
+else
+	CFLAGS  += -std=gnu99 -pedantic -Wall
 endif
+endif
+
 
 all: lib $(PROGRAM)
 

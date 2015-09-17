@@ -20,13 +20,8 @@
 #ifndef CLAX_PLATFORM_H
 #define CLAX_PLATFORM_H
 
-#if defined(_WIN32) || defined(ZOS)
-char *strndup(const char *str, size_t max_len);
-#endif
-
-#if defined(ZOS)
-char *mkdtemp();
-char *strdup(const char *str);
+#ifdef MVS
+#include "arch/zos/libascii/_Ascii_a.h"
 #endif
 
 #if defined(_WIN32)

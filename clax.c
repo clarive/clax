@@ -64,14 +64,14 @@ void _exit(int code)
     exit(code);
 }
 
-void abort()
+void clax_abort()
 {
     _exit(255);
 }
 
 void term(int dummy)
 {
-    abort();
+    clax_abort();
 }
 
 int clax_recv(void *ctx,  unsigned char *buf, size_t len)
@@ -344,7 +344,7 @@ int main(int argc, char **argv)
     if (options.log_file[0]) {
         options._log_file = fopen(options.log_file, "a");
         if (options._log_file == NULL) {
-            abort();
+            clax_abort();
         }
 
         dup2(fileno(options._log_file), STDERR_FILENO);

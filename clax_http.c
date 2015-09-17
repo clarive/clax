@@ -613,11 +613,10 @@ int clax_http_check_basic_auth(char *header, char *username, char *password)
     ok = header && strlen(header) > prefix_len && strncmp(header, prefix, prefix_len) == 0;
 
     if (ok)
-        ok = base64_decode_alloc(header + prefix_len, strlen(header) - prefix_len, &auth, &auth_len);
+        ok = base64_decode_alloc(header + prefix_len, strlen(header) - prefix_len, &auth, &auth_len) && auth != NULL;
 
-    if (ok && auth != NULL) {
+    if (ok) {
         sep = strstr(auth, ":");
-
         ok = sep != NULL;
     }
 
