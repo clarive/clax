@@ -26,13 +26,6 @@
 #include MBEDTLS_CONFIG_FILE
 #endif
 
-#if defined(MBEDTLS_SELF_TEST) && defined(MBEDTLS_PLATFORM_C)
-#include "mbedtls/platform.h"
-#else
-#include <stdio.h>
-#define mbedtls_printf     printf
-#endif
-
 #if defined(MBEDTLS_TIMING_C)
 
 #include "mbedtls/timing.h"
@@ -60,6 +53,13 @@ struct _hr_time
 #include <sys/time.h>
 #include <signal.h>
 #include <time.h>
+
+#if defined(MBEDTLS_SELF_TEST) && defined(MBEDTLS_PLATFORM_C)
+#include "mbedtls/platform.h"
+#else
+#include <stdio.h>
+#define mbedtls_printf     printf
+#endif
 
 struct _hr_time
 {

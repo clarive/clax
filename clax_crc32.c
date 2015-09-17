@@ -24,6 +24,7 @@
 #include <unistd.h>
 
 #include "clax_crc32.h"
+#include "clax_platform.h"
 
 unsigned long clax_crc32_table[256];
 

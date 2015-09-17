@@ -35,6 +35,7 @@
 #include "clax_http.h"
 #include "clax_big_buf.h"
 #include "clax_util.h"
+#include "clax_platform.h"
 
 enum {
     PARAM_MODE_KEY,

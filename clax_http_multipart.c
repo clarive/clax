@@ -20,6 +20,7 @@
 #include "clax_http.h"
 #include "clax_http_multipart.h"
 #include "clax_util.h"
+#include "clax_platform.h"
 
 void clax_http_multipart_list_init(clax_http_multipart_list_t *list, char *tempdir)
 {

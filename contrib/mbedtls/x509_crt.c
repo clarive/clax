@@ -48,15 +48,6 @@
 #include "mbedtls/pem.h"
 #endif
 
-#if defined(MBEDTLS_PLATFORM_C)
-#include "mbedtls/platform.h"
-#else
-#include <stdlib.h>
-#define mbedtls_free       free
-#define mbedtls_calloc    calloc
-#define mbedtls_snprintf   snprintf
-#endif
-
 #if defined(MBEDTLS_THREADING_C)
 #include "mbedtls/threading.h"
 #endif
@@ -74,6 +65,15 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #endif /* !_WIN32 || EFIX64 || EFI32 */
+#endif
+
+#if defined(MBEDTLS_PLATFORM_C)
+#include "mbedtls/platform.h"
+#else
+#include <stdlib.h>
+#define mbedtls_free       free
+#define mbedtls_calloc    calloc
+#define mbedtls_snprintf   snprintf
 #endif
 
 /* Implementation that should never be optimized out by the compiler */

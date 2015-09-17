@@ -24,6 +24,8 @@
 #include <unistd.h>
 #include <time.h>
 
+#include "clax_platform.h"
+
 void clax_log_(const char *file, int line, const char *func_, char *fmt, ...)
 {
     int size;

@@ -6,6 +6,7 @@ COVERAGE_DATA=$(SOURCES:.c=.gcda)
 CFLAGS= -Icontrib -Icontrib/mbedtls
 LFLAGS=
 LIBS=contrib/*/*.o
+TARGET=
 
 ifeq ($(WINDOWS),1)
 	PROGRAM =  clax.exe
@@ -16,6 +17,7 @@ ifeq ($(MVS),1)
 	CC      =  c99
 	CFLAGS  += -DMVS -D_ALL_SOURCE -D__STRING_CODE_SET__="ISO8859-1"
 	LIBS    += arch/zos/libascii/libascii.a
+	TARGET  = libascii
 else
 	CFLAGS  += -std=gnu99 -pedantic -Wall
 endif
@@ -23,7 +25,7 @@ endif
 
 all: lib $(PROGRAM)
 
-lib: mbedtls jsmn http-parser multipart-parser-c inih base64 slre $(OBJECTS)
+lib: mbedtls jsmn http-parser multipart-parser-c inih base64 slre $(TARGET) $(OBJECTS)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS)
@@ -38,6 +40,9 @@ depend: .depend
 
 -include .depend
 endif
+
+libascii:
+	$(MAKE) -C arch/zos/libascii CC=cxx
 
 inih:
 	$(MAKE) -C contrib/inih CFLAGS="$(CFLAGS)"

@@ -26,6 +26,7 @@
 #include "clax_log.h"
 #include "clax_big_buf.h"
 #include "clax_util.h"
+#include "clax_platform.h"
 
 clax_big_buf_t *clax_big_buf_init(clax_big_buf_t *bbuf, char *temp_dir, size_t max_size)
 {

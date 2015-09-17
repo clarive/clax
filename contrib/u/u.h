@@ -20,10 +20,6 @@
 #ifndef _U_H
 #define _U_H
 
-#ifdef MVS
-#include "../../arch/zos/libascii/_Ascii_a.h"
-#endif
-
 #define COLOR_GREEN "\x1b[0;32m"
 #define COLOR_RED "\x1b[0;31m"
 #define COLOR_YELLOW "\x1b[0;33m"
@@ -34,6 +30,10 @@
 #include <string.h>
 
 #include "slre/slre.h"
+
+#ifdef MVS
+#include "../../arch/zos/libascii/_Ascii_a.h"
+#endif
 
 int u_tests;
 int u_tests_failed;

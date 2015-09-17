@@ -29,8 +29,8 @@
 # include <sys/types.h>
 #endif
 
-#include "clax_platform.h"
 #include "clax_util.h"
+#include "clax_platform.h"
 
 void clax_kv_list_init(clax_kv_list_t *list)
 {

@@ -27,7 +27,6 @@
 #include <windows.h>
 #else
 #include <sys/wait.h>
-
 #endif
 
 #include "popen2.h"

@@ -35,6 +35,7 @@
 #include "clax_log.h"
 #include "clax_http.h"
 #include "clax_command.h"
+#include "clax_platform.h"
 
 volatile int alarm_fired = 0;
 

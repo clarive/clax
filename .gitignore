@@ -1,6 +1,7 @@
 clax
 *.exe
 *.o
+*.a
 .depend
 tests/.depend
 tests/test
