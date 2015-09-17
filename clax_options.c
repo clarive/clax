@@ -123,8 +123,8 @@ int clax_parse_options(opt *options, int argc, char **argv)
         case 'a': {
             char *sep;
             if ((sep = strstr(optarg, ":")) != NULL) {
-                options->basic_auth_username = strndup(optarg, sep - optarg);
-                options->basic_auth_password = strndup(sep + 1, strlen(optarg) - (sep - optarg) - 1);
+                options->basic_auth_username = clax_strndup(optarg, sep - optarg);
+                options->basic_auth_password = clax_strndup(sep + 1, strlen(optarg) - (sep - optarg) - 1);
             }
             else {
                 fprintf(stderr, "Error: Invalid username:password pair\n\n");

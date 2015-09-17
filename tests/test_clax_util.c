@@ -334,4 +334,110 @@ TEST_START(htol converts hex to integer)
 }
 TEST_END
 
+TEST_START(strdup duplicates a string)
+{
+    char *p;
+
+    p = clax_strdup("foobar");
+    ASSERT_STR_EQ(p, "foobar");
+    free(p);
+}
+TEST_END
+
+TEST_START(strndup duplicates a string with max characters)
+{
+    char *p;
+
+    p = clax_strndup("foobar", 6);
+    ASSERT_STR_EQ(p, "foobar");
+    free(p);
+
+    p = clax_strndup("foobar", 10);
+    ASSERT_STR_EQ(p, "foobar");
+    free(p);
+
+    p = clax_strndup("foobar", 3);
+    ASSERT_STR_EQ(p, "foo");
+    free(p);
+}
+TEST_END
+
+TEST_START(generates random string)
+{
+    char *p;
+
+    p = clax_randstr_alloc(0);
+    ASSERT_EQ(strlen(p), 0);
+    free(p);
+
+    p = clax_randstr_alloc(6);
+    ASSERT_EQ(strlen(p), 6);
+    ASSERT_MATCHES(p, "[a-zA-Z0-9]+");
+    free(p);
+}
+TEST_END
+
+TEST_START(generates random string based on template)
+{
+    char *p;
+
+    p = clax_randstr_template_alloc("X");
+    ASSERT_EQ(strlen(p), 1);
+    ASSERT_MATCHES(p, "[a-zA-Z0-9]+");
+    free(p);
+
+    p = clax_randstr_template_alloc("XXXX");
+    ASSERT_EQ(strlen(p), 4);
+    ASSERT_MATCHES(p, "[a-zA-Z0-9]{4}");
+    free(p);
+
+    p = clax_randstr_template_alloc("fooXXXbar");
+    ASSERT_EQ(strlen(p), 9);
+    ASSERT_MATCHES(p, "foo[a-zA-Z0-9]{3}bar");
+    free(p);
+}
+TEST_END
+
+TEST_START(generates random filename)
+{
+    char *p;
+
+    p = clax_mktmpfile_alloc("tmp", NULL);
+    ASSERT_EQ(strlen(p), 3 + 1 + 8);
+    ASSERT_MATCHES(p, "^tmp/[a-zA-Z0-9]+$");
+    free(p);
+
+    p = clax_mktmpfile_alloc(".", NULL);
+    ASSERT_EQ(strlen(p), 1 + 1 + 8);
+    ASSERT_MATCHES(p, "^\\./[a-zA-Z0-9]+$");
+    free(p);
+
+    p = clax_mktmpfile_alloc("", NULL);
+    ASSERT_EQ(strlen(p), 1 + 1 + 8);
+    ASSERT_MATCHES(p, "^\\./[a-zA-Z0-9]+$");
+    free(p);
+
+    p = clax_mktmpfile_alloc(NULL, NULL);
+    ASSERT_EQ(strlen(p), 1 + 1 + 8);
+    ASSERT_MATCHES(p, "^\\./[a-zA-Z0-9]+$");
+    free(p);
+}
+TEST_END
+
+TEST_START(generates random filename with template)
+{
+    char *p;
+
+    p = clax_mktmpfile_alloc("tmp", ".fileXXX");
+    ASSERT_EQ(strlen(p), 3 + 1 + 8);
+    ASSERT_MATCHES(p, "^tmp/.file[a-zA-Z0-9]{3}$");
+    free(p);
+
+    p = clax_mktmpfile_alloc("tmp", "aXbXc");
+    ASSERT_EQ(strlen(p), 3 + 1 + 5);
+    ASSERT_MATCHES(p, "^tmp/a[a-zA-Z0-9]b[a-zA-Z0-9]c$");
+    free(p);
+}
+TEST_END
+
 SUITE_END

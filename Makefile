@@ -3,16 +3,22 @@ SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
 COVERAGE_GRAPH=$(SOURCES:.c=.gcno)
 COVERAGE_DATA=$(SOURCES:.c=.gcda)
-CFLAGS=-std=gnu99 -pedantic -Wall \
-	   -Icontrib \
-	   -D_ALL_SOURCE
+CFLAGS= -Icontrib -Icontrib/mbedtls
 LFLAGS=
 LIBS=contrib/*/*.o
 
 ifeq ($(WINDOWS),1)
-	PROGRAM=clax.exe
-	LIBS+=-lws2_32
+	PROGRAM =  clax.exe
+	LIBS    += -lws2_32
+	CFLAGS  += -std=gnu99 -pedantic -Wall
 else
+ifeq ($(ZOS),1)
+	CC      =  c99
+	CFLAGS  += -DZOS -D_ALL_SOURCE -D__STRING_CODE_SET__="ISO8859-1"
+	LIBS    += arch/zos/libascii/libascii.a
+else
+	CFLAGS  += -std=gnu99 -pedantic -Wall
+endif
 endif
 
 all: lib $(PROGRAM)
@@ -20,8 +26,10 @@ all: lib $(PROGRAM)
 lib: mbedtls jsmn http-parser multipart-parser-c inih base64 slre $(OBJECTS)
 
 $(PROGRAM): $(OBJECTS)
-	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS) -o $(PROGRAM)
+	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS)
+	mv a.out $(PROGRAM)
 
+ifneq ($(ZOS),1)
 depend: .depend
 
 .depend: $(SOURCES)
@@ -29,27 +37,28 @@ depend: .depend
 	$(CC) $(CFLAGS) -MM $^ > ./.depend
 
 -include .depend
+endif
 
 inih:
-	$(MAKE) -C contrib/inih
+	$(MAKE) -C contrib/inih CFLAGS="$(CFLAGS)"
 
 jsmn:
 	$(MAKE) -C contrib/jsmn CFLAGS="-DJSMN_PARENT_LINKS"
 
 mbedtls:
-	$(MAKE) -C contrib/mbedtls
+	$(MAKE) -C contrib/mbedtls -f Makefile.clax CFLAGS="$(CFLAGS)"
 
 http-parser:
-	$(MAKE) -C contrib/http-parser package
+	$(MAKE) -C contrib/http-parser -f Makefile.clax CFLAGS="$(CFLAGS)"
 
 multipart-parser-c:
-	$(MAKE) -C contrib/multipart-parser-c
+	$(MAKE) -C contrib/multipart-parser-c -f Makefile.clax CFLAGS="$(CFLAGS)"
 
 base64:
-	$(MAKE) -C contrib/base64
+	$(MAKE) -C contrib/base64 CFLAGS="$(CFLAGS)"
 
 slre:
-	$(MAKE) -C contrib/slre
+	$(MAKE) -C contrib/slre CFLAGS="$(CFLAGS)"
 
 tests: lib
 	$(MAKE) -C tests

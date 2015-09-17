@@ -268,7 +268,7 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
                 fpath = clax_strjoin("/", subdir, new_name, NULL);
             }
             else {
-                char *p = strndup(filename, filename_len);
+                char *p = clax_strndup(filename, filename_len);
                 fpath = clax_strjoin("/", subdir, p, NULL);
                 free(p);
             }

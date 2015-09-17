@@ -65,8 +65,13 @@ char *clax_strjoin(char *sep, ...);
 
 int clax_mkdir(char *dirname, int mode);
 char *clax_mktmpdir_alloc();
-char *clax_mktmpfile_alloc(char *tmpdir, char *prefix);
+char *clax_mktmpfile_alloc(const char *tmpdir, const char *template);
 
 unsigned long int clax_htol(char *buf);
+
+char *clax_randstr_alloc(size_t len);
+char *clax_randstr_template_alloc(const char *template);
+char *clax_strdup(const char *str);
+char *clax_strndup(const char *str, size_t max);
 
 #endif

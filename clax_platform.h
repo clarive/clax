@@ -20,9 +20,17 @@
 #ifndef CLAX_PLATFORM_H
 #define CLAX_PLATFORM_H
 
+#if defined(_WIN32) || defined(ZOS)
+char *strndup(const char *str, size_t max_len);
+#endif
+
+#if defined(ZOS)
+char *mkdtemp();
+char *strdup(const char *str);
+#endif
+
 #if defined(_WIN32)
 
-char *strndup(const char *str, size_t max_len);
 unsigned int sleep(unsigned int seconds);
 
 #if defined(__MINGW64_VERSION_MAJOR)

@@ -31,7 +31,7 @@ clax_big_buf_t *clax_big_buf_init(clax_big_buf_t *bbuf, char *temp_dir, size_t m
 {
     memset(bbuf, 0, sizeof(clax_big_buf_t));
 
-    bbuf->temp_dir = strdup(temp_dir ? temp_dir : "/tmp");
+    bbuf->temp_dir = clax_strdup(temp_dir ? temp_dir : ".");
     bbuf->max_size = max_size;
 
     return bbuf;
@@ -64,7 +64,7 @@ int clax_big_buf_append(clax_big_buf_t *bbuf, const unsigned char *buf, size_t l
 {
     if (bbuf->temp_dir && bbuf->max_size && bbuf->len + len > bbuf->max_size) {
         if (!bbuf->fh) {
-            char *tmpfile = clax_mktmpfile_alloc(bbuf->temp_dir, ".file");
+            char *tmpfile = clax_mktmpfile_alloc(bbuf->temp_dir, ".fileXXXXXXXX");
 
             clax_log("Memory is too big, saving to file '%s'", tmpfile);
 
@@ -75,7 +75,7 @@ int clax_big_buf_append(clax_big_buf_t *bbuf, const unsigned char *buf, size_t l
                 return -1;
             }
 
-            bbuf->fpath = strdup(tmpfile);
+            bbuf->fpath = clax_strdup(tmpfile);
 
             if (bbuf->len) {
                 size_t wcount = fwrite(bbuf->memory, 1, bbuf->len, bbuf->fh);

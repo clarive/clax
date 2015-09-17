@@ -26,16 +26,6 @@
 
 #include <windows.h>
 
-char *strndup(const char *str, size_t max_len)
-{
-    size_t len = MIN(strlen(str), max_len);
-
-    char *p = malloc(len + 1);
-    strncpy(p, str, len);
-    p[len] = 0;
-    return p;
-}
-
 unsigned int sleep(unsigned int seconds)
 {
     Sleep(seconds * 1000);

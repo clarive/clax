@@ -29,6 +29,7 @@
 # include <sys/types.h>
 #endif
 
+#include "clax_platform.h"
 #include "clax_util.h"
 
 void clax_kv_list_init(clax_kv_list_t *list)
@@ -200,7 +201,7 @@ void clax_san_path(char *buf)
 char *clax_strjoin(char *sep, ...)
 {
     char *p;
-    char *join = strdup("");
+    char *join = clax_strdup("");
     size_t sep_len = strlen(sep);
     va_list a_list;
 
@@ -244,47 +245,76 @@ int clax_mkdir(char *dirname, int mode)
 char *clax_mktmpdir_alloc()
 {
 #ifdef _WIN32
-    char template[] = "tmpdir.XXXXXX";
-
-    char *tmpdir = _mktemp(template);
+    char *template = "clax.tmpdir.XXXXXX";
 #else
-    char template[] = "/tmp/clax.tests.tmpdir.XXXXXX";
+    char *template = "/tmp/clax.tmpdir.XXXXXX";
 
-    char *tmpdir = mkdtemp(template);
 #endif
 
-    clax_mkdir(tmpdir, 0755);
+    char *tmpdir = clax_randstr_template_alloc(template);
 
-    return strdup(tmpdir);
+    if (clax_mkdir(tmpdir, 0755) == 0)
+        return tmpdir;
+
+    return NULL;
 }
 
-char *clax_mktmpfile_alloc(char *tmpdir, char *prefix)
+char *clax_mktmpfile_alloc(const char *tmpdir, const char *template)
 {
-    char *fpath = NULL;
+    char *tmpdir_ = tmpdir && strlen(tmpdir) ? tmpdir : ".";
+    char *template_ = template && strlen(template) ? template : "XXXXXXXX";
+    char *filename = clax_randstr_template_alloc(template_);
 
-#ifdef _WIN32
-    char filename[MAX_PATH];
-    GetTempFileName(tmpdir, prefix, 0, filename);
-
-    /* Replacing \ by / */
-    filename[strlen(tmpdir)] = '/';
-
-    fpath = strdup(filename);
-#else
-    char *template = "XXXXXX";
-    fpath = malloc(strlen(tmpdir) + 1 + strlen(prefix) + strlen(template));
-    fpath[0] = 0;
-
-    strcpy(fpath, tmpdir);
+    char *fpath = malloc(strlen(tmpdir_) + 1 + strlen(filename) + 1);
+    strcpy(fpath, tmpdir_);
     strcat(fpath, "/");
-    strcat(fpath, prefix);
-    strcat(fpath, template);
+    strcat(fpath, filename);
 
-    int fd = mkstemp(fpath);
-    close(fd);
-#endif
+    free(filename);
 
     return fpath;
+}
+
+char *clax_randstr_template_alloc(const char *template)
+{
+    size_t rand_len = 0;
+
+    char *p = template;
+    while (*p++) {
+        if (*p == 'X')
+            rand_len++;
+    }
+
+    char *rand_str = clax_randstr_alloc(rand_len);
+    char *result = clax_strdup(template);
+
+    int i = 0;
+    p = result;
+    while (*p++) {
+        if (*p == 'X')
+            *p = rand_str[i++];
+    }
+
+    free(rand_str);
+
+    return result;
+}
+
+char *clax_randstr_alloc(size_t len)
+{
+    char *p = malloc(len + 1);
+
+    char alphabet[] = "0123456789"
+                      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                      "abcdefghijklmnopqrstuvwxyz";
+
+    for (int i = 0; i < len; i++) {
+        p[i] = alphabet[rand() % (sizeof(alphabet) - 1)];
+    }
+
+    p[len] = 0;
+
+    return p;
 }
 
 unsigned long clax_htol(char *buf)
@@ -310,4 +340,24 @@ unsigned long clax_htol(char *buf)
     }
 
     return res;
+}
+
+char *clax_strdup(const char *str)
+{
+    size_t len = strlen(str);
+
+    char *p = malloc(len + 1);
+    strncpy(p, str, len);
+    p[len] = 0;
+    return p;
+}
+
+char *clax_strndup(const char *str, size_t max_len)
+{
+    size_t len = MIN(strlen(str), max_len);
+
+    char *p = malloc(len + 1);
+    strncpy(p, str, len);
+    p[len] = 0;
+    return p;
 }
