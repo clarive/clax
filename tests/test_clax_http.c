@@ -32,7 +32,7 @@ int _parse(http_parser *parser, clax_http_request_t *req, const char *data)
 
 char test_send_cb_buf[1024] = {0};
 size_t test_send_cb_buf_len = 0;
-size_t test_send_cb(void *ctx, const unsigned char *buf, size_t len)
+int test_send_cb(void *ctx, const unsigned char *buf, size_t len)
 {
     memcpy(test_send_cb_buf + test_send_cb_buf_len, buf, len);
 
