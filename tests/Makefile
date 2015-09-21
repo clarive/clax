@@ -12,8 +12,7 @@ ifeq ($(WINDOWS),1)
 else
 ifeq ($(MVS),1)
 	CC      =  c99
-	CFLAGS  += -DMVS -D_ALL_SOURCE -D__STRING_CODE_SET__="ISO8859-1"
-	LIBS    += ../arch/zos/libascii/libascii.a
+	CFLAGS  += -DMVS -D_ALL_SOURCE
 else
 	CFLAGS  += -std=gnu99 -pedantic -Wall
 endif
@@ -23,8 +22,10 @@ endif
 all: lib $(PROGRAM)
 
 $(PROGRAM): $(OBJECTS)
-	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS) -o $(PROGRAM)
+	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS)
+	mv a.out $(PROGRAM)
 
+ifneq ($(MVS),1)
 depend: .depend
 
 .depend: $(SOURCES)
@@ -32,6 +33,7 @@ depend: .depend
 	$(CC) $(CFLAGS) -MM $^ > ./.depend
 
 -include .depend
+endif
 
 lib:
 	$(MAKE) -C ../
