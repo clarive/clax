@@ -31,10 +31,6 @@
 
 #include "slre/slre.h"
 
-#ifdef MVS
-#include "../../arch/zos/libascii/_Ascii_a.h"
-#endif
-
 int u_tests;
 int u_tests_failed;
 int u_tests_asserts;
