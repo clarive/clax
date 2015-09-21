@@ -22,6 +22,8 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <iconv.h>
+#include <sys/time.h>
+#include <time.h>
 
 #ifdef _WIN32
 # include <windows.h>
@@ -32,6 +34,8 @@
 
 #include "clax_util.h"
 #include "clax_platform.h"
+
+static srand_called = 0;
 
 void clax_kv_list_init(clax_kv_list_t *list)
 {
@@ -308,6 +312,14 @@ char *clax_randstr_alloc(size_t len)
     char alphabet[] = "0123456789"
                       "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                       "abcdefghijklmnopqrstuvwxyz";
+
+    if (!srand_called) {
+        struct timeval t1;
+        gettimeofday(&t1, NULL);
+        srand(t1.tv_usec * t1.tv_sec);
+
+        srand_called++;
+    }
 
     for (int i = 0; i < len; i++) {
         p[i] = alphabet[rand() % (sizeof(alphabet) - 1)];
