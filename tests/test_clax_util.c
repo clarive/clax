@@ -440,6 +440,8 @@ TEST_START(generates random filename with template)
 }
 TEST_END
 
+#ifndef MVS
+
 TEST_START(converts ascii to ebcdic)
 {
     char buf[] = "hello there!";
@@ -497,5 +499,7 @@ TEST_START(converts ebcdic to ascii inplace)
     clax_iconv_close();
 }
 TEST_END
+
+#endif
 
 SUITE_END
