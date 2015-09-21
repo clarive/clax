@@ -39,7 +39,7 @@
 
 volatile int alarm_fired = 0;
 
-void clax_command_timeout()
+void clax_command_timeout(int dummy)
 {
 #if defined(_WIN32)
 #else
