@@ -38,10 +38,26 @@ int u_tests_asserts_failed;
 int u_warnings;
 int u_ok;
 
+#define U_COLOR(color)            \
+    do {                          \
+        if (getenv("U_COLOR")) {  \
+            printf(color);        \
+        }                         \
+    } while (0);
+
+#define U_COLOR_OFF               \
+    do {                          \
+        if (getenv("U_COLOR")) {  \
+            printf(COLOR_OFF);    \
+        }                         \
+    } while (0);
+
 #define NOT_OK                                                         \
         u_local_tests_failed++;                                        \
         printf("    # %s:%d\n", __FILE__, __LINE__);                   \
-        printf(COLOR_RED "    not ok %d\n" COLOR_OFF, u_local_tests);
+        U_COLOR(COLOR_RED)                                             \
+        printf("    not ok %d\n" COLOR_OFF, u_local_tests);            \
+        U_COLOR_OFF
 
 #define _ASSERT(code)     \
     do {                  \
@@ -204,7 +220,9 @@ int u_ok;
 #define TEST_END \
         if (!u_local_tests) {                                      \
             u_warnings++;                                          \
-            printf(COLOR_YELLOW "# no tests\n" COLOR_OFF);         \
+            U_COLOR(COLOR_YELLOW)                                  \
+            printf("# no tests\n");                                \
+            U_COLOR_OFF                                            \
         }                                                          \
         else {                                                     \
             u_tests++;                                             \
@@ -213,10 +231,12 @@ int u_ok;
             if (u_local_tests_failed) {                            \
                 u_tests_asserts_failed += u_local_tests_failed;    \
                 u_tests_failed++;                                  \
-                printf(COLOR_RED "not ok %d (%d/%d)\n" COLOR_OFF   \
+                U_COLOR(COLOR_RED)                                 \
+                printf("not ok %d (%d/%d)\n"                       \
                         , u_tests                                  \
                         , u_local_tests_failed                     \
                         , u_local_tests);                          \
+                U_COLOR_OFF                                        \
                 printf("# %s:%d\n", __FILE__, __LINE__);           \
             } else {                                               \
                 printf("ok %d\n", u_tests);                        \
@@ -242,19 +262,25 @@ int u_ok;
     printf("1..%d (%d)\n", u_tests, u_tests_asserts);              \
                                                                    \
     if (u_tests_failed) {                                          \
-        printf(COLOR_RED "FAILED tests\n" COLOR_OFF);              \
-        printf(COLOR_RED "Failed %d/%d (%d/%d) tests\n" COLOR_OFF  \
+        U_COLOR(COLOR_RED)                                         \
+        printf("FAILED tests\n");                                  \
+        printf("Failed %d/%d (%d/%d) tests\n"                      \
                 , u_tests_failed                                   \
                 , u_tests                                          \
                 , u_tests_asserts_failed                           \
                 , u_tests_asserts);                                \
+        U_COLOR_OFF                                                \
                                                                    \
         exit(255);                                                 \
     } else {                                                       \
         if (u_warnings) {                                          \
-            printf(COLOR_YELLOW "SUCCESS (warnings)\n" COLOR_OFF); \
+            U_COLOR(COLOR_YELLOW)                                  \
+            printf("SUCCESS (warnings)\n");                        \
+            U_COLOR_OFF                                            \
         } else {                                                   \
-            printf(COLOR_GREEN "SUCCESS\n" COLOR_OFF);             \
+            U_COLOR(COLOR_GREEN)                                   \
+            printf("SUCCESS\n");                                   \
+            U_COLOR_OFF                                            \
         }                                                          \
     }                                                              \
                                                                    \
