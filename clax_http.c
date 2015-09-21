@@ -495,13 +495,13 @@ int clax_http_read_parse(void *ctx, recv_cb_t recv_cb, http_parser *parser, clax
 
 int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t *response)
 {
-    char buf[4];
+    char buf[5];
 
     const char *status_message = clax_http_status_message(response->status_code);
 
     TRY send_cb(ctx, (const unsigned char *)"HTTP/1.1 ", 9) GOTO
     sprintf(buf, "%d ", response->status_code);
-    TRY send_cb(ctx, (const unsigned char *)buf, strlen(buf)) GOTO
+    TRY send_cb(ctx, (const unsigned char *)buf, MIN(strlen(buf), sizeof(buf))) GOTO
     TRY send_cb(ctx, (const unsigned char *)status_message, strlen(status_message)) GOTO
     TRY send_cb(ctx, (const unsigned char *)"\r\n", 2) GOTO
 
