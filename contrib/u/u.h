@@ -56,7 +56,7 @@ int u_ok;
         u_local_tests_failed++;                                        \
         printf("    # %s:%d\n", __FILE__, __LINE__);                   \
         U_COLOR(COLOR_RED)                                             \
-        printf("    not ok %d\n" COLOR_OFF, u_local_tests);            \
+        printf("    not ok %d\n", u_local_tests);            \
         U_COLOR_OFF
 
 #define _ASSERT(code)     \
