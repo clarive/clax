@@ -480,7 +480,7 @@ int clax_http_read_parse(void *ctx, recv_cb_t recv_cb, http_parser *parser, clax
         ret = clax_http_parse(parser, request, (char *)buf, ret);
 
         if (ret < 0) {
-            clax_log("Parsing failed!");
+            clax_log("Parsing failed: %s", http_errno_description(parser->http_errno));
             return -1;
         }
         else if (ret == 1) {

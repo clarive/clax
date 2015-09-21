@@ -440,4 +440,62 @@ TEST_START(generates random filename with template)
 }
 TEST_END
 
+TEST_START(converts ascii to ebcdic)
+{
+    char buf[] = "hello there!";
+    char out[1024];
+
+    clax_iconv_open();
+
+    int ret = clax_ascii_to_ebcdic(buf, strlen(buf), out, 1024);
+    ASSERT_EQ(ret, 12);
+    ASSERT_BUF_EQ(out, "\x88\x85\x93\x93\x96\x40\xA3\x88\x85\x99\x85\x5A", 12);
+
+    clax_iconv_close();
+}
+TEST_END
+
+TEST_START(converts ascii to ebcdic inplace)
+{
+    char buf[] = "hello there!";
+
+    clax_iconv_open();
+
+    int ret = clax_ascii_to_ebcdic(buf, strlen(buf), buf, sizeof(buf));
+    ASSERT_EQ(ret, 12);
+    ASSERT_BUF_EQ(buf, "\x88\x85\x93\x93\x96\x40\xA3\x88\x85\x99\x85\x5A", 12);
+
+    clax_iconv_close();
+}
+TEST_END
+
+TEST_START(converts ebcdic to ascii)
+{
+    char buf[] = "\x88\x85\x93\x93\x96\x40\xA3\x88\x85\x99\x85\x5A";
+    char out[1024];
+
+    clax_iconv_open();
+
+    int ret = clax_ebcdic_to_ascii(buf, strlen(buf), out, 1024);
+    ASSERT_EQ(ret, 12);
+    ASSERT_BUF_EQ(out, "hello there!", 12);
+
+    clax_iconv_close();
+}
+TEST_END
+
+TEST_START(converts ebcdic to ascii inplace)
+{
+    char buf[] = "\x88\x85\x93\x93\x96\x40\xA3\x88\x85\x99\x85\x5A";
+
+    clax_iconv_open();
+
+    int ret = clax_ebcdic_to_ascii(buf, strlen(buf), buf, sizeof(buf));
+    ASSERT_EQ(ret, 12);
+    ASSERT_BUF_EQ(buf, "hello there!", 12);
+
+    clax_iconv_close();
+}
+TEST_END
+
 SUITE_END

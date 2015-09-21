@@ -327,6 +327,7 @@ exit:
 int main(int argc, char **argv)
 {
     clax_ctx_t clax_ctx;
+    clax_iconv_open();
 
     signal(SIGINT, term);
 

@@ -15,9 +15,7 @@ ifeq ($(WINDOWS),1)
 else
 ifeq ($(MVS),1)
 	CC      =  c99
-	CFLAGS  += -DMVS -D_ALL_SOURCE -D__STRING_CODE_SET__="ISO8859-1"
-	LIBS    += arch/zos/libascii/libascii.a
-	TARGET  = libascii
+	CFLAGS  += -DMVS -D_ALL_SOURCE
 else
 	CFLAGS  += -std=gnu99 -pedantic -Wall
 endif
@@ -41,9 +39,6 @@ depend: .depend
 -include .depend
 endif
 
-libascii:
-	$(MAKE) -C arch/zos/libascii CC=cxx
-
 inih:
 	$(MAKE) -C contrib/inih CFLAGS="$(CFLAGS)"
 
@@ -54,7 +49,7 @@ mbedtls:
 	$(MAKE) -C contrib/mbedtls -f Makefile.clax CFLAGS="$(CFLAGS)"
 
 http-parser:
-	$(MAKE) -C contrib/http-parser -f Makefile.clax CFLAGS="$(CFLAGS)"
+	$(MAKE) -C contrib/http-parser -f Makefile.clax CFLAGS="$(CFLAGS) -D__STRING_CODE_SET__=\"ISO8859-1\""
 
 multipart-parser-c:
 	$(MAKE) -C contrib/multipart-parser-c -f Makefile.clax CFLAGS="$(CFLAGS)"

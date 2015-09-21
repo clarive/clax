@@ -21,6 +21,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <unistd.h>
+#include <iconv.h>
 
 #ifdef _WIN32
 # include <windows.h>
@@ -360,4 +361,40 @@ char *clax_strndup(const char *str, size_t max_len)
     strncpy(p, str, len);
     p[len] = 0;
     return p;
+}
+
+static iconv_t iconv_e_to_a_cd;
+static iconv_t iconv_a_to_e_cd;
+
+size_t clax_iconv(iconv_t cd, char *from, size_t from_len, char *to, size_t to_len)
+{
+    size_t from_left = from_len;
+    size_t to_left   = to_len;
+
+    iconv(cd, &from, &from_left, &to, &to_left);
+
+    return to_len - to_left;
+}
+
+size_t clax_ebcdic_to_ascii(char *from, size_t from_len, char *to, size_t to_len)
+{
+    return clax_iconv(iconv_e_to_a_cd, from, from_len, to, to_len);
+}
+
+size_t clax_ascii_to_ebcdic(char *from, size_t from_len, char *to, size_t to_len)
+{
+    return clax_iconv(iconv_a_to_e_cd, from, from_len, to, to_len);
+}
+
+void clax_iconv_open()
+{
+    /* In iconv it's (_to_, _from_) */
+    iconv_e_to_a_cd = iconv_open("ISO8859-1", "IBM-1047");
+    iconv_a_to_e_cd = iconv_open("IBM-1047", "ISO8859-1");
+}
+
+void clax_iconv_close()
+{
+    iconv_close(iconv_e_to_a_cd);
+    iconv_close(iconv_a_to_e_cd);
 }

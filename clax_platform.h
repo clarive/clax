@@ -21,7 +21,6 @@
 #define CLAX_PLATFORM_H
 
 #ifdef MVS
-#include "arch/zos/libascii/_Ascii_a.h"
 #endif
 
 #if defined(_WIN32)

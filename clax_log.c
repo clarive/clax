@@ -37,12 +37,6 @@ void clax_log_(const char *file, int line, const char *func_, char *fmt, ...)
 
     strcpy(func, func_);
 
-#ifdef MVS
-    char func_a[1024];
-    __toascii_a((char * )func_a, func);
-    strcpy(func, func_a);
-#endif
-
     va_start(args, fmt);
     size = vsnprintf(NULL, 0, fmt, args) + 1;
     va_end(args);

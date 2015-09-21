@@ -87,11 +87,6 @@ int clax_parse_options(opt *options, int argc, char **argv)
     if (argc < 2)
         return -1;
 
-#ifdef MVS
-    if (argc > 1)
-        __argvtoascii_a(argc, (char **)argv);
-#endif
-
     opterr = 0;
     while ((c = getopt(argc, argv, "hnkzl:e:t:p:r:c:a:")) != -1) {
         switch (c) {
