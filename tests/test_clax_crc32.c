@@ -17,25 +17,35 @@
  *  along with Clax.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdarg.h>
 
 #include "u/u.h"
+#include "u_util.h"
 
-#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
+#include "clax_crc32.h"
+#include "clax_util.h"
 
-int main(int argc, char *argv[])
+SUITE_START(clax_crc32)
+
+TEST_START(calculates crc32 from fd)
 {
-    START_TESTING
+    char *tmp_dirname = clax_mktmpdir_alloc();
+    char *filename = clax_strjoin("/", tmp_dirname, "file", NULL);
 
-    RUN_SUITE(clax_big_buf)
-    RUN_SUITE(clax_crc32)
-    RUN_SUITE(clax_command)
-    RUN_SUITE(clax_dispatch)
-    RUN_SUITE(clax_http)
-    RUN_SUITE(clax_http_multipart_list)
-    RUN_SUITE(clax_options)
-    RUN_SUITE(clax_util)
+    FILE *fh = fopen(filename, "w");
+    fprintf(fh, "%s", "\xab\xcd\xef");
+    fclose(fh);
 
-    DONE_TESTING
+    fh = fopen(filename, "r");
+
+    int crc32 = clax_crc32_calc_fd(fileno(fh));
+
+    ASSERT_EQ(crc32, 1686977913);
+
+    rmrf(tmp_dirname);
 }
+TEST_END
+
+SUITE_END

@@ -27,7 +27,20 @@
 
 int _parse(http_parser *parser, clax_http_request_t *req, const char *data)
 {
-    return clax_http_parse(parser, req, data, strlen(data));
+    int ret;
+    char *p = data;
+
+#ifdef MVS
+    p = clax_etoa_alloc(data, strlen(data) + 1);
+#endif
+
+    ret = clax_http_parse(parser, req, p, strlen(p));
+
+#ifdef MVS
+    free(p);
+#endif
+
+    return ret;
 }
 
 char test_send_cb_buf[1024] = {0};
@@ -314,19 +327,22 @@ TEST_START(parse_parses_multipart_body)
     _parse(&parser, &request, "Content-Disposition: form-data; name=\"datafile1\"; filename=\"r.gif\"\r\n");
     _parse(&parser, &request, "Content-Type: image/gif\r\n");
     _parse(&parser, &request, "\r\n");
-    _parse(&parser, &request, "foo");
-    _parse(&parser, &request, "bar\r\n");
+    clax_http_parse(&parser, &request, "\xaa\xbb\xcc", 3);
+    clax_http_parse(&parser, &request, "\xdd\xee\xff", 3);
+    _parse(&parser, &request, "\r\n");
     _parse(&parser, &request, "--------------------------7ca8ddb13928aa86\r\n");
     _parse(&parser, &request, "Content-Disposition: form-data; name=\"datafile2\"; filename=\"g.gif\"\r\n");
     _parse(&parser, &request, "Content-Type: image/gif\r\n");
     _parse(&parser, &request, "\r\n");
-    _parse(&parser, &request, "bar");
-    _parse(&parser, &request, "baz\r\n");
+    clax_http_parse(&parser, &request, "\xdd\xee\xff", 3);
+    clax_http_parse(&parser, &request, "\xda\xea\xfa", 3);
+    _parse(&parser, &request, "\r\n");
     _parse(&parser, &request, "--------------------------7ca8ddb13928aa86\r\n");
     _parse(&parser, &request, "Content-Disposition: form-data; name=\"datafile3\"; filename=\"b.gif\"\r\n");
     _parse(&parser, &request, "Content-Type: image/gif\r\n");
     _parse(&parser, &request, "\r\n");
-    _parse(&parser, &request, "end\r\n");
+    clax_http_parse(&parser, &request, "\xff\xff\xff", 3);
+    _parse(&parser, &request, "\r\n");
     _parse(&parser, &request, "--------------------------7ca8ddb13928aa86--\r\n");
 
     ASSERT_EQ(request.message_done, 1);
@@ -346,7 +362,7 @@ TEST_START(parse_parses_multipart_body)
 
     clax_big_buf_read(&multipart->bbuf, content, sizeof(content), 0);
     ASSERT_EQ(multipart->bbuf.len, 6);
-    ASSERT_BUF_EQ(content, "foobar", 6);
+    ASSERT_BUF_EQ(content, "\xaa\xbb\xcc\xdd\xee\xff", 6);
 
     multipart = clax_http_multipart_list_at(&request.multiparts, 1);
 
@@ -358,7 +374,7 @@ TEST_START(parse_parses_multipart_body)
 
     clax_big_buf_read(&multipart->bbuf, content, sizeof(content), 0);
     ASSERT_EQ(multipart->bbuf.len, 6);
-    ASSERT_BUF_EQ(content, "barbaz", 6);
+    ASSERT_BUF_EQ(content, "\xdd\xee\xff\xda\xea\xfa", 6);
 
     multipart = clax_http_multipart_list_at(&request.multiparts, 2);
 
@@ -370,7 +386,7 @@ TEST_START(parse_parses_multipart_body)
 
     clax_big_buf_read(&multipart->bbuf, content, sizeof(content), 0);
     ASSERT_EQ(multipart->bbuf.len, 3);
-    ASSERT_BUF_EQ(content, "end", 3);
+    ASSERT_BUF_EQ(content, "\xff\xff\xff", 3);
 
     clax_http_request_free(&request);
 }
@@ -496,15 +512,35 @@ TEST_END
 
 TEST_START(check_basic_auth_checks_auth)
 {
-    ASSERT_EQ(clax_http_check_basic_auth("Basic Y2xheDpwYXNzd29yZA==", "clax", "password"), 1);
+    char *header = NULL;
+    char *base64 = NULL;
+    size_t len = 0;
+
+    base64_encode_alloc("clax:password", 13, &base64, &len);
+    header = clax_strjoin("", "Basic ", base64, NULL);
+    ASSERT_EQ(clax_http_check_basic_auth(header, "clax", "password"), 1);
+    free(header);
+    free(base64);
 
     ASSERT_EQ(clax_http_check_basic_auth(NULL, "clax", "password"), 0);
     ASSERT_EQ(clax_http_check_basic_auth("", "clax", "password"), 0);
     ASSERT_EQ(clax_http_check_basic_auth("invalid", "clax", "password"), 0);
+
     ASSERT_EQ(clax_http_check_basic_auth("Basic invalid", "clax", "password"), 0);
+
     ASSERT_EQ(clax_http_check_basic_auth("Basic Zm9vYmFy", "clax", "password"), 0);
-    ASSERT_EQ(clax_http_check_basic_auth("Basic Y2xhOnBhc3N3b3Jk", "clax", "password"), 0);
-    ASSERT_EQ(clax_http_check_basic_auth("Basic Y2xheDpwYXNzd29y", "clax", "password"), 0);
+
+    base64_encode_alloc("cla:password", 13, &base64, &len);
+    header = clax_strjoin("", "Basic ", base64, NULL);
+    ASSERT_EQ(clax_http_check_basic_auth(header, "clax", "password"), 0);
+    free(header);
+    free(base64);
+
+    base64_encode_alloc("clax:passwor", 13, &base64, &len);
+    header = clax_strjoin("", "Basic ", base64, NULL);
+    ASSERT_EQ(clax_http_check_basic_auth(header, "clax", "password"), 0);
+    free(header);
+    free(base64);
 }
 TEST_END
 

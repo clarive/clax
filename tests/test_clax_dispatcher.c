@@ -283,7 +283,7 @@ TEST_START(accepts_upload_with_correct_crc)
 
     clax_kv_list_push(&multipart->headers, "Content-Disposition", "form-data; name=\"file\"; filename=\"foobar\"");
 
-    clax_big_buf_append(&multipart->bbuf, (const unsigned char *)"foobar", 6);
+    clax_big_buf_append(&multipart->bbuf, (const unsigned char *)"\x66\x6F\x6F\x62\x61\x72", 6);
 
     clax_dispatch(&clax_ctx, &request, &response);
 

@@ -21,7 +21,6 @@
 #include <string.h>
 #include <stdarg.h>
 #include <unistd.h>
-#include <iconv.h>
 #include <sys/time.h>
 #include <time.h>
 
@@ -177,6 +176,25 @@ void clax_buf_append(unsigned char **dst, size_t *dst_len, const char *src, size
         memcpy((void *)(*dst + *dst_len), (const void *)src, src_len);
         *dst_len += src_len;
     }
+}
+
+char *clax_strcat_alloc(char *dst, char *src)
+{
+    char *res;
+    size_t src_len = strlen(src);
+
+    if (dst == NULL) {
+        res = malloc(src_len + 1);
+        strcpy(res, src);
+    }
+    else {
+        size_t dst_len = strlen(dst);
+
+        res = realloc(dst, dst_len + src_len + 1);
+        strcat(res, src);
+    }
+
+    return res;
 }
 
 void clax_san_path(char *buf)
@@ -375,38 +393,32 @@ char *clax_strndup(const char *str, size_t max_len)
     return p;
 }
 
-static iconv_t iconv_e_to_a_cd;
-static iconv_t iconv_a_to_e_cd;
-
-size_t clax_iconv(iconv_t cd, char *from, size_t from_len, char *to, size_t to_len)
+#ifdef MVS
+size_t clax_etoa(char *from, size_t from_len)
 {
-    size_t from_left = from_len;
-    size_t to_left   = to_len;
-
-    iconv(cd, &from, &from_left, &to, &to_left);
-
-    return to_len - to_left;
+    return __etoa_l(from, from_len);
 }
 
-size_t clax_ebcdic_to_ascii(char *from, size_t from_len, char *to, size_t to_len)
+char *clax_etoa_alloc(char *from, size_t from_len)
 {
-    return clax_iconv(iconv_e_to_a_cd, from, from_len, to, to_len);
+    char *b = malloc(from_len);
+    memcpy(b, from, from_len);
+    __etoa_l(b, from_len);
+
+    return b;
 }
 
-size_t clax_ascii_to_ebcdic(char *from, size_t from_len, char *to, size_t to_len)
+size_t clax_atoe(char *from, size_t from_len)
 {
-    return clax_iconv(iconv_a_to_e_cd, from, from_len, to, to_len);
+    return __atoe_l(from, from_len);
 }
 
-void clax_iconv_open()
+char *clax_atoe_alloc(char *from, size_t from_len)
 {
-    /* In iconv it's (_to_, _from_) */
-    iconv_e_to_a_cd = iconv_open("ISO8859-1", "IBM-1047");
-    iconv_a_to_e_cd = iconv_open("IBM-1047", "ISO8859-1");
-}
+    char *b = malloc(from_len);
+    memcpy(b, from, from_len);
+    __atoe_l(b, from_len);
 
-void clax_iconv_close()
-{
-    iconv_close(iconv_e_to_a_cd);
-    iconv_close(iconv_a_to_e_cd);
+    return b;
 }
+#endif

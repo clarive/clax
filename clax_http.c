@@ -102,6 +102,10 @@ int header_field_cb(http_parser *p, const char *buf, size_t len)
 
     char *key = clax_buf2str(buf, len);
 
+#ifdef MVS
+    clax_atoe(key, strlen(key));
+#endif
+
     clax_kv_list_push(&req->headers, key, "");
 
     free(key);
@@ -117,6 +121,10 @@ int header_value_cb(http_parser *p, const char *buf, size_t len)
 
     char *key = item->key;
     char *val = clax_buf2str(buf, len);
+
+#ifdef MVS
+    clax_atoe(val, strlen(val));
+#endif
 
     clax_kv_list_set(&req->headers, key, val);
 
@@ -148,8 +156,16 @@ int request_url_cb(http_parser *p, const char *buf, size_t len)
     strncpy(request->url, buf, len);
     request->url[len] = 0;
 
+#ifdef MVS
+    clax_atoe(request->url, len);
+#endif
+
     strncpy(request->path_info, buf + path_from, path_len);
     request->path_info[path_len] = 0;
+
+#ifdef MVS
+    clax_atoe(request->path_info, path_len);
+#endif
 
     size_t path_info_len = clax_http_url_decode(request->path_info);
 
@@ -164,8 +180,19 @@ int request_url_cb(http_parser *p, const char *buf, size_t len)
         int query_from = u.field_data[UF_QUERY].off;
         size_t query_len = u.field_data[UF_QUERY].len;
 
-        if (query_len)
-            clax_http_parse_urlencoded(&request->query_params, buf + query_from, query_len);
+        if (query_len) {
+            char *b = buf + query_from;
+
+#ifdef MVS
+            b = clax_atoe_alloc(b, query_len);
+#endif
+
+            clax_http_parse_urlencoded(&request->query_params, b, query_len);
+
+#ifdef MVS
+            free(b);
+#endif
+        }
     }
 
     return 0;
@@ -179,9 +206,11 @@ void clax_http_parse_urlencoded(clax_kv_list_t *params, const char *buf, size_t 
     size_t val_len = 0;
     char mode = PARAM_MODE_KEY;
 
+    const char *b = buf;
+
     int j;
     for (j = 0; j < len; j++) {
-        if (buf[j] == '&') {
+        if (b[j] == '&') {
             mode = PARAM_MODE_KEY;
 
             if (key_len || val_len) {
@@ -201,18 +230,18 @@ void clax_http_parse_urlencoded(clax_kv_list_t *params, const char *buf, size_t 
             val = NULL;
             val_len = 0;
         }
-        else if (buf[j] == '=') {
+        else if (b[j] == '=') {
             mode = PARAM_MODE_VAL;
         }
         else if (mode == PARAM_MODE_KEY) {
             if (key == NULL)
-                key = buf + j;
+                key = b + j;
 
             key_len++;
         }
         else if (mode == PARAM_MODE_VAL) {
             if (val == NULL)
-                val = buf + j;
+                val = b + j;
 
             val_len++;
         }
@@ -243,6 +272,10 @@ int on_multipart_header_name(multipart_parser* p, const char *buf, size_t len)
 
     char *key = clax_buf2str(buf, len);
 
+#ifdef MVS
+    clax_atoe(key, strlen(key));
+#endif
+
     clax_kv_list_push(&multipart->headers, key, "");
 
     free(key);
@@ -260,6 +293,10 @@ int on_multipart_header_value(multipart_parser* p, const char *buf, size_t len)
 
     char *val = clax_buf2str(buf, len);
 
+#ifdef MVS
+    clax_atoe(val, strlen(val));
+#endif
+
     clax_kv_list_set(&multipart->headers, item->key, val);
 
     free(val);
@@ -273,7 +310,9 @@ int on_part_data(multipart_parser* p, const char *buf, size_t len)
 
     clax_http_multipart_t *multipart = clax_http_multipart_list_last(&request->multiparts);
 
-    clax_big_buf_append(&multipart->bbuf, (const unsigned char *)buf, len);
+    char *b = buf;
+
+    clax_big_buf_append(&multipart->bbuf, b, len);
 
     return 0;
 }
@@ -311,18 +350,34 @@ int clax_http_body(http_parser *p, const char *buf, size_t len)
             req->multipart_callbacks.on_part_data_end = on_part_data_end;
             req->multipart_callbacks.on_body_end = on_body_end;
 
-            req->multipart_parser = multipart_parser_init(req->multipart_boundary, &req->multipart_callbacks);
+            char *boundary = req->multipart_boundary;
+#ifdef MVS
+            boundary = clax_etoa_alloc(boundary, strlen(boundary) + 1);
+#endif
+
+            req->multipart_parser = multipart_parser_init(boundary, &req->multipart_callbacks);
             multipart_parser_set_data(req->multipart_parser, req);
+
+#ifdef MVS
+            free(boundary);
+#endif
         }
 
         size_t nparsed = multipart_parser_execute(req->multipart_parser, buf, len);
 
         if (nparsed != len) {
-            clax_log("Multipart failed!");
+            clax_log("Multipart failed, state=%d!");
             return -1;
         }
     } else {
-        clax_buf_append(&req->body, &req->body_len, buf, len);
+        const char *b = buf;
+#ifdef MVS
+        b = clax_atoe_alloc(buf, len);
+#endif
+        clax_buf_append(&req->body, &req->body_len, b, len);
+#ifdef MVS
+        free(b);
+#endif
     }
 
     return 0;
@@ -356,6 +411,10 @@ size_t clax_http_url_decode(char *str)
             new_len -= 2;
 
             *p = code;
+
+#ifdef MVS
+            clax_atoe(p, 1);
+#endif
 
             if (*(p + 3)) {
                 memmove(p + 1, p + 3, strlen(p + 3) + 1);

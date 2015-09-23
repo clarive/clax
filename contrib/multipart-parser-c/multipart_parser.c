@@ -166,7 +166,8 @@ size_t multipart_parser_execute(multipart_parser* p, const char *buf, size_t len
           break;
         }
 
-        cl = tolower(c);
+        /*cl = tolower(c);*/
+        cl = c | 0x20;
         if ((c != '-') && (cl < 'a' || cl > 'z')) {
           multipart_log("invalid character in header name");
           return i;

@@ -74,9 +74,11 @@ char *clax_randstr_template_alloc(const char *template);
 char *clax_strdup(const char *str);
 char *clax_strndup(const char *str, size_t max);
 
-size_t clax_ebcdic_to_ascii(char *from, size_t from_len, char *to, size_t to_len);
-size_t clax_ascii_to_ebcdic(char *from, size_t from_len, char *to, size_t to_len);
-void clax_iconv_open();
-void clax_iconv_close();
+#ifdef MVS
+size_t clax_etoa(char *from, size_t from_len);
+char *clax_etoa_alloc(char *from, size_t from_len);
+size_t clax_atoe(char *from, size_t from_len);
+char *clax_atoe_alloc(char *from, size_t from_len);
+#endif
 
 #endif

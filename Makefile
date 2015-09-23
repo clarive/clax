@@ -52,7 +52,7 @@ http-parser:
 	$(MAKE) -C contrib/http-parser -f Makefile.clax CFLAGS="$(CFLAGS) -D__STRING_CODE_SET__=\"ISO8859-1\""
 
 multipart-parser-c:
-	$(MAKE) -C contrib/multipart-parser-c -f Makefile.clax CFLAGS="$(CFLAGS)"
+	$(MAKE) -C contrib/multipart-parser-c -f Makefile.clax CFLAGS="$(CFLAGS) -D__STRING_CODE_SET__=\"ISO8859-1\""
 
 base64:
 	$(MAKE) -C contrib/base64 CFLAGS="$(CFLAGS)"

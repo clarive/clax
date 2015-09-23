@@ -91,7 +91,17 @@ int clax_send(void *ctx, const unsigned char *buf, size_t len)
     int ret;
     int fd = fileno(stdout);
 
-    ret = (int)write(fd, buf, len);
+    const unsigned char *b = buf;
+
+#ifdef MVS
+    b = clax_etoa_alloc(buf, len);
+#endif
+
+    ret = (int)write(fd, b, len);
+
+#ifdef MVS
+    free(b);
+#endif
 
     /*clax_log("send (%d)=%d from %d", fd, ret, len);*/
 
@@ -327,7 +337,6 @@ exit:
 int main(int argc, char **argv)
 {
     clax_ctx_t clax_ctx;
-    clax_iconv_open();
 
     signal(SIGINT, term);
 
