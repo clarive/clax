@@ -42,8 +42,11 @@ TEST_START(calculates crc32 from fd)
 
     int crc32 = clax_crc32_calc_fd(fileno(fh));
 
+    fclose(fh);
+
     ASSERT_EQ(crc32, 1686977913);
 
+    free(filename);
     rmrf(tmp_dirname);
 }
 TEST_END
