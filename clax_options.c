@@ -64,6 +64,10 @@ int clax_config_handler(void *ctx, const char *section, const char *name, const 
         if (strcmp(value, "no") == 0) {
             options->no_ssl = 1;
         }
+    } else if (MATCH("ssl", "verify")) {
+        if (strcmp(value, "no") == 0) {
+            options->no_ssl_verify = 1;
+        }
     } else if (MATCH("ssl", "cert_file")) {
         strncpy(options->cert_file, value, sizeof_struct_member(opt, cert_file));
     } else if (MATCH("ssl", "key_file")) {
