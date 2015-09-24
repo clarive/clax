@@ -33,8 +33,18 @@ int util_parse_http_response(char *buf, size_t len)
 
     http_message_done = 0;
 
+    char *r = buf;
+
+#ifdef MVS
+    r = clax_etoa_alloc(buf, len);
+#endif
+
     http_parser_init(&parser, HTTP_RESPONSE);
-    int ret = http_parser_execute(&parser, &settings, buf, len);
+    int ret = http_parser_execute(&parser, &settings, r, len);
+
+#ifdef MVS
+    free(r);
+#endif
 
     return ret == len && http_message_done;
 }
@@ -91,6 +101,10 @@ int execute(char *command, char *request, char *obuf, size_t olen)
         offset += ret;
     }
     obuf[offset] = 0;
+
+#ifdef MVS
+    clax_atoe(obuf, offset);
+#endif
 
     int exit_code = pclose2(&ctx);
     if (exit_code != 0) {
