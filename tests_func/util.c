@@ -10,6 +10,7 @@
 
 #include "http-parser/http_parser.h"
 #include "popen2.h"
+#include "clax_util.h"
 #include "util.h"
 
 int http_message_done = 0;
@@ -42,6 +43,7 @@ int execute(char *command, char *request, char *obuf, size_t olen)
 {
     int ret;
     popen2_t ctx;
+    char *r = request;
 
     ret = popen2(command, &ctx);
     if (ret < 0) {
@@ -53,8 +55,12 @@ int execute(char *command, char *request, char *obuf, size_t olen)
     size_t request_len = strlen(request);
     int wcount = 0;
 
+#ifdef MVS
+    r = clax_etoa_alloc(request, request_len);
+#endif
+
     while (1) {
-        ret = write(ctx.in, request + offset, request_len - offset);
+        ret = write(ctx.in, r + offset, request_len - offset);
         wcount += ret;
 
         if (wcount == request_len)
@@ -66,6 +72,10 @@ int execute(char *command, char *request, char *obuf, size_t olen)
 
         offset += ret;
     }
+
+#ifdef MVS
+    free(r);
+#endif
 
     offset = 0;
     while (1) {
