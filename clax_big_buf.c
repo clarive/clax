@@ -113,8 +113,10 @@ int clax_big_buf_write_file(clax_big_buf_t *bbuf, char *fpath)
         clax_log("Renaming '%s' -> '%s'", bbuf->fpath, fpath);
 
         /* TODO: after files is closed big_buf is unusable, this has to be handled somehow */
-        fclose(bbuf->fh);
-        bbuf->fh = NULL;
+        if (bbuf->fh) {
+            fclose(bbuf->fh);
+            bbuf->fh = NULL;
+        }
 
         int ret = rename(bbuf->fpath, fpath);
 
