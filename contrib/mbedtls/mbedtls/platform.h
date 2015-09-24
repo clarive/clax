@@ -212,8 +212,4 @@ int mbedtls_platform_set_exit( void (*exit_func)( int status ) );
 }
 #endif
 
-#ifdef MVS
-//#include "../../../arch/zos/libascii/_Ascii_a.h"
-#endif
-
 #endif /* platform.h */

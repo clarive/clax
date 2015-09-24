@@ -1,5 +1,0 @@
-#!/bin/sh
-
-if [[ "$1" == "rc" ]] ; then
-    ar $@
-fi
