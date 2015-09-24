@@ -181,7 +181,7 @@ int request_url_cb(http_parser *p, const char *buf, size_t len)
         size_t query_len = u.field_data[UF_QUERY].len;
 
         if (query_len) {
-            char *b = buf + query_from;
+            const char *b = buf + query_from;
 
 #ifdef MVS
             b = clax_atoe_alloc(b, query_len);
@@ -310,9 +310,7 @@ int on_part_data(multipart_parser* p, const char *buf, size_t len)
 
     clax_http_multipart_t *multipart = clax_http_multipart_list_last(&request->multiparts);
 
-    char *b = buf;
-
-    clax_big_buf_append(&multipart->bbuf, b, len);
+    clax_big_buf_append(&multipart->bbuf, (const unsigned char *)buf, len);
 
     return 0;
 }

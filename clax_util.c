@@ -34,7 +34,7 @@
 #include "clax_util.h"
 #include "clax_platform.h"
 
-static srand_called = 0;
+static int srand_called = 0;
 
 void clax_kv_list_init(clax_kv_list_t *list)
 {

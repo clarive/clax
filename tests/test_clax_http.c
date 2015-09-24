@@ -23,12 +23,13 @@
 
 #include "u/u.h"
 
+#include "base64/base64.h"
 #include "clax_http.h"
 
 int _parse(http_parser *parser, clax_http_request_t *req, const char *data)
 {
     int ret;
-    char *p = data;
+    const char *p = data;
 
 #ifdef MVS
     p = clax_etoa_alloc(data, strlen(data) + 1);
@@ -514,9 +515,8 @@ TEST_START(check_basic_auth_checks_auth)
 {
     char *header = NULL;
     char *base64 = NULL;
-    size_t len = 0;
 
-    base64_encode_alloc("clax:password", 13, &base64, &len);
+    base64_encode_alloc("clax:password", 13, &base64);
     header = clax_strjoin("", "Basic ", base64, NULL);
     ASSERT_EQ(clax_http_check_basic_auth(header, "clax", "password"), 1);
     free(header);
@@ -530,13 +530,13 @@ TEST_START(check_basic_auth_checks_auth)
 
     ASSERT_EQ(clax_http_check_basic_auth("Basic Zm9vYmFy", "clax", "password"), 0);
 
-    base64_encode_alloc("cla:password", 13, &base64, &len);
+    base64_encode_alloc("cla:password", 13, &base64);
     header = clax_strjoin("", "Basic ", base64, NULL);
     ASSERT_EQ(clax_http_check_basic_auth(header, "clax", "password"), 0);
     free(header);
     free(base64);
 
-    base64_encode_alloc("clax:passwor", 13, &base64, &len);
+    base64_encode_alloc("clax:passwor", 13, &base64);
     header = clax_strjoin("", "Basic ", base64, NULL);
     ASSERT_EQ(clax_http_check_basic_auth(header, "clax", "password"), 0);
     free(header);
