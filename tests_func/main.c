@@ -12,6 +12,7 @@ int main(void)
     RUN_SUITE(basic_auth)
     RUN_SUITE(tree)
     RUN_SUITE(command)
+    RUN_SUITE(ssl)
 
     DONE_TESTING
 }
