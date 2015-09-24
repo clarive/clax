@@ -70,6 +70,10 @@ int clax_config_handler(void *ctx, const char *section, const char *name, const 
         strncpy(options->key_file, value, sizeof_struct_member(opt, key_file));
     } else if (MATCH("ssl", "entropy_file")) {
         strncpy(options->entropy_file, value, sizeof_struct_member(opt, entropy_file));
+    } else if (MATCH("http_basic_auth", "username")) {
+        options->basic_auth_username = clax_strdup(value);
+    } else if (MATCH("http_basic_auth", "password")) {
+        options->basic_auth_password = clax_strdup(value);
     } else {
         return 0;
     }

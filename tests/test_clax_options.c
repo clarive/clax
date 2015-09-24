@@ -205,6 +205,12 @@ TEST_START(parses_config)
 
     ASSERT_EQ(ret, 0)
     ASSERT_STR_EQ(options.config_file, "config.ini")
+    ASSERT_EQ(options.no_ssl, 0);
+    ASSERT_STR_EQ(options.cert_file, "ssl/server.crt");
+    ASSERT_STR_EQ(options.key_file, "ssl/server.key");
+    ASSERT_STR_EQ(options.entropy_file, "ssl/entropy");
+    ASSERT_STR_EQ(options.basic_auth_username, "clax");
+    ASSERT_STR_EQ(options.basic_auth_password, "password");
 
     clax_options_free(&options);
 }
