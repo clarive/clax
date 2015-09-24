@@ -676,6 +676,7 @@ int clax_http_check_basic_auth(char *header, char *username, char *password)
         ok = base64_decode_alloc(header + prefix_len, strlen(header) - prefix_len, &auth, &auth_len) && auth != NULL;
 
     if (ok) {
+        auth[auth_len] = 0;
 #ifdef MVS
         clax_atoe(auth, strlen(auth));
 #endif
