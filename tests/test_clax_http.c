@@ -48,9 +48,19 @@ char test_send_cb_buf[1024] = {0};
 size_t test_send_cb_buf_len = 0;
 int test_send_cb(void *ctx, const unsigned char *buf, size_t len)
 {
-    memcpy(test_send_cb_buf + test_send_cb_buf_len, buf, len);
+    const unsigned char *b = buf;
+
+#ifdef MVS
+    b = clax_atoe_alloc(buf, len);
+#endif
+
+    memcpy(test_send_cb_buf + test_send_cb_buf_len, b, len);
 
     test_send_cb_buf_len += len;
+
+#ifdef MVS
+    free(b);
+#endif
 
     return len;
 }
