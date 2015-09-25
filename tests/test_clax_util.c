@@ -24,6 +24,7 @@
 
 #include "u/u.h"
 
+#include "u_util.h"
 #include "clax_util.h"
 
 SUITE_START(clax_util)
@@ -463,5 +464,28 @@ TEST_START(converts ebcdic to ascii)
 TEST_END
 
 #endif
+
+TEST_START(slurps file)
+{
+    char *tmp_dirname = clax_mktmpdir_alloc();
+    char *filename = clax_strjoin("/", tmp_dirname, "file", NULL);
+
+    FILE *fh = fopen(filename, "w");
+    fprintf(fh, "%s", "\xab\xcd\xef");
+    fclose(fh);
+
+    size_t len = 0;
+
+    unsigned char *p = clax_slurp_alloc(filename, &len);
+    ASSERT_BUF_EQ(p, "\xab\xcd\xef\x00", 4);
+    ASSERT_EQ(len, 4);
+
+    free(p);
+
+    rmrf(tmp_dirname);
+
+    free(filename);
+}
+TEST_END
 
 SUITE_END

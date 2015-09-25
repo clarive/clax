@@ -91,17 +91,7 @@ int clax_send(void *ctx, const unsigned char *buf, size_t len)
     int ret;
     int fd = fileno(stdout);
 
-    const unsigned char *b = buf;
-
-#ifdef MVS
-    b = clax_etoa_alloc(buf, len);
-#endif
-
-    ret = (int)write(fd, b, len);
-
-#ifdef MVS
-    free(b);
-#endif
+    ret = (int)write(fd, buf, len);
 
     /*clax_log("send (%d)=%d from %d", fd, ret, len);*/
 
@@ -152,17 +142,22 @@ int dev_random_entropy_poll(void *data, unsigned char *output,
     unsigned char *p = output;
     ((void) data);
 
+    clax_log("Polling entropy file");
+
     *olen = 0;
 
     file = fopen(options.entropy_file, "rb");
-    if (file == NULL)
+    if (file == NULL) {
+        clax_log("Entropy failed");
         return MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
+    }
 
     while (left > 0) {
         /* /dev/random can return much less than requested. If so, try again */
         ret = fread(p, 1, left, file);
         if (ret == 0 && ferror(file)) {
             fclose(file);
+            clax_log("Entropy failed");
             return MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
         }
 
@@ -173,13 +168,19 @@ int dev_random_entropy_poll(void *data, unsigned char *output,
     fclose(file);
     *olen = len;
 
+    clax_log("Entropy=%d", len);
+
     return 0;
 }
 
 void clax_loop_ssl(clax_ctx_t *clax_ctx)
 {
     int ret;
-    const char *pers = "clax_server";
+    char pers[] = "clax_server";
+
+#ifdef MVS
+    clax_etoa(pers, strlen(pers));
+#endif
 
     mbedtls_entropy_context entropy;
     mbedtls_ctr_drbg_context ctr_drbg;
@@ -201,18 +202,47 @@ void clax_loop_ssl(clax_ctx_t *clax_ctx)
     mbedtls_debug_set_threshold(DEBUG_LEVEL);
 #endif
 
-    /*
-     * 1. Load the certificates and private RSA key
-     */
     clax_log("Loading the server cert. and key...");
 
-    ret = mbedtls_x509_crt_parse_file(&srvcert, options.cert_file);
+    unsigned char *file;
+    size_t file_len;
+
+    clax_log("Loading '%s'...", options.cert_file);
+    file = clax_slurp_alloc(options.cert_file, &file_len);
+
+    if (file == NULL) {
+        clax_log("Can't load cert_file: %s", options.cert_file);
+        goto exit;
+    }
+
+#ifdef MVS
+    clax_etoa(file, file_len);
+#endif
+
+    clax_log("Parsing '%s'...", options.cert_file);
+    ret = mbedtls_x509_crt_parse(&srvcert, (const unsigned char *)file, file_len);
+    free(file);
+
     if (ret != 0) {
         clax_log("failed\n  !  mbedtls_x509_crt_parse returned %d", ret);
         goto exit;
     }
 
-    ret =  mbedtls_pk_parse_keyfile(&pkey, (const char *) options.key_file, NULL);
+    clax_log("Loading '%s'...", options.key_file);
+    file = clax_slurp_alloc(options.key_file, &file_len);
+    if (file == NULL) {
+        clax_log("Can't load key_file: %s", options.key_file);
+        goto exit;
+    }
+
+#ifdef MVS
+    clax_etoa(file, file_len);
+#endif
+
+    clax_log("Parsing '%s'...", options.key_file);
+    ret = mbedtls_pk_parse_key(&pkey, (const unsigned char *)file, file_len, NULL, 0);
+    free(file);
+
     if (ret != 0) {
         clax_log("failed\n  !  mbedtls_pk_parse_key returned %d", ret);
         goto exit;
@@ -236,7 +266,7 @@ void clax_loop_ssl(clax_ctx_t *clax_ctx)
     clax_log("Seeding the random number generator...");
 
     if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
-                                       (const unsigned char *) pers,
+                                       (const unsigned char *)pers,
                                        strlen(pers))) != 0) {
         clax_log("failed\n  ! mbedtls_ctr_drbg_seed returned %d", ret);
         goto exit;
@@ -283,9 +313,6 @@ void clax_loop_ssl(clax_ctx_t *clax_ctx)
 
     clax_log("ok");
 
-    /*
-     * 5. Handshake
-     */
     clax_log("Performing the SSL/TLS handshake...");
 
     while ((ret = mbedtls_ssl_handshake(&ssl)) != 0) {
@@ -321,6 +348,9 @@ exit:
     if (ret != 0) {
         char error_buf[100];
         mbedtls_strerror(ret, error_buf, 100);
+#ifdef MVS
+        clax_atoe(error_buf, strlen(error_buf));
+#endif
         clax_log("Last error was: %d - %s", ret, error_buf);
     }
 #endif

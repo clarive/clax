@@ -422,3 +422,31 @@ char *clax_atoe_alloc(char *from, size_t from_len)
     return b;
 }
 #endif
+
+unsigned char *clax_slurp_alloc(char *filename, size_t *olen)
+{
+    char buf[1024];
+    unsigned char *slurp = NULL;
+    FILE *fh = fopen(filename, "rb");
+    *olen = 0;
+
+    if (fh == NULL)
+        return NULL;
+
+    size_t rcount = 0;
+    while ((rcount = fread(buf, 1, sizeof(buf), fh)) > 0) {
+        slurp = realloc(slurp, *olen + rcount + 1);
+
+        memcpy(slurp + *olen, buf, rcount);
+
+        *olen += rcount;
+
+        slurp[*olen] = 0;
+    }
+
+    (*olen)++;
+
+    fclose(fh);
+
+    return slurp;
+}

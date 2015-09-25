@@ -15,7 +15,7 @@ ifeq ($(WINDOWS),1)
 else
 ifeq ($(MVS),1)
 	CC      =  c99
-	CFLAGS  += -DMVS -D_ALL_SOURCE
+	CFLAGS  += -DMVS -D_ALL_SOURCE -DMBEDTLS_NO_DEFAULT_ENTROPY_SOURCES -DMBEDTLS_NO_PLATFORM_ENTROPY
 else
 	CFLAGS  += -std=gnu99 -pedantic -Wall
 endif
@@ -46,7 +46,7 @@ jsmn:
 	$(MAKE) -C contrib/jsmn CFLAGS="-DJSMN_PARENT_LINKS"
 
 mbedtls:
-	$(MAKE) -C contrib/mbedtls -f Makefile.clax CFLAGS="$(CFLAGS)"
+	$(MAKE) -C contrib/mbedtls -f Makefile.clax CFLAGS="$(CFLAGS) -D__STRING_CODE_SET__=\"ISO8859-1\""
 
 http-parser:
 	$(MAKE) -C contrib/http-parser -f Makefile.clax CFLAGS="$(CFLAGS) -D__STRING_CODE_SET__=\"ISO8859-1\""
