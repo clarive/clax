@@ -5,6 +5,15 @@ CFLAGS= -I../contrib -I../contrib/mbedtls -I../
 LFLAGS=
 LIBS=../clax_*.o ../popen2.o ../contrib/*/*.o
 
+ifeq ($(OS),Windows_NT)
+    WINDOWS=1
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),OS/390)
+        MVS=1
+    endif
+endif
+
 ifeq ($(WINDOWS),1)
 	PROGRAM =  test.exe
 	LIBS    += -lws2_32

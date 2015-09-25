@@ -8,6 +8,15 @@ LFLAGS=
 LIBS=contrib/*/*.o
 TARGET=
 
+ifeq ($(OS),Windows_NT)
+    WINDOWS=1
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),OS/390)
+        MVS=1
+    endif
+endif
+
 ifeq ($(WINDOWS),1)
 	PROGRAM =  clax.exe
 	LIBS    += -lws2_32
