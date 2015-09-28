@@ -17,13 +17,13 @@ endif
 ifeq ($(WINDOWS),1)
 	PROGRAM =  test.exe
 	LIBS    += -lws2_32
-	CFLAGS  += -pedantic -Wall
+	CFLAGS  += -std=gnu99 -pedantic -Wall
 else
 ifeq ($(MVS),1)
 	CC      =  c99
 	CFLAGS  += -DMVS -D_ALL_SOURCE
 else
-	CFLAGS  += -pedantic -Wall
+	CFLAGS  += -std=gnu99 -pedantic -Wall
 endif
 endif
 
