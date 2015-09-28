@@ -140,8 +140,26 @@ TEST_START(runs_command_vaargs)
 }
 TEST_END
 
-#ifndef _WIN32
 TEST_START(kills command after timeout)
+{
+    command_ctx_t ctx = {.command = "echo foo && sleep 1 && echo bar && sleep 1 && echo baz && sleep 1", .timeout = 1};
+
+    double start = get_time();
+
+    clax_command_start(&ctx);
+
+    clax_command_read_va(&ctx, command_vaargs_cb);
+
+    clax_command_close(&ctx);
+
+    double end = get_time();
+
+    ASSERT(end - start < 2)
+}
+TEST_END
+
+#ifndef _WIN32
+TEST_START(kills command after timeout without any output)
 {
     command_ctx_t ctx = {.command = "sleep 5", .timeout = 1};
 
@@ -155,7 +173,7 @@ TEST_START(kills command after timeout)
 
     double end = get_time();
 
-    ASSERT(end - start < 5)
+    ASSERT(end - start < 2)
 }
 TEST_END
 #endif

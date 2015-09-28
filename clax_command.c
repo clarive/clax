@@ -39,19 +39,32 @@
 
 volatile int alarm_fired = 0;
 
+#if defined(_WIN32)
+VOID CALLBACK TimerProc(
+    HWND hwnd,
+    UINT uMsg,
+    UINT idEvent,
+    DWORD dwTime
+   ) {
+    alarm_fired = 1;
+   }
+#else
 void clax_command_timeout(int dummy)
 {
-#if defined(_WIN32)
-#else
     signal(SIGALRM, SIG_IGN);
-#endif
 
     alarm_fired = 1;
 }
+#endif
 
 void clax_kill_kid(popen2_t *kid)
 {
 #if defined(_WIN32)
+    clax_log("Killing pid=%d", kid->pid);
+
+    HANDLE hProcess = OpenProcess(SYNCHRONIZE, FALSE, kid->pid);
+    TerminateProcess(hProcess, 1);
+    CloseHandle(hProcess);
 #else
     int ret = 0;
 
@@ -108,6 +121,10 @@ int clax_command_read(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list
     int ret;
     va_list a_list;
 
+#ifdef _WIN32
+    MSG msg;
+#endif
+
     int timeout = ctx->timeout;
     popen2_t *kid = &ctx->kid;
 
@@ -117,6 +134,7 @@ int clax_command_read(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list
         clax_log("Setting command timeout=%d", timeout);
 
 #if defined(_WIN32)
+        SetTimer(NULL, 0, timeout * 1000, (TIMERPROC)TimerProc);
 #else
         alarm_fired = 0;
         signal(SIGALRM, clax_command_timeout);
@@ -153,6 +171,13 @@ int clax_command_read(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list
         /* We ignore errors here, even if the client disconnects we have to
          * continue running the command */
         chunk_cb(buf, ret, a_list);
+
+#ifdef _WIN32
+        if (timeout) {
+            GetMessage(&msg, NULL, 0, 0);
+            DispatchMessage(&msg);
+        }
+#endif
     };
 
     return clax_command_close(ctx);
