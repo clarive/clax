@@ -337,12 +337,14 @@ TEST_START(saves_upload_with_passed_time)
     clax_options_free(&options);
 
     struct stat st;
-    struct tm last_modified_time;
 
-    stat("foobar", &st);
+    ASSERT_EQ(stat("foobar", &st), 0);
 
-    localtime_r(&st.st_mtime, &last_modified_time);
-    ASSERT_EQ(mktime(&last_modified_time), 1234567890);
+#ifdef _WIN32
+    ASSERT_EQ(st.st_mtime, 1234567890);
+#else
+    ASSERT_EQ(st.st_mtim.tv_sec, 1234567890);
+#endif
 
     chdir(cwd);
     rmrf(tmp_dirname);
