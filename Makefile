@@ -36,7 +36,7 @@ lib: mbedtls jsmn http-parser multipart-parser-c inih base64 slre $(TARGET) $(OB
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS)
-	mv a.out $(PROGRAM)
+	mv a.* $(PROGRAM)
 
 ifneq ($(MVS),1)
 depend: .depend
