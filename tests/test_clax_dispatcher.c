@@ -176,7 +176,7 @@ TEST_START(saves_upload_to_another_dir)
 
     char *tmp_dirname = clax_mktmpdir_alloc();
     chdir(tmp_dirname);
-    mkdir("subdir", 0755);
+    clax_mkdir("subdir", 0755);
 
     clax_ctx.options = &options;
 
