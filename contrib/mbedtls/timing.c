@@ -68,6 +68,8 @@ struct _hr_time
 
 #endif /* _WIN32 && !EFIX64 && !EFI32 */
 
+#define mbedtls_printf     printf
+
 #if !defined(HAVE_HARDCLOCK) && defined(MBEDTLS_HAVE_ASM) &&  \
     ( defined(_MSC_VER) && defined(_M_IX86) ) || defined(__WATCOMC__)
 

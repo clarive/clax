@@ -220,7 +220,7 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
 
         if (stat(subdir, &info) == 0 && info.st_mode & S_IFDIR) {
         } else {
-            clax_log("Output directory does not exist");
+            clax_log("Output directory '%s' does not exist", subdir);
 
             clax_dispatch_bad_request(clax_ctx, req, res);
             return;
@@ -331,14 +331,39 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
     }
 }
 
+void clax_dispatch_delete(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
+{
+    char *file = req->path_info + strlen("/tree/");
+    struct stat st;
+
+    if (stat(file, &st) != 0 || !(st.st_mode & S_IFREG)) {
+        clax_dispatch_not_found(clax_ctx, req, res);
+        return;
+    }
+
+    int ret = unlink(file);
+
+    if (ret == 0) {
+        res->status_code = 200;
+        clax_kv_list_push(&res->headers, "Content-Type", "application/json");
+        clax_big_buf_append_str(&res->body, "{\"message\":\"ok\"}");
+    }
+    else {
+        clax_dispatch_system_error(clax_ctx, req, res);
+        return;
+    }
+}
+
 void clax_dispatch_tree(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     if (req->method == HTTP_HEAD || req->method == HTTP_GET) {
         clax_dispatch_download(clax_ctx, req, res);
     } else if (req->method == HTTP_POST) {
         clax_dispatch_upload(clax_ctx, req, res);
+    } else if (req->method == HTTP_DELETE) {
+        clax_dispatch_delete(clax_ctx, req, res);
     } else {
-        clax_dispatch_not_found(clax_ctx, req, res);
+        clax_dispatch_method_not_allowed(clax_ctx, req, res);
     }
 }
 
@@ -346,7 +371,12 @@ clax_dispatcher_action_t clax_dispatcher_actions[] = {
     {"/", (1 << HTTP_GET), CLAX_DISPATCHER_NO_FLAGS, clax_dispatch_index},
     {"/ping", (1 << HTTP_GET), CLAX_DISPATCHER_NO_FLAGS, clax_dispatch_ping},
     {"/command", (1 << HTTP_POST), CLAX_DISPATCHER_NO_FLAGS, clax_dispatch_command},
-    {"^/tree/", (1 << HTTP_HEAD | 1 << HTTP_GET | 1 << HTTP_POST), CLAX_DISPATCHER_FLAG_100_CONTINUE, clax_dispatch_tree},
+    {"^/tree/", (
+            1 << HTTP_HEAD |
+            1 << HTTP_GET  |
+            1 << HTTP_POST |
+            1 << HTTP_DELETE
+        ), CLAX_DISPATCHER_FLAG_100_CONTINUE, clax_dispatch_tree},
 };
 
 size_t clax_dispatcher_match(const char *path_info, size_t path_info_len, const char *path, size_t path_len)

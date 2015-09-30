@@ -209,6 +209,22 @@ Required
 
     curl -F 'file=@path_to_file' http://clax-server/tree/
 
+### Delete file
+
+    DELETE /tree/path/to/file
+
+Delete file.
+
+#### Response
+
+    200 OK
+
+    {"status":"ok"}
+
+#### Example
+
+    curl -X DELETE http://clax-server/tree/path/to/file
+
 ## Run Command
 
     POST /command
