@@ -429,6 +429,47 @@ TEST_START(serves_file_as_attachment)
 }
 TEST_END
 
+TEST_START(serves file with crc32)
+{
+    opt options;
+    clax_ctx_t clax_ctx;
+    clax_http_request_t request;
+    clax_http_response_t response;
+
+    memset(&clax_ctx, 0, sizeof(clax_ctx_t));
+    clax_options_init(&options);
+    clax_http_request_init(&request);
+    clax_http_response_init(&response, NULL, 0);
+
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+
+    char *tmp_dirname = clax_mktmpdir_alloc();
+    chdir(tmp_dirname);
+
+    clax_ctx.options = &options;
+
+    FILE *fp = fopen("foo", "wb");
+    char *buf = "hello";
+    fwrite(buf, 1, strlen(buf), fp);
+    fclose(fp);
+
+    request.method = HTTP_GET;
+    strcpy(request.path_info, "/tree/foo");
+
+    clax_dispatch(&clax_ctx, &request, &response);
+
+    ASSERT_STR_EQ(clax_kv_list_find(&response.headers, "X-Clax-CRC32"), "3610a686")
+
+    clax_http_request_free(&request);
+    clax_http_response_free(&response);
+    clax_options_free(&options);
+
+    chdir(cwd);
+    rmrf(tmp_dirname);
+}
+TEST_END
+
 TEST_START(returns_bad_request_when_wrong_params)
 {
     opt options;

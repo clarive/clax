@@ -21,6 +21,7 @@
  * Based on CRC-32 version 1.04 by Craig Bruce, 05-Dec-1994
  */
 
+#include <stdio.h>
 #include <unistd.h>
 
 #include "clax_crc32.h"
@@ -66,5 +67,20 @@ unsigned long clax_crc32_calc_fd(int fd)
     }
 
     return crc ^ 0xFFFFFFFF;
+}
+
+unsigned long clax_crc32_calc_file(char *filename)
+{
+    FILE *fh;
+
+    fh = fopen(filename, "r");
+    if (fh == NULL)
+        return -1;
+
+    unsigned long crc = clax_crc32_calc_fd(fileno(fh));
+
+    fclose(fh);
+
+    return crc;
 }
 

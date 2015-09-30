@@ -180,6 +180,10 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
         return;
     }
 
+    unsigned long crc32 = clax_crc32_calc_file(file);
+    char crc32_hex[9] = {0};
+    snprintf(crc32_hex, sizeof(crc32_hex), "%lx", crc32);
+
     FILE *fh = fopen(file, "rb");
 
     if (fh == NULL) {
@@ -204,6 +208,8 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
 
     strftime(last_modified_buf, sizeof(last_modified_buf), "%a, %d %b %Y %H:%M:%S GMT", last_modified_time_p);
     clax_kv_list_push(&res->headers, "Last-Modified", last_modified_buf);
+
+    clax_kv_list_push(&res->headers, "X-Clax-CRC32", crc32_hex);
 
     if (req->method == HTTP_GET)
         res->body_fh = fh;

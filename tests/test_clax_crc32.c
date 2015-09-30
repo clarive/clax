@@ -51,4 +51,22 @@ TEST_START(calculates crc32 from fd)
 }
 TEST_END
 
+TEST_START(calculates crc32 from file)
+{
+    char *tmp_dirname = clax_mktmpdir_alloc();
+    char *filename = clax_strjoin("/", tmp_dirname, "file", NULL);
+
+    FILE *fh = fopen(filename, "w");
+    fprintf(fh, "%s", "\xab\xcd\xef");
+    fclose(fh);
+
+    int crc32 = clax_crc32_calc_file(filename);
+
+    ASSERT_EQ(crc32, 1686977913);
+
+    free(filename);
+    rmrf(tmp_dirname);
+}
+TEST_END
+
 SUITE_END

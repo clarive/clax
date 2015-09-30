@@ -28,5 +28,6 @@
 
 void clax_crc32_gen(void);
 unsigned long clax_crc32_calc_fd(int fd);
+unsigned long clax_crc32_calc_file(char *filename);
 
 #endif
