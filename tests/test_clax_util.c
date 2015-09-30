@@ -389,12 +389,12 @@ TEST_START(generates random string based on template)
 
     p = clax_randstr_template_alloc("XXXX");
     ASSERT_EQ(strlen(p), 4);
-    ASSERT_MATCHES(p, "[a-zA-Z0-9]{4}");
+    ASSERT_MATCHES(p, "[a-zA-Z0-9]+");
     free(p);
 
     p = clax_randstr_template_alloc("fooXXXbar");
     ASSERT_EQ(strlen(p), 9);
-    ASSERT_MATCHES(p, "foo[a-zA-Z0-9]{3}bar");
+    ASSERT_MATCHES(p, "foo[a-zA-Z0-9]+bar");
     free(p);
 }
 TEST_END
@@ -431,7 +431,7 @@ TEST_START(generates random filename with template)
 
     p = clax_mktmpfile_alloc("tmp", ".fileXXX");
     ASSERT_EQ(strlen(p), 3 + 1 + 8);
-    ASSERT_MATCHES(p, "^tmp/.file[a-zA-Z0-9]{3}$");
+    ASSERT_MATCHES(p, "^tmp/\\.file[a-zA-Z0-9]+$");
     free(p);
 
     p = clax_mktmpfile_alloc("tmp", "aXbXc");

@@ -188,26 +188,26 @@ int u_ok;
         }                                             \
     } while (0);
 
-#define ASSERT_MATCHES(got, re)                                    \
-    do {                                                           \
-        char *u_val = (char *)got;                                 \
-        _ASSERT(slre_match(re, u_val, strlen(u_val), NULL, 0, 0))  \
-                                                                   \
-        if (!u_ok) {                                               \
-            printf("    # " #got ":\n");                           \
-            printf("    # not matches " # re "\n");                \
-        }                                                          \
+#define ASSERT_MATCHES(got, re)                                         \
+    do {                                                                \
+        char *u_val = (char *)got;                                      \
+        _ASSERT(slre_match(re, u_val, strlen(u_val), NULL, 0, 0) >= 0)  \
+                                                                        \
+        if (!u_ok) {                                                    \
+            printf("    # " #got ":\n");                                \
+            printf("    # not matches " # re "\n");                     \
+        }                                                               \
     } while (0);
 
-#define ASSERT_NOT_MATCHES(got, re)                                \
-    do {                                                           \
-        char *u_val = (char *)got;                                 \
-        _ASSERT(!slre_match(re, u_val, strlen(u_val), NULL, 0, 0)) \
-                                                                   \
-        if (!u_ok) {                                               \
-            printf("    # " #got ":\n");                           \
-            printf("    # not matches " # re "\n");                \
-        }                                                          \
+#define ASSERT_NOT_MATCHES(got, re)                                    \
+    do {                                                               \
+        char *u_val = (char *)got;                                     \
+        _ASSERT(slre_match(re, u_val, strlen(u_val), NULL, 0, 0) < 0)  \
+                                                                       \
+        if (!u_ok) {                                                   \
+            printf("    # " #got ":\n");                               \
+            printf("    # not matches " # re "\n");                    \
+        }                                                              \
     } while (0);
 
 #define SUITE_START(name)              \

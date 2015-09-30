@@ -44,12 +44,14 @@ TEST_START(command failure)
             "%s", (int)strlen(body), body);
 
     int rcount = execute(CMD " -n -r . -l " DEVNULL, request, output, sizeof(output));
+    output[rcount] = 0;
 
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
 
     ASSERT_MATCHES(output, "X-Clax-PID: \\d+")
-    ASSERT_MATCHES(output, "X-Clax-Exit: 0")
+    ASSERT_MATCHES(output, "X-Clax-Exit: \\d+")
+    ASSERT_NOT_MATCHES(output, "X-Clax-Exit: 0")
 }
 TEST_END
 
