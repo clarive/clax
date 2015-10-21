@@ -149,6 +149,7 @@ int popen2(const char *cmdline, popen2_t *child)
         return -1;
 
     if (pid == 0) {
+        setsid();
         setpgid(0, 0);
 
         close(pipe_stdin[WRITE]);
