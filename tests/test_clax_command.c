@@ -154,7 +154,7 @@ TEST_START(kills command after timeout)
 
     double end = get_time();
 
-    ASSERT(end - start < 2)
+    ASSERT(end - start < 3)
 }
 TEST_END
 
