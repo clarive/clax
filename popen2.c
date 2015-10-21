@@ -157,7 +157,7 @@ int popen2(const char *cmdline, popen2_t *child)
         close(pipe_stdout[READ]);
         dup2(pipe_stdout[WRITE], WRITE);
 
-        execl("/bin/sh", "sh", "-c", cmdline, NULL);
+        execl("/bin/sh", "sh", "-c", cmdline, (char*)0);
         exit(99);
     }
 
