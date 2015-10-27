@@ -52,7 +52,8 @@ struct clax_http_status_message_s clax_http_messages[] = {
     {400, "Bad Request"},
     {401, "Unauthorized"},
     {404, "Not Found"},
-    {405, "Method Not Allowed"}
+    {405, "Method Not Allowed"},
+    {500, "Internal System Error"}
 };
 
 const char *clax_http_status_message(int code)
