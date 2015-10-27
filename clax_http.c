@@ -508,21 +508,21 @@ int clax_http_chunked(char *buf, size_t len, va_list a_list_)
     ctx = va_arg(a_list, void *);
 
     if (len) {
-        olen = snprintf(obuf, sizeof(obuf), "%x\r\n", (int)len);
+        olen = snprintf(obuf, sizeof(obuf), "%x" EOL, (int)len);
         TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)obuf, olen) GOTO
         TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)buf, len) GOTO
-        TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)"\r\n", 2) GOTO
+        TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)EOL, EOLL) GOTO
     }
     else {
-        TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)"0\r\n", 3) GOTO
+        TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)"0" EOL, 1 + EOLL) GOTO
 
         /* Trailing headers */
         if (buf && strlen(buf)) {
             TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)buf, strlen(buf)) GOTO
-            TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)"\r\n", 2) GOTO
+            TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)EOL, EOLL) GOTO
         }
 
-        TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)"\r\n", 2) GOTO
+        TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)EOL, EOLL) GOTO
     }
 
     return 0;
@@ -579,7 +579,7 @@ int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t 
     sprintf(buf, "%d ", response->status_code);
     TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)buf, MIN(strlen(buf), sizeof(buf))) GOTO
     TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)status_message, strlen(status_message)) GOTO
-    TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)"\r\n", 2) GOTO
+    TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)EOL, EOLL) GOTO
 
     size_t header_iter = 0;
     clax_kv_list_item_t *header;
@@ -587,7 +587,7 @@ int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t 
         TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)header->key, strlen(header->key)) GOTO;
         TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)": ", 2) GOTO;
         TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)header->val, strlen(header->val)) GOTO;
-        TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)"\r\n", 2) GOTO;
+        TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)EOL, EOLL) GOTO;
     }
 
     if (response->body.len) {
@@ -596,7 +596,7 @@ int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t 
         unsigned char buf[1024];
 
         TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)"Content-Length: ", 16) GOTO;
-        sprintf((char *)buf, "%d\r\n\r\n", (int)response->body.len);
+        sprintf((char *)buf, "%d" EOL EOL, (int)response->body.len);
         TRY send_cb_wrapper(send_cb, ctx, buf, strlen((char *)buf)) GOTO;
 
         offset = 0;
@@ -605,7 +605,7 @@ int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t 
             offset += rcount;
         }
     } else if (response->body_cb) {
-        TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)"\r\n", 2) GOTO;
+        TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)EOL, EOLL) GOTO;
 
         /* TODO: error handling */
         response->body_cb(response->body_cb_ctx, clax_http_chunked, send_cb, ctx);
@@ -613,7 +613,7 @@ int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t 
         const unsigned char buf[1024];
         size_t rcount;
 
-        TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)"\r\n", 2) GOTO;
+        TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)EOL, EOLL) GOTO;
         while ((rcount = fread((void *)buf, 1, sizeof(buf), response->body_fh)) > 0) {
             TRY send_cb_wrapper(send_cb, ctx, buf, rcount) GOTO;
         }
@@ -621,7 +621,7 @@ int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t 
         fclose(response->body_fh);
         response->body_fh = NULL;
     } else {
-        TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)"\r\n", 2) GOTO;
+        TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)EOL, EOLL) GOTO;
     }
 
     return 0;

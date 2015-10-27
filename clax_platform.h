@@ -20,9 +20,6 @@
 #ifndef CLAX_PLATFORM_H
 #define CLAX_PLATFORM_H
 
-#ifdef MVS
-#endif
-
 #if defined(_WIN32)
 
 unsigned int sleep(unsigned int seconds);
@@ -42,6 +39,14 @@ unsigned int sleep(unsigned int seconds);
 # define gmtime_r(tp, tm) ((gmtime_s((tm), (tp)) == 0) ? (tm) : NULL)
 # define localtime_r(tp, tm) ((localtime_s((tm), (tp)) == 0) ? (tm) : NULL)
 #endif
+
+# define EOL "\n"
+# define EOLL 1
+
+#else
+
+# define EOL "\r\n"
+# define EOLL 2
 
 #endif
 
