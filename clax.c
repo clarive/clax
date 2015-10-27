@@ -368,6 +368,12 @@ int main(int argc, char **argv)
 {
     clax_ctx_t clax_ctx;
 
+#ifdef _WIN32
+    _setmode(_fileno(stdin), _O_BINARY);
+    _setmode(_fileno(stdout), _O_BINARY);
+    _setmode(_fileno(stderr), _O_BINARY);
+#endif
+
     signal(SIGINT, term);
 
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
