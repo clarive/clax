@@ -295,10 +295,7 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
             else {
                 if (crc32 && strlen(crc32)) {
                     unsigned long got_crc32 = clax_htol(crc32);
-
-                    int fd = open(fpath, O_RDONLY);
-                    unsigned long exp_crc32 = clax_crc32_calc_fd(fd);
-                    close(fd);
+                    unsigned long exp_crc32 = clax_crc32_calc_file(fpath);
 
                     if (got_crc32 != exp_crc32) {
                         clax_log("CRC mismatch %u != %u (%s)", exp_crc32, got_crc32, crc32);
