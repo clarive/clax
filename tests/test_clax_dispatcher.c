@@ -420,6 +420,9 @@ TEST_START(serves_file_as_attachment)
     ASSERT_EQ(response.status_code, 200)
     ASSERT_NOT_NULL(clax_kv_list_find(&response.headers, "Last-Modified"))
 
+    char *content_length = clax_kv_list_find(&response.headers, "Content-Length");
+    ASSERT_STR_EQ(content_length, "5");
+
     clax_http_request_free(&request);
     clax_http_response_free(&response);
     clax_options_free(&options);

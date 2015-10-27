@@ -168,12 +168,13 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
 {
     char *file = req->path_info + strlen("/tree/");
 
-    char buf[255];
+    char size_buf[255];
     char base_buf[255];
     char last_modified_buf[30];
     struct stat st;
     struct tm last_modified_time;
     struct tm *last_modified_time_p;
+    size_t size;
 
     if (stat(file, &st) != 0 || !(st.st_mode & S_IFREG)) {
         clax_dispatch_not_found(clax_ctx, req, res);
@@ -191,7 +192,11 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
         return;
     }
 
-    snprintf(buf, sizeof(buf), "%d", (int)st.st_size);
+    fseek(fh, 0L, SEEK_END);
+    size = ftell(fh);
+    fseek(fh, 0L, SEEK_SET);
+
+    snprintf(size_buf, sizeof(size_buf), "%d", (int)size);
 
     char *base = basename(file);
     strcpy(base_buf, "attachment; filename=\"");
@@ -202,7 +207,7 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
     clax_kv_list_push(&res->headers, "Content-Type", "application/octet-stream");
     clax_kv_list_push(&res->headers, "Content-Disposition", base_buf);
     clax_kv_list_push(&res->headers, "Pragma", "no-cache");
-    clax_kv_list_push(&res->headers, "Content-Length", buf);
+    clax_kv_list_push(&res->headers, "Content-Length", size_buf);
 
     last_modified_time_p = gmtime_r(&st.st_mtime, &last_modified_time);
 
