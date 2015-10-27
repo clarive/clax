@@ -73,7 +73,7 @@ unsigned long clax_crc32_calc_file(char *filename)
 {
     FILE *fh;
 
-    fh = fopen(filename, "r");
+    fh = fopen(filename, "rb");
     if (fh == NULL)
         return -1;
 
