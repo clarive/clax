@@ -62,31 +62,57 @@ int popen2(const char *cmdline, popen2_t *child)
     if (!SetHandleInformation(pipe_in_write, HANDLE_FLAG_INHERIT, 0))
         return -1;
 
-   PROCESS_INFORMATION piProcInfo;
-   STARTUPINFO siStartInfo;
-   BOOL bSuccess = FALSE;
+    PROCESS_INFORMATION piProcInfo;
+    STARTUPINFO siStartInfo;
+    BOOL bSuccess = FALSE;
 
-   ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+    ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
 
-   ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
-   siStartInfo.cb = sizeof(STARTUPINFO);
-   siStartInfo.hStdError = pipe_out_write;
-   siStartInfo.hStdOutput = pipe_out_write;
-   siStartInfo.hStdInput = pipe_in_read;
-   siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+    ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+    siStartInfo.cb = sizeof(STARTUPINFO);
+    siStartInfo.hStdError = pipe_out_write;
+    siStartInfo.hStdOutput = pipe_out_write;
+    siStartInfo.hStdInput = pipe_in_read;
+    siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 
-   bSuccess = CreateProcess(NULL,
-      (char *)cmdline,
-      NULL,
-      NULL,
-      TRUE,
-      CREATE_NO_WINDOW,
-      NULL,
-      NULL,
-      &siStartInfo,
-      &piProcInfo);
+    char *cmd = "cmd.exe /C \"";
+    char *cmd_line_exe = malloc(strlen(cmd) + strlen(cmdline) + 1 + 1);
+    strcpy(cmd_line_exe, cmd);
+    strcat(cmd_line_exe, cmdline);
+    strcat(cmd_line_exe, "\"");
+
+    bSuccess = CreateProcess(NULL,
+       cmd_line_exe,
+       NULL,
+       NULL,
+       TRUE,
+       CREATE_NO_WINDOW,
+       NULL,
+       NULL,
+       &siStartInfo,
+       &piProcInfo);
+
+    free(cmd_line_exe);
 
     if (!bSuccess) {
+        LPVOID lpMsgBuf;
+        DWORD dw = GetLastError();
+
+        FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER |
+            FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            dw,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR) &lpMsgBuf,
+            0, NULL );
+
+        /* lpMsgBuf already has a \n */
+        fprintf(stderr, "CreateProcess failed: %s", lpMsgBuf);
+
+        LocalFree(lpMsgBuf);
+
         return -1;
     }
 
