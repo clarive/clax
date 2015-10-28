@@ -8,31 +8,19 @@ LIBS=../clax_*.o \
 	 ../contrib/*/*.o \
 	 ../tests/u_util.o
 
-ifeq ($(WINDOWS),1)
-	PROGRAM =  test.exe
-	LIBS    += -lws2_32
-	CFLAGS  += -std=gnu99 -pedantic -Wall
-else
-ifeq ($(MVS),1)
-	CC      =  c99
-	CFLAGS  += -DMVS -D_ALL_SOURCE
-else
-	CFLAGS  += -std=gnu99 -pedantic -Wall
-endif
-endif
-
+include ../Makefile.vars
 
 all: lib $(PROGRAM)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS)
-	mv a.* $(PROGRAM)
+	$(CP) $(EXE) $(PROGRAM)
 
 ifneq ($(MVS),1)
 depend: .depend
 
 .depend: $(SOURCES)
-	rm -rf ./.depend
+	$(RMRF) ./.depend
 	$(CC) $(CFLAGS) -MM $^ > ./.depend
 
 -include .depend
@@ -49,6 +37,6 @@ check-coverage:
 	$(MAKE) CFLAGS="-fprofile-arcs -ftest-coverage -O0 $(CFLAGS)" check
 
 clean:
-	rm -f $(PROGRAM) $(OBJECTS) *.exe
-	rm -f *.gcno *.gcda
-	rm -f .depend
+	$(RMF) $(PROGRAM) $(OBJECTS) *.exe
+	$(RMF) *.gcno *.gcda
+	$(RMF) .depend

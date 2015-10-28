@@ -75,11 +75,12 @@ int popen2(const char *cmdline, popen2_t *child)
     siStartInfo.hStdInput = pipe_in_read;
     siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 
-    char *cmd = "cmd.exe /C \"";
-    char *cmd_line_exe = malloc(strlen(cmd) + strlen(cmdline) + 1 + 1);
-    strcpy(cmd_line_exe, cmd);
+    char *cmd_start = "cmd.exe /C \"";
+    char *cmd_end = "&& exit /b %errorlevel%\"";
+    char *cmd_line_exe = malloc(strlen(cmd_start) + strlen(cmdline) + strlen(cmd_end) + 1);
+    strcpy(cmd_line_exe, cmd_start);
     strcat(cmd_line_exe, cmdline);
-    strcat(cmd_line_exe, "\"");
+    strcat(cmd_line_exe, cmd_end);
 
     bSuccess = CreateProcess(NULL,
        cmd_line_exe,

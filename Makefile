@@ -6,44 +6,23 @@ COVERAGE_DATA=$(SOURCES:.c=.gcda)
 CFLAGS= -Icontrib -Icontrib/mbedtls
 LFLAGS=
 LIBS=contrib/*/*.o
-TARGET=
 
-ifeq ($(OS),Windows_NT)
-    WINDOWS=1
-else
-    UNAME_S := $(shell uname -s)
-    ifeq ($(UNAME_S),OS/390)
-        MVS=1
-    endif
-endif
-
-ifeq ($(WINDOWS),1)
-	PROGRAM =  clax.exe
-	LIBS    += -lws2_32
-	CFLAGS  += -std=gnu99 -pedantic -Wall
-else
-ifeq ($(MVS),1)
-	CC      =  c99
-	CFLAGS  += -DMVS -D_ALL_SOURCE -DMBEDTLS_NO_DEFAULT_ENTROPY_SOURCES -DMBEDTLS_NO_PLATFORM_ENTROPY
-else
-	CFLAGS  += -std=gnu99 -pedantic -Wall
-endif
-endif
+include Makefile.vars
 
 all: lib $(PROGRAM)
 
-lib: mbedtls jsmn http-parser multipart-parser-c inih base64 slre $(TARGET) $(OBJECTS)
+lib: mbedtls jsmn http-parser multipart-parser-c inih base64 slre $(OBJECTS)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS)
-	mv a.* $(PROGRAM)
+	$(CP) $(EXE) $(PROGRAM)
 
 ifneq ($(MVS),1)
 depend: .depend
 
 .depend: $(SOURCES)
-	rm -rf ./.depend
-	$(CC) $(CFLAGS) -MM $^ > ./.depend
+	$(RMRF) .depend
+	$(CC) $(CFLAGS) -MM $^ > .depend
 
 -include .depend
 endif
@@ -109,11 +88,11 @@ coverage-prepare:
 	lcov --rc lcov_branch_coverage=1 --no-external -c -i -d . -o coverage/coverage-base.info
 
 clean:
-	rm -f $(PROGRAM) $(OBJECTS)
-	rm -f *.exe
-	rm -f .depend
-	rm -f *.gcno *.gcda
-	rm -rf coverage
+	$(RMF)  $(PROGRAM) $(OBJECTS)
+	$(RMF)  *.exe
+	$(RMF)  .depend
+	$(RMF)  *.gcno *.gcda
+	$(RMRF) coverage
 	$(MAKE) -C tests clean
 	$(MAKE) -C tests_func clean
 	$(MAKE) -C bench clean
