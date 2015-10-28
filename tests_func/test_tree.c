@@ -31,7 +31,7 @@ TEST_START(upload)
     char *tmpdir = clax_mktmpdir_alloc();
 
     char command[1024];
-    sprintf(command, CMD " -n -r '%s' -l " DEVNULL, tmpdir);
+    sprintf(command, CMD " -n -r %s -l " DEVNULL, tmpdir);
 
     int rcount = execute(command, request, output, sizeof(output));
 
@@ -67,7 +67,7 @@ TEST_START(upload_with_different_name)
     char *tmpdir = clax_mktmpdir_alloc();
 
     char command[1024];
-    sprintf(command, CMD " -n -r '%s' -l" DEVNULL, tmpdir);
+    sprintf(command, CMD " -n -r %s -l" DEVNULL, tmpdir);
 
     int rcount = execute(command, request, output, sizeof(output));
 
@@ -133,7 +133,7 @@ TEST_START(delete file)
     char *tmpdir = clax_mktmpdir_alloc();
 
     char command[1024];
-    sprintf(command, CMD " -n -r '%s' -l " DEVNULL, tmpdir);
+    sprintf(command, CMD " -n -r %s -l " DEVNULL, tmpdir);
 
     execute(command, request, output, sizeof(output));
 

@@ -11,7 +11,7 @@ TEST_START(success)
     int rcount;
     char output[1024];
 
-    rcount = execute(CMD " -n -r . -l " DEVNULL " -a 'clax:password'",
+    rcount = execute(CMD " -n -r . -l " DEVNULL " -a clax:password",
             "GET /\r\nAuthorization: Basic Y2xheDpwYXNzd29yZA==\r\n\r\n", output, sizeof(output));
 
     ASSERT(rcount > 0);
@@ -26,7 +26,7 @@ TEST_START(missing header)
     int rcount;
     char output[1024];
 
-    rcount = execute(CMD " -n -r . -l " DEVNULL " -a 'clax:password'", "GET /\r\n\r\n", output, sizeof(output));
+    rcount = execute(CMD " -n -r . -l " DEVNULL " -a clax:password", "GET /\r\n\r\n", output, sizeof(output));
 
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
@@ -40,7 +40,7 @@ TEST_START(invalid header)
     int rcount;
     char output[1024];
 
-    rcount = execute(CMD " -n -r . -l " DEVNULL " -a 'clax:password'", "GET /\r\nAuthorization: invalid\r\n\r\n", output, sizeof(output));
+    rcount = execute(CMD " -n -r . -l " DEVNULL " -a clax:password", "GET /\r\nAuthorization: invalid\r\n\r\n", output, sizeof(output));
 
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
@@ -54,7 +54,7 @@ TEST_START(invalid base64 in header)
     int rcount;
     char output[1024];
 
-    rcount = execute(CMD " -n -r . -l " DEVNULL " -a 'clax:password'", "GET /\r\nAuthorization: Basic invalid64\r\n\r\n", output, sizeof(output));
+    rcount = execute(CMD " -n -r . -l " DEVNULL " -a clax:password", "GET /\r\nAuthorization: Basic invalid64\r\n\r\n", output, sizeof(output));
 
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
@@ -68,7 +68,7 @@ TEST_START(no colon)
     int rcount;
     char output[1024];
 
-    rcount = execute(CMD " -n -r . -l " DEVNULL " -a 'clax:password'", "GET /\r\nAuthorization: Basic Zm9vYmFy\r\n\r\n", output, sizeof(output));
+    rcount = execute(CMD " -n -r . -l " DEVNULL " -a clax:password", "GET /\r\nAuthorization: Basic Zm9vYmFy\r\n\r\n", output, sizeof(output));
 
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
@@ -82,7 +82,7 @@ TEST_START(wrong username)
     int rcount;
     char output[1024];
 
-    rcount = execute(CMD " -n -r . -l " DEVNULL " -a 'clax:password'", "GET /\r\nAuthorization: Basic Y2xhOnBhc3N3b3Jk\r\n\r\n", output, sizeof(output));
+    rcount = execute(CMD " -n -r . -l " DEVNULL " -a clax:password", "GET /\r\nAuthorization: Basic Y2xhOnBhc3N3b3Jk\r\n\r\n", output, sizeof(output));
 
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
@@ -96,7 +96,7 @@ TEST_START(wrong password)
     int rcount;
     char output[1024];
 
-    rcount = execute(CMD " -n -r . -l " DEVNULL " -a 'clax:password'", "GET /\r\nAuthorization: Basic Y2xheDpwYXNzd29y\r\n\r\n", output, sizeof(output));
+    rcount = execute(CMD " -n -r . -l " DEVNULL " -a clax:password", "GET /\r\nAuthorization: Basic Y2xheDpwYXNzd29y\r\n\r\n", output, sizeof(output));
 
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
