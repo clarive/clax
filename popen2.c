@@ -36,6 +36,25 @@
 
 #if defined(_WIN32)
 
+#define PRINT_LAST_ERROR(msg)                                   \
+    LPVOID lpMsgBuf;                                            \
+    DWORD dw = GetLastError();                                  \
+                                                                \
+    FormatMessage(                                              \
+        FORMAT_MESSAGE_ALLOCATE_BUFFER |                        \
+        FORMAT_MESSAGE_FROM_SYSTEM |                            \
+        FORMAT_MESSAGE_IGNORE_INSERTS,                          \
+        NULL,                                                   \
+        dw,                                                     \
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),              \
+        (LPTSTR) &lpMsgBuf,                                     \
+        0, NULL );                                              \
+                                                                \
+    /* lpMsgBuf already has a \n */                             \
+    fprintf(stderr, msg ": %s", lpMsgBuf);                      \
+                                                                \
+    LocalFree(lpMsgBuf);
+
 int popen2(const char *cmdline, popen2_t *child)
 {
     SECURITY_ATTRIBUTES saAttr;
@@ -76,7 +95,7 @@ int popen2(const char *cmdline, popen2_t *child)
     siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 
     char *cmd_start = "cmd.exe /C \"";
-    char *cmd_end = "&& exit /b %errorlevel%\"";
+    char *cmd_end = "\"";
     char *cmd_line_exe = malloc(strlen(cmd_start) + strlen(cmdline) + strlen(cmd_end) + 1);
     strcpy(cmd_line_exe, cmd_start);
     strcat(cmd_line_exe, cmdline);
@@ -96,23 +115,7 @@ int popen2(const char *cmdline, popen2_t *child)
     free(cmd_line_exe);
 
     if (!bSuccess) {
-        LPVOID lpMsgBuf;
-        DWORD dw = GetLastError();
-
-        FormatMessage(
-            FORMAT_MESSAGE_ALLOCATE_BUFFER |
-            FORMAT_MESSAGE_FROM_SYSTEM |
-            FORMAT_MESSAGE_IGNORE_INSERTS,
-            NULL,
-            dw,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            (LPTSTR) &lpMsgBuf,
-            0, NULL );
-
-        /* lpMsgBuf already has a \n */
-        fprintf(stderr, "CreateProcess failed: %s", lpMsgBuf);
-
-        LocalFree(lpMsgBuf);
+        PRINT_LAST_ERROR("CreateProcess failed");
 
         return -1;
     }
@@ -142,19 +145,29 @@ int pclose2(popen2_t *child)
     _close(child->in);
     _close(child->out);
 
-    HANDLE hProcess = OpenProcess(SYNCHRONIZE, FALSE, child->pid);
+    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | SYNCHRONIZE, FALSE, child->pid);
 
     unsigned long int exit_code = 0;
 
-    switch (WaitForSingleObject(hProcess, INFINITE)) {
-    case WAIT_OBJECT_0:
-        GetExitCodeProcess(hProcess, &exit_code);
-        return exit_code;
-    case WAIT_TIMEOUT:
-        return 255;
-    default:
-        return 255;
+    WaitForSingleObject(hProcess, INFINITE);
+
+    int done = 0;
+    while (!done) {
+        if (GetExitCodeProcess(hProcess, &exit_code) == FALSE) {
+            PRINT_LAST_ERROR("GetExitCodeProcess failed");
+
+            exit_code = 255;
+            done++;
+        }
+        else if (exit_code == STILL_ACTIVE) {
+            continue;
+        }
+        else {
+            done++;
+        }
     }
+
+    CloseHandle(hProcess);
 
     return exit_code;
 }
