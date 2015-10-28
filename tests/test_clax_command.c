@@ -67,7 +67,7 @@ SUITE_START(clax_command)
 TEST_START(start_runs_command)
 {
 #ifdef _WIN32
-    command_ctx_t ctx = {.command="dir"};
+    command_ctx_t ctx = {.command="set foo=bar"};
 #else
     command_ctx_t ctx = {.command="echo 'bar'"};
 #endif
