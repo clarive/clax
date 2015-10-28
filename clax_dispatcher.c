@@ -62,7 +62,7 @@ void clax_command_read_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
 {
     command_ctx_t *command_ctx = ctx;
     va_list a_list;
-    char buf[16];
+    char buf[32];
 
     va_start(a_list, chunk_cb);
 
