@@ -47,7 +47,6 @@ ifneq ($(MVS),1)
 depend: .depend
 
 .depend: $(SOURCES)
-	$(RMRF) .depend
 	$(CC) $(CFLAGS) -MM $^ > .depend
 
 -include .depend
