@@ -15,6 +15,13 @@ MV = mv
 CP = cp
 EXE = a.out
 
+ifeq ($(OS),Windows_NT)
+	WINDOWS=1
+ifneq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
+	WINDOWS_CMD=1
+endif
+endif
+
 ifeq ($(WINDOWS),1)
 	EXE     = a.exe
 	PROGRAM =  clax.exe
