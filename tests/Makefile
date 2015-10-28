@@ -5,7 +5,33 @@ CFLAGS= -I../contrib -I../contrib/mbedtls -I../
 LFLAGS=
 LIBS=../clax_*.o ../popen2.o ../contrib/*/*.o
 
-include ../Makefile.vars
+RM = rm
+RMF = rm -f
+RMRF = rm -rf
+MV = mv
+CP = cp
+EXE = a.out
+
+ifeq ($(WINDOWS),1)
+	EXE     = a.exe
+	PROGRAM =  clax.exe
+	LIBS    += -lws2_32
+	CFLAGS  += -std=gnu99 -pedantic -Wall
+ifeq ($(WINDOWS_CMD),1)
+	RM      = del
+	RMF     = del /f
+	RMRF    = rd /s /q
+	MV      = move
+	CP      = copy
+endif
+else
+ifeq ($(MVS),1)
+	CC      =  c99
+	CFLAGS  += -DMVS -D_ALL_SOURCE -DMBEDTLS_NO_DEFAULT_ENTROPY_SOURCES -DMBEDTLS_NO_PLATFORM_ENTROPY
+else
+	CFLAGS  += -std=gnu99 -pedantic -Wall
+endif
+endif
 
 all: lib $(PROGRAM)
 
