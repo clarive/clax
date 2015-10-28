@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <ftw.h>
 #include <errno.h>
 
 #include "http-parser/http_parser.h"
