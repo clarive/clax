@@ -7,7 +7,7 @@ char *mktmpdir();
 int rmrf(char *path);
 
 #ifdef _WIN32
-# define CMD "../clax.exe"
+# define CMD "..\\clax.exe"
 #else
 # define CMD "../clax"
 #endif
