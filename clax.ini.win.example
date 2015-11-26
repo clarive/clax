@@ -1,0 +1,9 @@
+root = C:\Users\clarive\Clax\
+log_file = C:\Users\clarive\Clax\clax.log
+
+[ssl]
+enabled = no
+
+#[http_basic_auth]
+#username = clax
+#password = password
