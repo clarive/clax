@@ -1,6 +1,6 @@
 # Clax Installation
 
-Clax needs an Inetd daemon running (inetd/`xinetd` on Unix or wininetd on Windows).
+Clax needs an Inetd daemon running (`inetd`/`xinetd` on Unix or `wininetd` on Windows).
 
 ## Windows
 
