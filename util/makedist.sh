@@ -9,7 +9,7 @@ else
     VERSION=`git rev-parse --short HEAD`
 fi
 
-DIST="clax_${VERSION}_${OS}_${ARCH}";
+DIST="clax_${VERSION}_${OS}-${ARCH}";
 
 if [ "$WINDOWS" = "1" ]; then
     ARCHIVE="$DIST.zip"
