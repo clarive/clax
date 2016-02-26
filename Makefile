@@ -60,25 +60,25 @@ depend: .depend
 endif
 
 inih:
-	$(MAKE) -C contrib/inih CFLAGS="$(CFLAGS)"
+	$(MAKE) -C contrib/inih CC="$(CC)" CFLAGS="$(CFLAGS)"
 
 jsmn:
-	$(MAKE) -C contrib/jsmn CFLAGS="-DJSMN_PARENT_LINKS"
+	$(MAKE) -C contrib/jsmn CC="$(CC)" CFLAGS="-DJSMN_PARENT_LINKS"
 
 mbedtls:
-	$(MAKE) -C contrib/mbedtls -f Makefile.clax CFLAGS="$(CFLAGS) -D__STRING_CODE_SET__=\"ISO8859-1\""
+	$(MAKE) -C contrib/mbedtls -f Makefile.clax CC="$(CC)" CFLAGS="$(CFLAGS) -D__STRING_CODE_SET__=\"ISO8859-1\""
 
 http-parser:
-	$(MAKE) -C contrib/http-parser -f Makefile.clax CFLAGS="$(CFLAGS) -D__STRING_CODE_SET__=\"ISO8859-1\""
+	$(MAKE) -C contrib/http-parser -f Makefile.clax CC="$(CC)" CFLAGS="$(CFLAGS) -D__STRING_CODE_SET__=\"ISO8859-1\""
 
 multipart-parser-c:
-	$(MAKE) -C contrib/multipart-parser-c -f Makefile.clax CFLAGS="$(CFLAGS) -D__STRING_CODE_SET__=\"ISO8859-1\""
+	$(MAKE) -C contrib/multipart-parser-c -f Makefile.clax CC="$(CC)" CFLAGS="$(CFLAGS) -D__STRING_CODE_SET__=\"ISO8859-1\""
 
 base64:
-	$(MAKE) -C contrib/base64 CFLAGS="$(CFLAGS)"
+	$(MAKE) -C contrib/base64 CC="$(CC)" CFLAGS="$(CFLAGS)"
 
 slre:
-	$(MAKE) -C contrib/slre CFLAGS="$(CFLAGS)"
+	$(MAKE) -C contrib/slre CC="$(CC)" CFLAGS="$(CFLAGS)"
 
 tests: lib
 	$(MAKE) -C tests

@@ -1,7 +1,12 @@
 #!/bin/bash
 
-OS=linux
-ARCH=`uname -m`
+if [ "$WINDOWS" = "1" ]; then
+    OS=windows
+    ARCH=x86_64
+else
+    OS=linux
+    ARCH=`uname -m`
+fi
 
 if [ -f "VERSION" ]; then
     VERSION=`cat VERSION | tr -d "\012"`
