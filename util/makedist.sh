@@ -1,12 +1,17 @@
 #!/bin/bash
 
-BRANCH=`git rev-parse --abbrev-ref HEAD`
-SHA=`git rev-parse --short HEAD`
+OS=linux
+ARCH=`uname -m`
 
-DIST="clax-$BRANCH-$SHA";
+if [ -f "VERSION" ]; then
+    VERSION=`cat VERSION | tr -d "\012"`
+else
+    VERSION=`git rev-parse --short HEAD`
+fi
+
+DIST="clax_${VERSION}_${OS}_${ARCH}";
 
 if [ "$WINDOWS" = "1" ]; then
-    DIST="$DIST-win"
     ARCHIVE="$DIST.zip"
     rm -rf $DIST/
     mkdir $DIST
@@ -17,7 +22,6 @@ if [ "$WINDOWS" = "1" ]; then
 
     zip -r $ARCHIVE $DIST/
 else
-    DIST="$DIST-linux"
     ARCHIVE="$DIST.tar.gz"
     rm -rf $DIST/
     mkdir $DIST
