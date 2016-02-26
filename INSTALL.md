@@ -24,11 +24,35 @@ Windows package already has wininetd.exe file in it and sample configuration fil
 
 1. Make sure /etc/services has clax service
 
-    clax            11801/tcp
+    clax 11801/tcp
 
 2. Add the following line to /etc/inetd.conf
 
-    clax     stream tcp nowait <user> /patht/to/clax clax -c /path/to/clax.ini
+    clax     stream tcp nowait <user> <path-to>/clax clax -c <path-to>/clax.ini
 
 3. Restart inetd
+4. Check that http://localhost:11801 is returning "Hello world" message
+
+### xinetd
+
+1. Make sure /etc/services has clax service
+
+    clax 11801/tcp
+
+2. Create a file named clax-stream in /etc/xinetd.d/ with:
+
+```
+service clax
+{
+    flags           = REUSE
+    socket_type     = stream
+    wait            = no
+    user            = <user>
+    server          = <path-to>/clax
+    server_args     = -c <path-to>/clax.ini
+    log_on_failure  += USERID
+}
+```
+
+3. Restart xinetd
 4. Check that http://localhost:11801 is returning "Hello world" message
