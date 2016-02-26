@@ -1,10 +1,10 @@
 # Clax Installation
 
-Clax needs an Inetd daemon running (xinted on Unix or wininetd on Windows).
+Clax needs an Inetd daemon running (inetd/xinetd on Unix or wininetd on Windows).
 
 ## Windows
 
-Windows packages already has wininetd.exe file in it and sample configuration files.
+Windows package already has wininetd.exe file in it and sample configuration files.
 
 1. Copy wininetd.conf to C:\Windows\ and adjust the paths accordingly
 
@@ -14,8 +14,9 @@ Windows packages already has wininetd.exe file in it and sample configuration fi
 
     wininetd.exe --install
 
-3. Configure clax.ini
-4. Check that http://localhost:11801 is returning "Hello world" message
+3. Make sure the service is running in Services Control Panel
+4. Configure clax.ini
+5. Check that http://localhost:11801 is returning "Hello world" message
 
 ## Linux
 
