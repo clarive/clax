@@ -3,6 +3,9 @@
 if [ "$WINDOWS" = "1" ]; then
     OS=windows
     ARCH=x86_64
+elif uname -a | grep 'OS/390'; then
+    OS=zos
+    ARCH=`uname -m`
 else
     OS=linux
     ARCH=`uname -m`
