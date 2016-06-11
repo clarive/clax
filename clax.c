@@ -390,6 +390,7 @@ int main(int argc, char **argv)
     if (options.log_file[0]) {
         options._log_file = fopen(options.log_file, "a");
         if (options._log_file == NULL) {
+            fprintf(stderr, "Can't open log_file '%s': %s\n", options.log_file, strerror(errno));
             clax_abort();
         }
 

@@ -488,4 +488,37 @@ TEST_START(slurps file)
 }
 TEST_END
 
+TEST_START(appends new string)
+{
+    char str[255] = "";
+
+    int copied = clax_strcat(str, 255, "hello");
+
+    ASSERT_EQ(copied, 5);
+    ASSERT_STR_EQ(str, "hello");
+}
+TEST_END
+
+TEST_START(appends another string)
+{
+    char str[255] = "hello";
+
+    int copied = clax_strcat(str, sizeof(str), " there");
+
+    ASSERT_EQ(copied, 6);
+    ASSERT_STR_EQ(str, "hello there");
+}
+TEST_END
+
+TEST_START(appends string that is too big)
+{
+    char str[7] = "hello";
+
+    int copied = clax_strcat(str, sizeof(str), " there");
+
+    ASSERT_EQ(copied, 1);
+    ASSERT_STR_EQ(str, "hello ");
+}
+TEST_END
+
 SUITE_END

@@ -82,5 +82,6 @@ char *clax_atoe_alloc(char *from, size_t from_len);
 #endif
 
 unsigned char *clax_slurp_alloc(char *filename, size_t *olen);
+size_t clax_strcat(char *dst, size_t dst_max_len, char *src);
 
 #endif

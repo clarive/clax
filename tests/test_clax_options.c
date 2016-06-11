@@ -29,48 +29,13 @@
 
 SUITE_START(clax_options)
 
-TEST_START(not_enough_args)
-{
-    opt options;
-
-    clax_options_init(&options);
-
-    char *argv[] = {0};
-    int ret = clax_parse_options(&options, 0, argv);
-
-    ASSERT_EQ(ret, -1);
-
-    clax_options_free(&options);
-}
-TEST_END
-
-TEST_START(root_is_required)
-{
-    opt options;
-
-    clax_options_init(&options);
-
-    char *argv[] = {"clax", "-n"};
-    int ret = clax_parse_options(&options, sizeof_array(argv), argv);
-
-    ASSERT_EQ(ret, -1);
-
-    char *argv2[] = {"clax", "-n", "-r", "unknown-root"};
-    int ret2 = clax_parse_options(&options, sizeof_array(argv2), argv2);
-
-    ASSERT_EQ(ret2, -1);
-
-    clax_options_free(&options);
-}
-TEST_END
-
 TEST_START(parses_basic_auth)
 {
     opt options;
 
     clax_options_init(&options);
 
-    char *argv[] = {"clax", "-r", ".", "-a", "foo:bar"};
+    char *argv[] = {"clax", "-a", "foo:bar"};
     int ret = clax_parse_options(&options, sizeof_array(argv), argv);
 
     ASSERT_EQ(ret, 0);
@@ -87,7 +52,7 @@ TEST_START(parses_basic_auth_invalid)
 
     clax_options_init(&options);
 
-    char *argv[] = {"clax", "-n", "-r", ".", "-a", "foobar"};
+    char *argv[] = {"clax", "-n", "-a", "foobar"};
     int ret = clax_parse_options(&options, sizeof_array(argv), argv);
 
     ASSERT_EQ(ret, -1);
@@ -102,7 +67,7 @@ TEST_START(parses_ssl_options)
 
     clax_options_init(&options);
 
-    char *argv[] = {"clax", "-r", ".", "-s", "-t", "ssl/server.crt", "-p", "ssl/server.key"};
+    char *argv[] = {"clax", "-s", "-t", "ssl/server.crt", "-p", "ssl/server.key"};
     int ret = clax_parse_options(&options, sizeof_array(argv), argv);
 
     ASSERT_EQ(ret, 0)
@@ -121,7 +86,7 @@ TEST_START(parses_ssl_options_require_cert_and_key)
 
     clax_options_init(&options);
 
-    char *argv[] = {"clax", "-r", ".", "-s"};
+    char *argv[] = {"clax", "-s"};
     int ret = clax_parse_options(&options, sizeof_array(argv), argv);
 
     ASSERT_EQ(ret, -1)
@@ -129,7 +94,7 @@ TEST_START(parses_ssl_options_require_cert_and_key)
     clax_options_free(&options);
     clax_options_init(&options);
 
-    char *argv2[] = {"clax", "-r", ".", "-s", "-t", "ssl/server.crt"};
+    char *argv2[] = {"clax", "-s", "-t", "ssl/server.crt"};
     int ret2 = clax_parse_options(&options, sizeof_array(argv2), argv2);
 
     ASSERT_EQ(ret2, -1)
@@ -137,7 +102,7 @@ TEST_START(parses_ssl_options_require_cert_and_key)
     clax_options_free(&options);
     clax_options_init(&options);
 
-    char *argv3[] = {"clax", "-r", ".", "-s", "-p", "ssl/server.key"};
+    char *argv3[] = {"clax", "-s", "-p", "ssl/server.key"};
     int ret3 = clax_parse_options(&options, sizeof_array(argv3), argv3);
 
     ASSERT_EQ(ret3, -1)
@@ -152,7 +117,7 @@ TEST_START(parses_ssl_options_no_verify)
 
     clax_options_init(&options);
 
-    char *argv[] = {"clax", "-r", ".", "-t", "ssl/server.crt", "-p", "ssl/server.key", "-k"};
+    char *argv[] = {"clax", "-t", "ssl/server.crt", "-p", "ssl/server.key", "-k"};
     int ret = clax_parse_options(&options, sizeof_array(argv), argv);
 
     ASSERT_EQ(ret, 0)
@@ -168,7 +133,7 @@ TEST_START(parses_ssl_options_entropy_file)
 
     clax_options_init(&options);
 
-    char *argv[] = {"clax", "-r", ".", "-t", "ssl/server.crt", "-p", "ssl/server.key", "-e", "ssl/entropy"};
+    char *argv[] = {"clax", "-t", "ssl/server.crt", "-p", "ssl/server.key", "-e", "ssl/entropy"};
     int ret = clax_parse_options(&options, sizeof_array(argv), argv);
 
     ASSERT_EQ(ret, 0)
@@ -222,7 +187,7 @@ TEST_START(parses_log_file)
 
     clax_options_init(&options);
 
-    char *argv[] = {"clax", "-r", ".", "-l", "/dev/null"};
+    char *argv[] = {"clax", "-l", "/dev/null"};
     int ret = clax_parse_options(&options, sizeof_array(argv), argv);
 
     ASSERT_EQ(ret, 0)

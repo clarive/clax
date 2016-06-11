@@ -4,6 +4,11 @@
 #include <dirent.h>
 #include <errno.h>
 #include <unistd.h>
+#include <libgen.h>
+
+#ifdef _WIN32
+# include <windows.h>
+#endif
 
 #include "inih/ini.h"
 #include "clax_options.h"
@@ -35,13 +40,13 @@ void clax_usage()
             "   ------\n"
             "   -c <config_file>        path to configuration file\n"
             "   -z                      print default configuration\n"
-            "   -r <root>               home directory (required, will chdir to it)\n"
-            "   -l <log_file>           path to log file (default: stderr)\n"
+            "   -r <root>               home directory (will chdir to it, default: clax location)\n"
+            "   -l <log_file>           path to log file (default: clax.log in root directory)\n"
             "   -a <username:password>  basic authentication credentials\n"
             "\n"
             "   ssl\n"
             "   ---\n"
-            "   -n                      do not use ssl at all (default: on)\n"
+            "   -s                      use ssl (default: off)\n"
             "   -k                      do not verify client certificate (default: on)\n"
             "   -t <cert_file>          path to cert file (required if ssl, CA included)\n"
             "   -p <key_file>           path to private key file (required if ssl)\n"
@@ -91,9 +96,6 @@ int clax_parse_options(opt *options, int argc, char **argv)
 
     optarg = NULL;
     optind = opterr = optopt = 0;
-
-    if (argc < 2)
-        return -1;
 
     opterr = 0;
     while ((c = getopt(argc, argv, "hskzl:e:t:p:r:c:a:")) != -1) {
@@ -176,11 +178,7 @@ int clax_parse_options(opt *options, int argc, char **argv)
         }
     }
 
-    if (!strlen(options->root)) {
-        fprintf(stderr, "Error: root is required\n\n");
-
-        return -1;
-    } else {
+    if (strlen(options->root)) {
         DIR *dir = opendir(options->root);
         if (dir) {
             closedir(dir);
@@ -190,11 +188,6 @@ int clax_parse_options(opt *options, int argc, char **argv)
 
                 return -1;
             }
-
-            char last = options->root[strlen(options->root) - 1];
-            if (last != '/') {
-                strcat(options->root, "/");
-            }
         } else if (ENOENT == errno) {
             fprintf(stderr, "Error: provided root directory does not exist: %s\n\n", options->root);
 
@@ -202,6 +195,40 @@ int clax_parse_options(opt *options, int argc, char **argv)
         } else {
             fprintf(stderr, "Error: cannot open provided root directory\n\n");
 
+            return -1;
+        }
+    }
+    else {
+#ifdef _WIN32
+        GetModuleFileName(NULL, options->root, sizeof_struct_member(opt, root));
+#else
+        readlink("/proc/self/exe", options->root, sizeof_struct_member(opt, root));
+#endif
+
+        dirname(options->root);
+    }
+
+    if (options->root[strlen(options->root) - 1] != '/') {
+        if (clax_strcat(options->root, sizeof_struct_member(opt, root), "/") == 0) {
+            fprintf(stderr, "Error: Root path is too long\n\n");
+            return -1;
+        }
+    }
+
+    if (strlen(options->log_file) == 0) {
+        int max_len = sizeof(options->log_file);
+
+        int copied = clax_strcat(options->log_file, max_len, options->root);
+
+        if (copied == 0) {
+            fprintf(stderr, "Error: Path to log_file is too long\n\n");
+            return -1;
+        }
+
+        copied = clax_strcat(options->log_file, max_len, "clax.log");
+
+        if (copied == 0) {
+            fprintf(stderr, "Error: Path to log_file is too long\n\n");
             return -1;
         }
     }

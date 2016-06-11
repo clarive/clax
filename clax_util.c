@@ -197,6 +197,27 @@ char *clax_strcat_alloc(char *dst, char *src)
     return res;
 }
 
+size_t clax_strcat(char *dst, size_t dst_max_len, char *src)
+{
+    size_t orig_len = strlen(dst);
+    size_t src_len = strlen(src);
+    size_t to_copy = src_len;
+
+    if (orig_len + to_copy > dst_max_len - 1) {
+        to_copy = dst_max_len - orig_len - 1;
+    }
+
+    if (to_copy > 0) {
+        strncat(dst, src, to_copy);
+        dst[orig_len + to_copy] = 0;
+
+        return to_copy;
+    }
+    else {
+        return 0;
+    }
+}
+
 void clax_san_path(char *buf)
 {
     char *p = buf;

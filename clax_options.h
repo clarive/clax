@@ -21,9 +21,9 @@
 #define CLAX_OPTIONS_H
 
 typedef struct {
+    char root[255];
     char log_file[255];
     char config_file[255];
-    char root[255];
 
     char *basic_auth_username;
     char *basic_auth_password;
