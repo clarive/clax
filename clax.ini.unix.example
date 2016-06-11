@@ -1,12 +1,12 @@
-root = /opt/clarive/clax
-log_file = /opt/clarive/logs/clax.log
+#root = /opt/clarive/clax
+#log_file = /opt/clarive/logs/clax.log
 
-[ssl]
-enabled = yes
-cert_file = /opt/clarive/ssl/clax.crt
-key_file = /opt/clarive/ssl/clax.key
+#[ssl]
+#enabled = yes
+#cert_file = /opt/clarive/ssl/clax.crt
+#key_file = /opt/clarive/ssl/clax.key
 #entropy_file = /opt/clarive/entropy
 
-[http_basic_auth]
-username = clax
-password = password
+#[http_basic_auth]
+#username = clax
+#password = password

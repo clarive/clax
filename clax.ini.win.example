@@ -1,8 +1,11 @@
-root = C:\Users\clarive\Clax\
-log_file = C:\Users\clarive\Clax\clax.log
+#root = C:\Users\clarive\Clax\
+#log_file = C:\Users\clarive\Clax\clax.log
 
-[ssl]
-enabled = no
+#[ssl]
+#enabled = yes
+#cert_file = /opt/clarive/ssl/clax.crt
+#key_file = /opt/clarive/ssl/clax.key
+#entropy_file = /opt/clarive/entropy
 
 #[http_basic_auth]
 #username = clax

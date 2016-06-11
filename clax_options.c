@@ -139,18 +139,18 @@ int clax_parse_options(opt *options, int argc, char **argv)
                   }
         case 'z':
             fprintf(stderr,
-                    "root = /opt/clarive/clax\n"
-                    "log_file = /opt/clarive/logs/clax.log\n"
+                    "#root = /opt/clarive/clax\n"
+                    "#log_file = /opt/clarive/logs/clax.log\n"
                     "\n"
-                    "[ssl]\n"
-                    "enabled = yes\n"
-                    "cert_file = /opt/clarive/ssl/clax.crt\n"
-                    "key_file = /opt/clarive/ssl/clax.key\n"
+                    "#[ssl]\n"
+                    "#enabled = yes\n"
+                    "#cert_file = /opt/clarive/ssl/clax.crt\n"
+                    "#key_file = /opt/clarive/ssl/clax.key\n"
                     "#entropy_file = /opt/clarive/entropy\n"
                     "\n"
-                    "[http_basic_auth]\n"
-                    "username = clax\n"
-                    "password = password\n"
+                    "#[http_basic_auth]\n"
+                    "#username = clax\n"
+                    "#password = password\n"
                    );
 
             exit(0);
