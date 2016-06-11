@@ -10,7 +10,7 @@ TEST_START(rejects not ssl request)
     int rcount;
     char output[1024];
 
-    rcount = execute(CMD " -t ssl/server.crt -k ssl/server.key -r . ", "GET /\r\nContent-Length: 0\r\n\r\n", output, sizeof(output));
+    rcount = execute(CMD " -s -t ssl/server.crt -k ssl/server.key -r . ", "GET /\r\nContent-Length: 0\r\n\r\n", output, sizeof(output));
 
     ASSERT(rcount < 0);
     ASSERT_NULL(strstr(output, "200 OK"));
