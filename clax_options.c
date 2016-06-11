@@ -61,8 +61,8 @@ int clax_config_handler(void *ctx, const char *section, const char *name, const 
     } else if (MATCH("", "log_file")) {
         strncpy(options->log_file, value, sizeof_struct_member(opt, log_file));
     } else if (MATCH("ssl", "enabled")) {
-        if (strcmp(value, "no") == 0) {
-            options->no_ssl = 1;
+        if (strcmp(value, "yes") == 0) {
+            options->ssl = 1;
         }
     } else if (MATCH("ssl", "verify")) {
         if (strcmp(value, "no") == 0) {
@@ -96,7 +96,7 @@ int clax_parse_options(opt *options, int argc, char **argv)
         return -1;
 
     opterr = 0;
-    while ((c = getopt(argc, argv, "hnkzl:e:t:p:r:c:a:")) != -1) {
+    while ((c = getopt(argc, argv, "hskzl:e:t:p:r:c:a:")) != -1) {
         switch (c) {
         case 'c':
             strncpy(options->config_file, optarg, sizeof(options->config_file));
@@ -108,8 +108,8 @@ int clax_parse_options(opt *options, int argc, char **argv)
             /* -1 for the / if its needed */
             strncpy(options->root, optarg, sizeof_struct_member(opt, root) - 1);
             break;
-        case 'n':
-            options->no_ssl = 1;
+        case 's':
+            options->ssl = 1;
             break;
         case 'k':
             options->no_ssl_verify = 1;
@@ -168,7 +168,7 @@ int clax_parse_options(opt *options, int argc, char **argv)
         }
     }
 
-    if (!options->no_ssl) {
+    if (options->ssl) {
         if (!strlen(options->cert_file) || !strlen(options->key_file)) {
             fprintf(stderr, "Error: cert_file and key_file are required\n\n");
 

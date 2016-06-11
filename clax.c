@@ -401,9 +401,9 @@ int main(int argc, char **argv)
     clax_log("Option: root=%s", options.root);
     clax_log("Option: entropy_file=%s", options.entropy_file);
     clax_log("Option: log_file=%s", options.log_file);
-    clax_log("Option: no_ssl=%d", options.no_ssl);
+    clax_log("Option: ssl=%d", options.ssl);
 
-    if (options.no_ssl) {
+    if (!options.ssl) {
         clax_http_dispatch(&clax_ctx, clax_send, clax_recv, NULL);
     } else {
         clax_loop_ssl(&clax_ctx);

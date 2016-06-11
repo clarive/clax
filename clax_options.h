@@ -28,7 +28,7 @@ typedef struct {
     char *basic_auth_username;
     char *basic_auth_password;
 
-    char no_ssl;
+    char ssl;
     char no_ssl_verify;
     char cert_file[255];
     char key_file[255];
