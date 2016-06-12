@@ -84,6 +84,13 @@ void clax_dispatch_not_found(clax_ctx_t *clax_ctx, clax_http_request_t *req, cla
     clax_big_buf_append_str(&res->body, "Not found");
 }
 
+void clax_dispatch_bad_gateway(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
+{
+    clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
+    res->status_code = 502;
+    clax_big_buf_append_str(&res->body, "Bad Gateway");
+}
+
 void clax_dispatch_method_not_allowed(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
