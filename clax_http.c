@@ -23,8 +23,12 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <unistd.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <netdb.h>
-#include <sys/ioctl.h>
+#endif
 
 #include "http-parser/http_parser.h"
 #include "multipart-parser-c/multipart_parser.h"
@@ -837,9 +841,9 @@ int clax_http_connect_to_proxy(char *hostname, char *port)
         return -1;
     }
 
-    bzero((char *)&serv_addr, sizeof(serv_addr));
+    memset((char *)&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr,
+    memcpy((char *)server->h_addr,
          (char *)&serv_addr.sin_addr.s_addr,
          server->h_length);
     serv_addr.sin_port = htons(portno);
