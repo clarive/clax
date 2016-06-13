@@ -396,21 +396,41 @@ unsigned long clax_htol(char *buf)
 
 char *clax_strdup(const char *str)
 {
+    if (str == NULL) {
+        return NULL;
+    }
+
     size_t len = strlen(str);
 
     char *p = malloc(len + 1);
+
+    if (p == NULL) {
+        return NULL;
+    }
+
     strncpy(p, str, len);
     p[len] = 0;
+
     return p;
 }
 
 char *clax_strndup(const char *str, size_t max_len)
 {
+    if (str == NULL) {
+        return NULL;
+    }
+
     size_t len = MIN(strlen(str), max_len);
 
     char *p = malloc(len + 1);
+
+    if (p == NULL) {
+        return NULL;
+    }
+
     strncpy(p, str, len);
     p[len] = 0;
+
     return p;
 }
 

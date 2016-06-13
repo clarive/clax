@@ -339,6 +339,9 @@ TEST_START(strdup duplicates a string)
 {
     char *p;
 
+    p = clax_strdup(NULL);
+    ASSERT_NULL(p);
+
     p = clax_strdup("foobar");
     ASSERT_STR_EQ(p, "foobar");
     free(p);
@@ -348,6 +351,9 @@ TEST_END
 TEST_START(strndup duplicates a string with max characters)
 {
     char *p;
+
+    p = clax_strndup(NULL, 6);
+    ASSERT_NULL(p);
 
     p = clax_strndup("foobar", 6);
     ASSERT_STR_EQ(p, "foobar");
