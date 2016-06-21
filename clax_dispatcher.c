@@ -98,18 +98,30 @@ void clax_dispatch_method_not_allowed(clax_ctx_t *clax_ctx, clax_http_request_t 
     clax_big_buf_append_str(&res->body, "Method not allowed");
 }
 
-void clax_dispatch_system_error(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
+void clax_dispatch_system_error(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res, char *msg)
 {
+    char *p = msg;
+
+    if (p == NULL) {
+        p = "System error";
+    }
+
     clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
     res->status_code = 500;
-    clax_big_buf_append_str(&res->body, "System error");
+    clax_big_buf_append_str(&res->body, p);
 }
 
-void clax_dispatch_bad_request(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
+void clax_dispatch_bad_request(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res, char *msg)
 {
+    char *p = msg;
+
+    if (p == NULL) {
+        p = "Bad Request";
+    }
+
     res->status_code = 400;
     clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
-    clax_big_buf_append_str(&res->body, "Bad request");
+    clax_big_buf_append_str(&res->body, p);
 }
 
 void clax_dispatch_not_authorized(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
@@ -140,7 +152,7 @@ void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_
 
     char *command = clax_kv_list_find(&req->body_params, "command");
     if (!command || !strlen(command)) {
-        clax_dispatch_bad_request(clax_ctx, req, res);
+        clax_dispatch_bad_request(clax_ctx, req, res, "Command is requried");
         return;
     }
 
@@ -153,7 +165,7 @@ void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_
 
     pid_t pid = clax_command_start(&command_ctx);
     if (pid <= 0) {
-        clax_dispatch_system_error(clax_ctx, req, res);
+        clax_dispatch_system_error(clax_ctx, req, res, "Can't start command");
         return;
     }
 
@@ -240,7 +252,7 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
         } else {
             clax_log("Output directory '%s' does not exist", subdir);
 
-            clax_dispatch_bad_request(clax_ctx, req, res);
+            clax_dispatch_bad_request(clax_ctx, req, res, "Output directory does not exist");
             return;
         }
     }
@@ -276,7 +288,7 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
             char *time = clax_kv_list_find(&req->query_params, "time");
 
             if (crc32 && strlen(crc32) != 8) {
-                clax_dispatch_bad_request(clax_ctx, req, res);
+                clax_dispatch_bad_request(clax_ctx, req, res, "Invalid CRC32");
                 return;
             }
 
@@ -297,7 +309,7 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
 
             if (ret < 0) {
                 clax_log("Saving file failed: %s\n", fpath);
-                clax_dispatch_system_error(clax_ctx, req, res);
+                clax_dispatch_system_error(clax_ctx, req, res, "Saving file failed");
             }
             else {
                 if (crc32 && strlen(crc32)) {
@@ -306,7 +318,7 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
 
                     if (got_crc32 != exp_crc32) {
                         clax_log("CRC mismatch %u != %u (%s)", exp_crc32, got_crc32, crc32);
-                        clax_dispatch_bad_request(clax_ctx, req, res);
+                        clax_dispatch_bad_request(clax_ctx, req, res, "CRC32 mismatch");
 
                         remove(fpath);
                         free(fpath);
@@ -342,7 +354,7 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
     }
 
     if (!res->status_code) {
-        clax_dispatch_bad_request(clax_ctx, req, res);
+        clax_dispatch_bad_request(clax_ctx, req, res, NULL);
     }
 }
 
@@ -364,7 +376,7 @@ void clax_dispatch_delete(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
         clax_big_buf_append_str(&res->body, "{\"message\":\"ok\"}");
     }
     else {
-        clax_dispatch_system_error(clax_ctx, req, res);
+        clax_dispatch_system_error(clax_ctx, req, res, "Can't delete file");
         return;
     }
 }

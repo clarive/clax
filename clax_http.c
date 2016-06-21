@@ -740,7 +740,7 @@ int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_c
 
     clax_log("Reading & parsing request...");
     if (clax_http_read_parse(ctx, recv_cb, &parser, &request) < 0) {
-        clax_dispatch_bad_request(ctx, &request, &response);
+        clax_dispatch_bad_request(ctx, &request, &response, NULL);
 
         TRY clax_http_write_response(ctx, send_cb, &response) GOTO;
 
@@ -927,7 +927,7 @@ void clax_http_dispatch_proxy(clax_ctx_t *clax_ctx, http_parser *parser, clax_ht
     char *sep;
 
     if (hops == NULL || strlen(hops) == 0) {
-        clax_dispatch_bad_request(clax_ctx, req, res);
+        clax_dispatch_bad_request(clax_ctx, req, res, "Invalid X-Hops header");
         TRY clax_http_write_response(ctx, send_cb, res) GOTO;
         return;
     }
@@ -942,7 +942,7 @@ void clax_http_dispatch_proxy(clax_ctx_t *clax_ctx, http_parser *parser, clax_ht
     }
 
     if (hostname == NULL || strlen(hostname) == 0) {
-        clax_dispatch_bad_request(clax_ctx, req, res);
+        clax_dispatch_bad_request(clax_ctx, req, res, "Invalid X-Hops header");
         TRY clax_http_write_response(ctx, send_cb, res) GOTO;
         return;
     }
