@@ -85,8 +85,10 @@ unsigned char *clax_slurp_alloc(char *filename, size_t *olen);
 size_t clax_strcat(char *dst, size_t dst_max_len, char *src);
 
 int clax_is_path_d(const char *path);
+int clax_is_path_f(const char *path);
 int clax_mkdir_p(const char *path);
 int clax_rmpath_r(const char *path);
 int clax_rmdir_r(const char *path);
+int clax_touch(const char *path);
 
 #endif

@@ -532,18 +532,22 @@ int clax_mkdir_p(const char *path)
     return 0;
 }
 
+int clax_is_path_f(const char *path)
+{
+    struct stat path_stat;
+
+    stat(path, &path_stat);
+
+    return S_ISREG(path_stat.st_mode);
+}
+
 int clax_is_path_d(const char *path)
 {
-    DIR *dir = opendir(path);
-    if (dir) {
-        closedir(dir);
+    struct stat path_stat;
 
-        return 1;
-    } else if (ENOENT == errno) {
-        return 0;
-    }
+    stat(path, &path_stat);
 
-    return 1;
+    return S_ISDIR(path_stat.st_mode);
 }
 
 int clax_rmdir(const char *path)
@@ -592,4 +596,16 @@ int clax_rmpath_r(const char *path)
     closedir(dir);
 
     return clax_rmdir(path);
+}
+
+int clax_touch(const char *path)
+{
+    int fd = open(path, O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH);
+
+    if (fd) {
+        return 0;
+    }
+    else {
+        return -1;
+    }
 }

@@ -195,8 +195,24 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
     struct tm *last_modified_time_p;
     size_t size;
 
-    if (stat(file, &st) != 0 || !(st.st_mode & S_IFREG)) {
+    if (stat(file, &st) != 0) {
         clax_dispatch_not_found(clax_ctx, req, res);
+        return;
+    }
+
+    if (!clax_is_path_d(file) && !clax_is_path_f(file)) {
+        clax_dispatch_not_found(clax_ctx, req, res);
+        return;
+    }
+
+    last_modified_time_p = gmtime_r(&st.st_mtime, &last_modified_time);
+
+    strftime(last_modified_buf, sizeof(last_modified_buf), "%a, %d %b %Y %H:%M:%S GMT", last_modified_time_p);
+    clax_kv_list_push(&res->headers, "Last-Modified", last_modified_buf);
+
+    if (clax_is_path_d(file)) {
+        res->status_code = 200;
+        clax_kv_list_push(&res->headers, "Content-Type", "directory");
         return;
     }
 
@@ -227,11 +243,6 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
     clax_kv_list_push(&res->headers, "Content-Disposition", base_buf);
     clax_kv_list_push(&res->headers, "Pragma", "no-cache");
     clax_kv_list_push(&res->headers, "Content-Length", size_buf);
-
-    last_modified_time_p = gmtime_r(&st.st_mtime, &last_modified_time);
-
-    strftime(last_modified_buf, sizeof(last_modified_buf), "%a, %d %b %Y %H:%M:%S GMT", last_modified_time_p);
-    clax_kv_list_push(&res->headers, "Last-Modified", last_modified_buf);
 
     clax_kv_list_push(&res->headers, "X-Clax-CRC32", crc32_hex);
 

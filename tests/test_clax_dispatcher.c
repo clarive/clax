@@ -392,6 +392,82 @@ TEST_START(creates directory)
 }
 TEST_END
 
+TEST_START(returns ok when file exists)
+{
+    opt options;
+    clax_ctx_t clax_ctx;
+    clax_http_request_t request;
+    clax_http_response_t response;
+
+    memset(&clax_ctx, 0, sizeof(clax_ctx_t));
+    clax_options_init(&options);
+    clax_http_request_init(&request);
+    clax_http_response_init(&response, NULL, 0);
+
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+
+    char *tmp_dirname = clax_mktmpdir_alloc();
+    chdir(tmp_dirname);
+
+    clax_touch("foo");
+
+    clax_ctx.options = &options;
+
+    request.method = HTTP_HEAD;
+    strcpy(request.path_info, "/tree/foo");
+
+    clax_dispatch(&clax_ctx, &request, &response);
+
+    ASSERT_EQ(response.status_code, 200)
+
+    clax_http_request_free(&request);
+    clax_http_response_free(&response);
+    clax_options_free(&options);
+
+    chdir(cwd);
+    rmrf(tmp_dirname);
+}
+TEST_END
+
+TEST_START(returns ok when directory exists)
+{
+    opt options;
+    clax_ctx_t clax_ctx;
+    clax_http_request_t request;
+    clax_http_response_t response;
+
+    memset(&clax_ctx, 0, sizeof(clax_ctx_t));
+    clax_options_init(&options);
+    clax_http_request_init(&request);
+    clax_http_response_init(&response, NULL, 0);
+
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+
+    char *tmp_dirname = clax_mktmpdir_alloc();
+    chdir(tmp_dirname);
+
+    clax_mkdir("foo", 0755);
+
+    clax_ctx.options = &options;
+
+    request.method = HTTP_HEAD;
+    strcpy(request.path_info, "/tree/foo");
+
+    clax_dispatch(&clax_ctx, &request, &response);
+
+    ASSERT_EQ(response.status_code, 200)
+
+    clax_http_request_free(&request);
+    clax_http_response_free(&response);
+    clax_options_free(&options);
+
+    chdir(cwd);
+    rmrf(tmp_dirname);
+}
+TEST_END
+
 TEST_START(serves_404_when_file_not_found)
 {
     opt options;
