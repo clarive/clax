@@ -22,6 +22,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <sys/time.h>
+#include <sys/stat.h> /* stat */
 #include <time.h>
 #include <errno.h>
 #include <limits.h>
@@ -30,7 +31,6 @@
 #ifdef _WIN32
 # include <windows.h>
 #else
-# include <sys/stat.h>
 # include <sys/types.h>
 #endif
 
