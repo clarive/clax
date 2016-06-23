@@ -212,7 +212,7 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
 
     if (clax_is_path_d(file)) {
         res->status_code = 200;
-        clax_kv_list_push(&res->headers, "Content-Type", "directory");
+        clax_kv_list_push(&res->headers, "Content-Type", "application/vnd.clarive-clax.folder");
         return;
     }
 
