@@ -45,7 +45,7 @@ endif
 all: version lib $(PROGRAM)
 
 version:
-	sh util/makeversion.sh
+	OS=$(OS) ARCH=$(ARCH) WINDOWS=$(WINDOWS) sh util/makeversion.sh
 
 lib: mbedtls jsmn http-parser multipart-parser-c inih base64 slre $(OBJECTS)
 

@@ -1,4 +1,6 @@
 WINDOWS=1
 CC=i686-w64-mingw32-gcc
+OS=windows
+ARCH=x86
 
 -include Makefile

@@ -2,15 +2,20 @@
 
 VERSION="`date +%Y%m%d`-`git rev-parse --short HEAD`"
 
-if [ "$WINDOWS" = "1" ]; then
-    OS=windows
-    ARCH=x86_64
-elif uname -a | grep 'OS/390'; then
-    OS=zos
-    ARCH=`uname -m`
-else
-    OS=linux
-    ARCH=`uname -m`
+echo $OS
+echo $ARCH
+
+if [ "$OS" = "" ] && [ "$ARCH" = "" ]; then
+    if [ "$WINDOWS" = "1" ]; then
+        OS=windows
+        ARCH=x86_64
+    elif uname -a | grep 'OS/390'; then
+        OS=zos
+        ARCH=`uname -m`
+    else
+        OS=linux
+        ARCH=`uname -m`
+    fi
 fi
 
 cp clax_version.h.template clax_version.h
