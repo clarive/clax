@@ -42,7 +42,10 @@ else
 endif
 endif
 
-all: lib $(PROGRAM)
+all: version lib $(PROGRAM)
+
+version:
+	sh util/makeversion.sh
 
 lib: mbedtls jsmn http-parser multipart-parser-c inih base64 slre $(OBJECTS)
 

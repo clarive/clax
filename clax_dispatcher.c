@@ -35,6 +35,7 @@
 #endif
 
 #include "clax.h"
+#include "clax_version.h"
 #include "clax_http.h"
 #include "clax_log.h"
 #include "clax_command.h"
@@ -143,7 +144,7 @@ void clax_dispatch_index(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_ht
 {
     res->status_code = 200;
     clax_kv_list_push(&res->headers, "Content-Type", "application/json");
-    clax_big_buf_append_str(&res->body, "{\"message\":\"Hello, world!\"}");
+    clax_big_buf_append_str(&res->body, "{\"message\":\"Hello, world!\",\"version\":\"" CLAX_VERSION "\",\"os\":\"" CLAX_OS "\",\"arch\":\"" CLAX_ARCH "\"}");
 }
 
 void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
