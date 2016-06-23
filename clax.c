@@ -59,6 +59,11 @@ void _exit(int code)
         fclose(options._log_file);
     }
 
+    if (options._access_log_file) {
+        clax_log("Closing access log file '%s'", options.access_log_file);
+        fclose(options._access_log_file);
+    }
+
     clax_log("Exit=%d", code);
 
     exit(code);
@@ -397,11 +402,20 @@ int main(int argc, char **argv)
         dup2(fileno(options._log_file), STDERR_FILENO);
     }
 
+    if (options.access_log_file[0]) {
+        options._access_log_file = fopen(options.access_log_file, "a");
+        if (options._access_log_file == NULL) {
+            fprintf(stderr, "Can't open access_log_file '%s': %s\n", options.access_log_file, strerror(errno));
+            clax_abort();
+        }
+    }
+
     setbuf(stdout, NULL);
 
     clax_log("Option: root=%s", options.root);
     clax_log("Option: entropy_file=%s", options.entropy_file);
     clax_log("Option: log_file=%s", options.log_file);
+    clax_log("Option: access_log_file=%s", options.access_log_file);
     clax_log("Option: ssl=%d", options.ssl);
 
     if (!options.ssl) {

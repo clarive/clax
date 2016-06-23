@@ -106,6 +106,9 @@ int clax_parse_options(opt *options, int argc, char **argv)
         case 'l':
             strncpy(options->log_file, optarg, sizeof(options->log_file));
             break;
+        case 'o':
+            strncpy(options->access_log_file, optarg, sizeof(options->access_log_file));
+            break;
         case 'r':
             /* -1 for the / if its needed */
             strncpy(options->root, optarg, sizeof_struct_member(opt, root) - 1);
@@ -141,6 +144,7 @@ int clax_parse_options(opt *options, int argc, char **argv)
             fprintf(stderr,
                     "#root = /opt/clarive/clax\n"
                     "#log_file = /opt/clarive/logs/clax.log\n"
+                    "#access_log_file = /opt/clarive/logs/clax.access.log\n"
                     "\n"
                     "#[ssl]\n"
                     "#enabled = yes\n"
@@ -229,6 +233,24 @@ int clax_parse_options(opt *options, int argc, char **argv)
 
         if (copied == 0) {
             fprintf(stderr, "Error: Path to log_file is too long\n\n");
+            return -1;
+        }
+    }
+
+    if (strlen(options->access_log_file) == 0) {
+        int max_len = sizeof(options->access_log_file);
+
+        int copied = clax_strcat(options->access_log_file, max_len, options->root);
+
+        if (copied == 0) {
+            fprintf(stderr, "Error: Path to access_log_file is too long\n\n");
+            return -1;
+        }
+
+        copied = clax_strcat(options->access_log_file, max_len, "clax.access.log");
+
+        if (copied == 0) {
+            fprintf(stderr, "Error: Path to access_log_file is too long\n\n");
             return -1;
         }
     }

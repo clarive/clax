@@ -23,6 +23,7 @@
 typedef struct {
     char root[255];
     char log_file[255];
+    char access_log_file[255];
     char config_file[255];
 
     char *basic_auth_username;
@@ -36,6 +37,7 @@ typedef struct {
 
     /* Private */
     FILE *_log_file;
+    FILE *_access_log_file;
 } opt;
 
 void clax_options_init(opt *options);

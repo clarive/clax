@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <unistd.h>
+#include <sys/socket.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -803,6 +804,30 @@ int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_c
     }
 
 cleanup:
+
+    if (clax_ctx->options && clax_ctx->options->_access_log_file) {
+        FILE *fh = clax_ctx->options->_access_log_file;
+
+        /*char *buf = "GET /\n";*/
+
+        struct sockaddr addr;
+        socklen_t len;
+
+        int ip = getpeername(stdin, &addr, &len);
+
+        unsigned char bytes[4];
+        bytes[0] = ip & 0xFF;
+        bytes[1] = (ip >> 8) & 0xFF;
+        bytes[2] = (ip >> 16) & 0xFF;
+        bytes[3] = (ip >> 24) & 0xFF;
+
+        /*printf("%d.%d.%d.%d\n", bytes[3], bytes[2], bytes[1], bytes[0]);*/
+
+        fprintf(fh, "%d.%d.%d.%d\n", bytes[3], bytes[2], bytes[1], bytes[0]);
+
+        /*fwrite(buf, 1, sizeof(buf), fh);*/
+    }
+
     clax_http_request_free(&request);
     clax_http_response_free(&response);
 
