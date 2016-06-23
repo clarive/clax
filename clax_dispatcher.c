@@ -357,7 +357,7 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
             clax_san_path(dirname);
 
             char *fullpath = clax_strjoin("/", subdir, dirname, NULL);
-            if (clax_mkdir(fullpath, 0755) < 0) {
+            if (clax_mkdir_p(fullpath) < 0) {
                 clax_dispatch_system_error(clax_ctx, req, res, "Can't create directory");
             }
             else {
