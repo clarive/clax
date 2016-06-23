@@ -246,10 +246,9 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
     char *subdir = req->path_info + strlen("/tree/");
 
     if (strlen(subdir)) {
-        struct stat info;
+        int ok = clax_mkdir_p(subdir);
 
-        if (stat(subdir, &info) == 0 && info.st_mode & S_IFDIR) {
-        } else {
+        if (!clax_is_path_d(subdir)) {
             clax_log("Output directory '%s' does not exist", subdir);
 
             clax_dispatch_bad_request(clax_ctx, req, res, "Output directory does not exist");

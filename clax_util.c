@@ -23,6 +23,9 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <time.h>
+#include <errno.h>
+#include <limits.h>
+#include <dirent.h>
 
 #ifdef _WIN32
 # include <windows.h>
@@ -490,4 +493,103 @@ unsigned char *clax_slurp_alloc(char *filename, size_t *olen)
     fclose(fh);
 
     return slurp;
+}
+
+/* Based on https://gist.github.com/JonathonReinhart/8c0d90191c38af2dcadb102c4e202950 */
+int clax_mkdir_p(const char *path)
+{
+    const size_t len = strlen(path);
+    char _path[PATH_MAX];
+    char *p;
+
+    errno = 0;
+
+    if (len > sizeof(_path) - 1) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    strcpy(_path, path);
+
+    for (p = _path + 1; *p; p++) {
+        if (*p == '/') {
+            *p = '\0';
+
+            if (clax_mkdir(_path, S_IRWXU) != 0) {
+                if (errno != EEXIST)
+                    return -1;
+            }
+
+            *p = '/';
+        }
+    }
+
+    if (clax_mkdir(_path, S_IRWXU) != 0) {
+        if (errno != EEXIST)
+            return -1;
+    }
+
+    return 0;
+}
+
+int clax_is_path_d(const char *path)
+{
+    DIR *dir = opendir(path);
+    if (dir) {
+        closedir(dir);
+
+        return 1;
+    } else if (ENOENT == errno) {
+        return 0;
+    }
+
+    return 1;
+}
+
+int clax_rmdir(const char *path)
+{
+    return rmdir(path);
+}
+
+int clax_rmdir_r(const char *path)
+{
+    struct dirent *d;
+    DIR *dir = opendir(path);
+
+    if (dir == NULL) {
+        return -1;
+    }
+
+    return clax_rmpath_r(path);
+}
+
+int clax_rmpath_r(const char *path)
+{
+    struct dirent *d;
+    DIR *dir = opendir(path);
+
+    if (dir == NULL) {
+        if (errno == ENOTDIR) {
+            unlink(path);
+        }
+
+        return 0;
+    }
+
+    while ((d = readdir(dir)) != NULL) {
+        if (strcmp(d->d_name, ".") == 0)
+            continue;
+        if (strcmp(d->d_name, "..") == 0)
+            continue;
+
+        char *p = clax_strjoin("/", path, d->d_name, NULL);
+        clax_rmdir_r(p);
+        free(p);
+
+        break;
+    }
+
+    closedir(dir);
+
+    return clax_rmdir(path);
 }

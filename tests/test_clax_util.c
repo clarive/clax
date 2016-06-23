@@ -527,4 +527,22 @@ TEST_START(appends string that is too big)
 }
 TEST_END
 
+TEST_START(creates intermediate directories)
+{
+    char *path = "/foo/bar/baz/";
+    char *tempdir = clax_mktmpdir_alloc();
+
+    char *fullpath = clax_strjoin("/", tempdir, path, NULL);
+
+    clax_mkdir_p(fullpath);
+
+    ASSERT_EQ(clax_is_path_d(fullpath), 1);
+
+    clax_rmpath_r(tempdir);
+
+    free(fullpath);
+    free(tempdir);
+}
+TEST_END
+
 SUITE_END
