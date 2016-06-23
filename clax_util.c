@@ -499,7 +499,7 @@ unsigned char *clax_slurp_alloc(char *filename, size_t *olen)
 int clax_mkdir_p(const char *path)
 {
     const size_t len = strlen(path);
-    char _path[PATH_MAX];
+    char _path[255];
     char *p;
 
     errno = 0;

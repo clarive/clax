@@ -164,9 +164,9 @@ int clax_parse_options(opt *options, int argc, char **argv)
 
     if (strlen(options->config_file)) {
         if (ini_parse(options->config_file, clax_config_handler, options) < 0) {
-            fprintf(stderr, "Error: can't load '%s': %s\n\n", options->config_file, strerror(errno));
+            //fprintf(stderr, "Error: can't load '%s': %s\n\n", options->config_file, strerror(errno));
 
-            return -1;
+            //return -1;
         }
     }
 
@@ -202,7 +202,19 @@ int clax_parse_options(opt *options, int argc, char **argv)
 #ifdef _WIN32
         GetModuleFileName(NULL, options->root, sizeof_struct_member(opt, root));
 #else
-        readlink("/proc/self/exe", options->root, sizeof_struct_member(opt, root));
+        if (readlink("/proc/self/exe", options->root, sizeof_struct_member(opt, root)) == -1) {
+            char cwd[1024];
+            getcwd(cwd, sizeof(cwd));
+
+            if (argv[0][0] == '/') {
+                strncpy(options->root, argv[0], sizeof(options->root));
+            }
+            else {
+                char *root = clax_strjoin("/", cwd, argv[0]);
+
+                strncpy(options->root, root, sizeof(options->root));
+            }
+        }
 #endif
 
         dirname(options->root);
