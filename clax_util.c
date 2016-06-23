@@ -515,7 +515,7 @@ int clax_mkdir_p(const char *path)
         if (*p == '/') {
             *p = '\0';
 
-            if (clax_mkdir(_path, S_IRWXU) != 0) {
+            if (clax_mkdir(_path, 0755) != 0) {
                 if (errno != EEXIST)
                     return -1;
             }
@@ -524,7 +524,7 @@ int clax_mkdir_p(const char *path)
         }
     }
 
-    if (clax_mkdir(_path, S_IRWXU) != 0) {
+    if (clax_mkdir(_path, 0755) != 0) {
         if (errno != EEXIST)
             return -1;
     }
