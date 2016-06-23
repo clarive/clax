@@ -144,6 +144,7 @@ void clax_dispatch_index(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_ht
 {
     res->status_code = 200;
     clax_kv_list_push(&res->headers, "Content-Type", "application/json");
+    clax_kv_list_push(&res->headers, "X-Clax-Root", clax_ctx->options->root);
     clax_big_buf_append_str(&res->body, "{\"message\":\"Hello, world!\",\"version\":\"" CLAX_VERSION "\",\"os\":\"" CLAX_OS "\",\"arch\":\"" CLAX_ARCH "\"}");
 }
 

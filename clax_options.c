@@ -179,24 +179,6 @@ int clax_parse_options(opt *options, int argc, char **argv)
     }
 
     if (strlen(options->root)) {
-        DIR *dir = opendir(options->root);
-        if (dir) {
-            closedir(dir);
-
-            if (chdir(options->root) < 0) {
-                fprintf(stderr, "Error: cannot chdir to '%s'\n\n", options->root);
-
-                return -1;
-            }
-        } else if (ENOENT == errno) {
-            fprintf(stderr, "Error: provided root directory does not exist: %s\n\n", options->root);
-
-            return -1;
-        } else {
-            fprintf(stderr, "Error: cannot open provided root directory\n\n");
-
-            return -1;
-        }
     }
     else {
 #ifdef _WIN32
@@ -215,10 +197,31 @@ int clax_parse_options(opt *options, int argc, char **argv)
                 strncpy(options->root, root, sizeof(options->root));
             }
         }
+        else {
+            dirname(options->root);
+        }
 #endif
 
-        dirname(options->root);
     }
+
+        DIR *dir = opendir(options->root);
+        if (dir) {
+            closedir(dir);
+
+            if (chdir(options->root) < 0) {
+                fprintf(stderr, "Error: cannot chdir to '%s'\n\n", options->root);
+
+                return -1;
+            }
+        } else if (ENOENT == errno) {
+            fprintf(stderr, "Error: provided root directory does not exist: %s\n\n", options->root);
+
+            return -1;
+        } else {
+            fprintf(stderr, "Error: cannot open provided root directory\n\n");
+
+            return -1;
+        }
 
     if (options->root[strlen(options->root) - 1] != '/') {
         if (clax_strcat(options->root, sizeof_struct_member(opt, root), "/") == 0) {
