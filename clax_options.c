@@ -197,9 +197,8 @@ int clax_parse_options(opt *options, int argc, char **argv)
                 strncpy(options->root, root, sizeof(options->root));
             }
         }
-        else {
-            dirname(options->root);
-        }
+
+        dirname(options->root);
 #endif
 
     }
@@ -218,7 +217,7 @@ int clax_parse_options(opt *options, int argc, char **argv)
 
             return -1;
         } else {
-            fprintf(stderr, "Error: cannot open provided root directory\n\n");
+            fprintf(stderr, "Error: cannot open provided root directory: %s\n\n", options->root);
 
             return -1;
         }
