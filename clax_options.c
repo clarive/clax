@@ -198,9 +198,9 @@ int clax_parse_options(opt *options, int argc, char **argv)
             }
         }
 
-        dirname(options->root);
 #endif
 
+        dirname(options->root);
     }
 
         DIR *dir = opendir(options->root);
