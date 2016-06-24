@@ -76,9 +76,9 @@ char *clax_strndup(const char *str, size_t max);
 
 #ifdef MVS
 size_t clax_etoa(char *from, size_t from_len);
-char *clax_etoa_alloc(char *from, size_t from_len);
+char *clax_etoa_alloc(const char *from, size_t from_len);
 size_t clax_atoe(char *from, size_t from_len);
-char *clax_atoe_alloc(char *from, size_t from_len);
+char *clax_atoe_alloc(const char *from, size_t from_len);
 #endif
 
 unsigned char *clax_slurp_alloc(char *filename, size_t *olen);

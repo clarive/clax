@@ -484,7 +484,7 @@ size_t clax_etoa(char *from, size_t from_len)
     return __etoa_l(from, from_len);
 }
 
-char *clax_etoa_alloc(char *from, size_t from_len)
+char *clax_etoa_alloc(const char *from, size_t from_len)
 {
     char *b = malloc(from_len);
     memcpy(b, from, from_len);
@@ -498,7 +498,7 @@ size_t clax_atoe(char *from, size_t from_len)
     return __atoe_l(from, from_len);
 }
 
-char *clax_atoe_alloc(char *from, size_t from_len)
+char *clax_atoe_alloc(const char *from, size_t from_len)
 {
     char *b = malloc(from_len);
     memcpy(b, from, from_len);
@@ -657,6 +657,7 @@ char *clax_detect_root(char *root, size_t root_size, char **argv)
     GetModuleFileName(NULL, root, root_size);
 
 #else
+
     char *p = clax_detect_exe_from_proc(root, root_size);
 
     if (p == NULL) {
@@ -672,11 +673,19 @@ char *clax_detect_root(char *root, size_t root_size, char **argv)
 
 char *clax_detect_exe_from_proc(char *root, size_t root_size)
 {
+#ifdef _WIN32
+
+    return NULL;
+
+#else
+
     if (readlink("/proc/self/exe", root, root_size) == -1) {
         return NULL;
     }
 
     return root;
+
+#endif
 }
 
 char *clax_detect_exe_from_argv(char *root, size_t root_size, char **argv)

@@ -82,6 +82,13 @@ int clax_recv(void *ctx,  unsigned char *buf, size_t len)
 
     ret = (int)read(fd, buf, len);
 
+#ifdef MVS
+    if (isatty(fd)) {
+        clax_etoa((char *)buf, len);
+    }
+
+#endif
+
     /*clax_log("recv (%d)=%d from %d", fd, ret, len);*/
 
     return ret;
@@ -217,7 +224,7 @@ void clax_loop_ssl(clax_ctx_t *clax_ctx)
     }
 
 #ifdef MVS
-    clax_etoa(file, file_len);
+    clax_etoa((char *)file, file_len);
 #endif
 
     clax_log("Parsing '%s'...", options.cert_file);
@@ -237,7 +244,7 @@ void clax_loop_ssl(clax_ctx_t *clax_ctx)
     }
 
 #ifdef MVS
-    clax_etoa(file, file_len);
+    clax_etoa((char *)file, file_len);
 #endif
 
     clax_log("Parsing '%s'...", options.key_file);

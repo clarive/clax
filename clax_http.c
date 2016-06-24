@@ -200,7 +200,7 @@ int request_url_cb(http_parser *p, const char *buf, size_t len)
             clax_http_parse_urlencoded(&request->query_params, b, query_len);
 
 #ifdef MVS
-            free(b);
+            free((void *)b);
 #endif
         }
     }
@@ -378,13 +378,13 @@ int clax_http_body(http_parser *p, const char *buf, size_t len)
             return -1;
         }
     } else {
-        const char *b = buf;
+        char *b = (char *)buf;
 #ifdef MVS
         b = clax_atoe_alloc(buf, len);
 #endif
         clax_buf_append(&req->body, &req->body_len, b, len);
 #ifdef MVS
-        free(b);
+        free((void *)b);
 #endif
     }
 
@@ -487,16 +487,15 @@ int send_cb_wrapper(send_cb_t send_cb, void *ctx, const unsigned char *buf, size
     int ret;
 
 #ifdef MVS
-    int is_interactive = isatty(fileno(stdin));
-    if (!is_interactive) {
-        b = clax_etoa_alloc(buf, len);
+    if (!isatty(fileno(stdin))) {
+        b = (const unsigned char *)clax_etoa_alloc((const char *)buf, len);
     }
 #endif
 
     ret = send_cb(ctx, b, len);
 
 #ifdef MVS
-    free(b);
+    free((void *)b);
 #endif
 
     return ret;
@@ -977,7 +976,7 @@ void clax_http_dispatch_proxy(clax_ctx_t *clax_ctx, http_parser *parser, clax_ht
 
     clax_log("Proxy request written. Waiting for response...");
 
-    char buffer[1024];
+    unsigned char buffer[1024];
     memset(buffer, 0, sizeof(buffer) * sizeof(char));
 
     while (1) {
