@@ -122,7 +122,7 @@ coverage-prepare:
 	mkdir coverage
 	lcov --rc lcov_branch_coverage=1 --no-external -c -i -d . -o coverage/coverage-base.info
 
-archive: all
+archive: version
 	sh util/makearchive.sh
 
 dist: all

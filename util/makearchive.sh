@@ -1,14 +1,17 @@
 #!/bin/bash
 
-BRANCH=`git rev-parse --abbrev-ref HEAD`
-SHA=`git rev-parse --short HEAD`
+set -x
 
-DIST="clax-$BRANCH-$SHA";
-ARCHIVE="$DIST.tar.gz"
+VERSION=`cat VERSION | tr -d "\012"`
 
-git archive --format=tar --prefix=$DIST/ HEAD | gzip > $ARCHIVE
+DIST="clax_$VERSION";
+ARCHIVE="$DIST.tar"
+
+git archive --format=tar --prefix=$DIST/ HEAD > $ARCHIVE
+tar -rf $ARCHIVE --transform "s,^,$DIST/," clax_version.h VERSION
+gzip $ARCHIVE
 
 echo
 echo "DONE"
 echo
-echo $ARCHIVE
+echo "$ARCHIVE.gz"

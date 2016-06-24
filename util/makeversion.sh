@@ -1,14 +1,13 @@
 #!/bin/sh
 
-if [ -d '.git']; then
+if [ -d ".git" ]; then
     VERSION="`date +%Y%m%d`-`git rev-parse --short HEAD`"
 
     cp clax_version.h.template clax_version.h
     sed -i "s/CLAX_VERSION \".*\"/CLAX_VERSION \"$VERSION\"/" clax_version.h
-fi
 
-echo $OS
-echo $ARCH
+    echo $VERSION > VERSION
+fi
 
 if [ "$OS" = "" ] && [ "$ARCH" = "" ]; then
     if [ "$WINDOWS" = "1" ]; then

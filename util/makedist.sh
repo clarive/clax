@@ -11,11 +11,7 @@ else
     ARCH=`uname -m`
 fi
 
-if [ -f "VERSION" ]; then
-    VERSION=`cat VERSION | tr -d "\012"`
-else
-    VERSION=`git rev-parse --short HEAD`
-fi
+VERSION=`cat VERSION | tr -d "\012"`
 
 DIST="clax_${VERSION}_${OS}-${ARCH}";
 
