@@ -1,4 +1,5 @@
 clax
+clax_version.h
 *.exe
 *.o
 *.a

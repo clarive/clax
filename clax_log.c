@@ -26,9 +26,10 @@
 
 #include "clax_platform.h"
 
-void clax_log_(const char *file, int line, const char *func_, char *fmt, ...)
+int clax_log_(const char *file, int line, const char *func_, char *fmt, ...)
 {
     int size;
+    int ret;
     char *cp;
     va_list args;
     char func[1024];
@@ -50,8 +51,10 @@ void clax_log_(const char *file, int line, const char *func_, char *fmt, ...)
         char timestr[255];
         strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S", timeinfo);
 
-        fprintf(stderr, "%s:%d:%s:%d:%s(): %s\n", timestr, getpid(), file, line, func, cp);
+        ret = fprintf(stderr, "%s:%d:%s:%d:%s(): %s\n", timestr, getpid(), file, line, func, cp);
     }
     va_end(args);
     free(cp);
+
+    return ret;
 }

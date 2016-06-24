@@ -11,6 +11,9 @@
 #endif
 
 #include "inih/ini.h"
+#include "clax.h"
+#include "clax_log.h"
+#include "clax_errors.h"
 #include "clax_options.h"
 #include "clax_util.h"
 #include "clax_platform.h"
@@ -31,26 +34,12 @@ void clax_options_free(opt *options)
 
 void clax_usage()
 {
-    fprintf(stderr,
+    fprintf(stdout,
             "usage: clax [options]\n"
             "\n"
-            "Options:\n"
-            "\n"
-            "   common\n"
-            "   ------\n"
-            "   -c <config_file>        path to configuration file\n"
-            "   -z                      print default configuration\n"
-            "   -r <root>               home directory (will chdir to it, default: clax location)\n"
-            "   -l <log_file>           path to log file (default: clax.log in root directory)\n"
-            "   -a <username:password>  basic authentication credentials\n"
-            "\n"
-            "   ssl\n"
-            "   ---\n"
-            "   -s                      use ssl (default: off)\n"
-            "   -k                      do not verify client certificate (default: on)\n"
-            "   -t <cert_file>          path to cert file (required if ssl, CA included)\n"
-            "   -p <key_file>           path to private key file (required if ssl)\n"
-            "   -e <entropy_file>       path to entropy file (needed on some systems)\n"
+            "   -l <log_file>     path to log file (REQUIRED)\n"
+            "   -c <config_file>  path to configuration file (defaults to clax.ini\n"
+            "                         in binary location directory)\n"
             "\n"
             );
 }
@@ -98,7 +87,7 @@ int clax_parse_options(opt *options, int argc, char **argv)
     optind = opterr = optopt = 0;
 
     opterr = 0;
-    while ((c = getopt(argc, argv, "hskzl:e:t:p:r:c:a:")) != -1) {
+    while ((c = getopt(argc, argv, "h:l:c:")) != -1) {
         switch (c) {
         case 'c':
             strncpy(options->config_file, optarg, sizeof(options->config_file));
@@ -106,143 +95,89 @@ int clax_parse_options(opt *options, int argc, char **argv)
         case 'l':
             strncpy(options->log_file, optarg, sizeof(options->log_file));
             break;
-        case 'r':
-            /* -1 for the / if its needed */
-            strncpy(options->root, optarg, sizeof_struct_member(opt, root) - 1);
-            break;
-        case 's':
-            options->ssl = 1;
-            break;
-        case 'k':
-            options->no_ssl_verify = 1;
-            break;
-        case 'e':
-            strncpy(options->entropy_file, optarg, sizeof(options->entropy_file));
-            break;
-        case 't':
-            strncpy(options->cert_file, optarg, sizeof(options->cert_file));
-            break;
-        case 'p':
-            strncpy(options->key_file, optarg, sizeof(options->key_file));
-            break;
-        case 'a': {
-            char *sep;
-            if ((sep = strstr(optarg, ":")) != NULL) {
-                options->basic_auth_username = clax_strndup(optarg, sep - optarg);
-                options->basic_auth_password = clax_strndup(sep + 1, strlen(optarg) - (sep - optarg) - 1);
-            }
-            else {
-                fprintf(stderr, "Error: Invalid username:password pair\n\n");
-                return -1;
-            }
-            break;
-                  }
-        case 'z':
-            fprintf(stderr,
-                    "#root = /opt/clarive/clax\n"
-                    "#log_file = /opt/clarive/logs/clax.log\n"
-                    "\n"
-                    "#[ssl]\n"
-                    "#enabled = yes\n"
-                    "#cert_file = /opt/clarive/ssl/clax.crt\n"
-                    "#key_file = /opt/clarive/ssl/clax.key\n"
-                    "#entropy_file = /opt/clarive/entropy\n"
-                    "\n"
-                    "#[http_basic_auth]\n"
-                    "#username = clax\n"
-                    "#password = password\n"
-                   );
-
-            exit(0);
-            break;
         case '?':
         case 'h':
         default:
+            return CLAX_ERROR_INVALID_CMD_ARGS;
+        }
+    }
+
+    if (strlen(options->log_file) == 0) {
+        return CLAX_ERROR_LOG_REQUIRED;
+    }
+    else {
+        if (options->log_file[0]) {
+            options->_log_file = fopen(options->log_file, "a");
+            if (options->_log_file == NULL) {
+                return CLAX_ERROR_LOG_CANTOPEN;
+            }
+
+            dup2(fileno(options->_log_file), STDERR_FILENO);
+
+            if (clax_log("Started") < 0) {
+                return CLAX_ERROR_LOG_CANTWRITE;
+            }
+        }
+    }
+
+    if (clax_detect_root(argv, options->root, sizeof_struct_member(opt, root)) == NULL) {
+        clax_log("Can't detect root directory: %s", strerror(errno));
+        return -1;
+    }
+    clax_log("Detected root directory: %s", options->root);
+
+    clax_log("Changing directory to '%s'", options->root);
+    if (clax_chdir(options->root) < 0) {
+        clax_log("Error: cannot chdir to '%s': %s", options->root, strerror(errno));
+        return -1;
+    }
+
+    if (strlen(options->config_file) == 0) {
+        char *path_to_config = clax_strjoin("/", options->root, "clax.ini", NULL);
+        if (path_to_config) {
+            if (clax_is_path_f(path_to_config)) {
+                clax_log("Detected configuration file '%s'", path_to_config);
+
+                int copied = clax_strcat(options->config_file, sizeof_struct_member(opt, config_file), path_to_config);
+
+                free(path_to_config);
+
+                if (copied < strlen(path_to_config)) {
+                    clax_log("Path to configuration file is too long");
+                    return -1;
+                }
+            }
+        }
+        else {
             return -1;
         }
     }
 
     if (strlen(options->config_file)) {
-        if (ini_parse(options->config_file, clax_config_handler, options) < 0) {
-            //fprintf(stderr, "Error: can't load '%s': %s\n\n", options->config_file, strerror(errno));
+        clax_log("Reading configuration file '%s'", options->config_file);
 
-            //return -1;
+        if (ini_parse(options->config_file, clax_config_handler, options) < 0) {
+            clax_log("Error: Can't parse ini file");
+            return -1;
+        }
+
+        char cwd[1024];
+        getcwd(cwd, sizeof(cwd));
+
+        if (strcmp(options->root, cwd) != 0) {
+            clax_log("Root directory changed to '%s'", options->root);
+
+            clax_log("Changing directory to '%s'", options->root);
+            if (clax_chdir(options->root) < 0) {
+                clax_log("Error: cannot chdir to '%s': %s", options->root, strerror(errno));
+                return -1;
+            }
         }
     }
 
     if (options->ssl) {
         if (!strlen(options->cert_file) || !strlen(options->key_file)) {
-            fprintf(stderr, "Error: cert_file and key_file are required\n\n");
-
-            return -1;
-        }
-    }
-
-    if (strlen(options->root)) {
-    }
-    else {
-#ifdef _WIN32
-        GetModuleFileName(NULL, options->root, sizeof_struct_member(opt, root));
-#else
-        if (readlink("/proc/self/exe", options->root, sizeof_struct_member(opt, root)) == -1) {
-            char cwd[1024];
-            getcwd(cwd, sizeof(cwd));
-
-            if (argv[0][0] == '/') {
-                strncpy(options->root, argv[0], sizeof(options->root));
-            }
-            else {
-                char *root = clax_strjoin("/", cwd, argv[0], NULL);
-
-                strncpy(options->root, root, sizeof(options->root));
-            }
-        }
-
-#endif
-
-        dirname(options->root);
-    }
-
-        DIR *dir = opendir(options->root);
-        if (dir) {
-            closedir(dir);
-
-            if (chdir(options->root) < 0) {
-                fprintf(stderr, "Error: cannot chdir to '%s'\n\n", options->root);
-
-                return -1;
-            }
-        } else if (ENOENT == errno) {
-            fprintf(stderr, "Error: provided root directory does not exist: %s\n\n", options->root);
-
-            return -1;
-        } else {
-            fprintf(stderr, "Error: cannot open provided root directory: %s\n\n", options->root);
-
-            return -1;
-        }
-
-    if (options->root[strlen(options->root) - 1] != '/') {
-        if (clax_strcat(options->root, sizeof_struct_member(opt, root), "/") == 0) {
-            fprintf(stderr, "Error: Root path is too long\n\n");
-            return -1;
-        }
-    }
-
-    if (strlen(options->log_file) == 0) {
-        int max_len = sizeof(options->log_file);
-
-        int copied = clax_strcat(options->log_file, max_len, options->root);
-
-        if (copied == 0) {
-            fprintf(stderr, "Error: Path to log_file is too long\n\n");
-            return -1;
-        }
-
-        copied = clax_strcat(options->log_file, max_len, "clax.log");
-
-        if (copied == 0) {
-            fprintf(stderr, "Error: Path to log_file is too long\n\n");
+            clax_log("Error: cert_file and key_file are required");
             return -1;
         }
     }

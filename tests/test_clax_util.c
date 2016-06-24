@@ -322,6 +322,12 @@ TEST_START(clax_strjoin_joins_strings)
     ASSERT_STR_EQ(p, "");
 
     free(p);
+
+    p = clax_strjoin("/", "/", "/", "/", NULL);
+
+    ASSERT_STR_EQ(p, "/////");
+
+    free(p);
 }
 TEST_END
 

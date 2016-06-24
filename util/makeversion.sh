@@ -1,6 +1,11 @@
 #!/bin/sh
 
-VERSION="`date +%Y%m%d`-`git rev-parse --short HEAD`"
+if [ -d '.git']; then
+    VERSION="`date +%Y%m%d`-`git rev-parse --short HEAD`"
+
+    cp clax_version.h.template clax_version.h
+    sed -i "s/CLAX_VERSION \".*\"/CLAX_VERSION \"$VERSION\"/" clax_version.h
+fi
 
 echo $OS
 echo $ARCH
@@ -18,7 +23,5 @@ if [ "$OS" = "" ] && [ "$ARCH" = "" ]; then
     fi
 fi
 
-cp clax_version.h.template clax_version.h
-sed -i "s/CLAX_VERSION \".*\"/CLAX_VERSION \"$VERSION\"/" clax_version.h
 sed -i "s/CLAX_OS \".*\"/CLAX_OS \"$OS\"/" clax_version.h
 sed -i "s/CLAX_ARCH \".*\"/CLAX_ARCH \"$ARCH\"/" clax_version.h

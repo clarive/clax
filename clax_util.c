@@ -27,6 +27,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <dirent.h>
+#include <libgen.h> /* dirname */
 
 #ifdef _WIN32
 # include <windows.h>
@@ -34,6 +35,7 @@
 # include <sys/types.h>
 #endif
 
+#include "clax.h"
 #include "clax_util.h"
 #include "clax_platform.h"
 
@@ -557,7 +559,6 @@ int clax_rmdir(const char *path)
 
 int clax_rmdir_r(const char *path)
 {
-    struct dirent *d;
     DIR *dir = opendir(path);
 
     if (dir == NULL) {
@@ -608,4 +609,58 @@ int clax_touch(const char *path)
     else {
         return -1;
     }
+}
+
+char *clax_detect_root(char **argv, char *root, size_t root_size)
+{
+#ifdef _WIN32
+    GetModuleFileName(NULL, root, root_size);
+#else
+    if (readlink("/proc/self/exe", root, root_size) == -1) {
+        getcwd(root, root_size);
+
+        if (argv[0][0] == '/') {
+            int copied = clax_strcat(root, root_size, argv[0]);
+
+            if (copied < strlen(argv[0])) {
+                errno = ENAMETOOLONG;
+                return NULL;
+            }
+        }
+        else {
+            char *joined = clax_strjoin("/", root, argv[0], NULL);
+
+            int copied = clax_strcat(root, root_size, joined);
+
+            free(joined);
+
+            if (copied < strlen(joined)) {
+                errno = ENAMETOOLONG;
+                return NULL;
+            }
+        }
+    }
+#endif
+
+    dirname(root);
+
+    return root;
+}
+
+int clax_chdir(char *path)
+{
+    DIR *dir = opendir(path);
+    if (dir) {
+        closedir(dir);
+
+        if (chdir(path) < 0) {
+            return -1;
+        }
+    } else if (ENOENT == errno) {
+        return -1;
+    } else {
+        return -1;
+    }
+
+    return 0;
 }

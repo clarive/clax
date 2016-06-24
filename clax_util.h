@@ -91,4 +91,9 @@ int clax_rmpath_r(const char *path);
 int clax_rmdir_r(const char *path);
 int clax_touch(const char *path);
 
+const char *clax_strerror(int error);
+char *clax_detect_root(char **argv, char *root, size_t root_size);
+char *clax_strncatt(char *dst, size_t max_len, char *src);
+int clax_chdir(char *path);
+
 #endif

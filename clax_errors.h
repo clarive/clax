@@ -17,32 +17,16 @@
  *  along with Clax.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLAX_OPTIONS_H
-#define CLAX_OPTIONS_H
+#ifndef CLAX_ERRORS_H
+#define CLAX_ERRORS_H
 
-#include <stdio.h>
+#define CLAX_ERROR_START -1
 
-typedef struct {
-    char root[255];
-    char log_file[255];
-    char config_file[255];
+#define CLAX_ERROR_INVALID_CMD_ARGS (CLAX_ERROR_START - 1)
+#define CLAX_ERROR_LOG_REQUIRED     (CLAX_ERROR_START - 2)
+#define CLAX_ERROR_LOG_CANTOPEN     (CLAX_ERROR_START - 3)
+#define CLAX_ERROR_LOG_CANTWRITE    (CLAX_ERROR_START - 4)
 
-    char *basic_auth_username;
-    char *basic_auth_password;
-
-    char ssl;
-    char no_ssl_verify;
-    char cert_file[255];
-    char key_file[255];
-    char entropy_file[255];
-
-    /* Private */
-    FILE *_log_file;
-} opt;
-
-void clax_options_init(opt *options);
-void clax_options_free(opt *options);
-void clax_usage();
-int clax_parse_options(opt *options, int argc, char **argv);
+const char *clax_strerror(int error);
 
 #endif

@@ -40,6 +40,7 @@
 #include "mbedtls/ssl_cache.h"
 
 #include "clax.h"
+#include "clax_errors.h"
 #include "clax_options.h"
 #include "clax_http.h"
 #include "clax_log.h"
@@ -57,9 +58,9 @@ void _exit(int code)
     if (options._log_file) {
         clax_log("Closing log file '%s'", options.log_file);
         fclose(options._log_file);
-    }
 
-    clax_log("Exit=%d", code);
+        clax_log("Exit=%d", code);
+    }
 
     exit(code);
 }
@@ -374,30 +375,44 @@ int main(int argc, char **argv)
     _setmode(_fileno(stderr), _O_BINARY);
 #endif
 
+    int is_interactive = isatty(fileno(stdin));
+
     signal(SIGINT, term);
+    setbuf(stdout, NULL);
 
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
     clax_options_init(&options);
 
     int ok = clax_parse_options(&options, argc, argv);
     if (ok < 0) {
-        clax_usage();
-        exit(255);
+        const char *error = clax_strerror(ok);
+        size_t len = strlen(error);
+
+        if (is_interactive) {
+            fprintf(stdout, "Error: %s\n", error);
+
+            if (ok != -1) {
+                fprintf(stdout, "\n");
+                clax_usage();
+            }
+
+            _exit(255);
+        }
+        else {
+            fprintf(stdout,
+                    "HTTP/1.1 500 System Error\r\n"
+                    "Content-Type: text/plain\r\n"
+                    "Content-Length: %d\r\n"
+                    "\r\n"
+                    "%s\n",
+                    (int)(len + 1),
+                    error
+            );
+            goto cleanup;
+        }
     }
 
     clax_ctx.options = &options;
-
-    if (options.log_file[0]) {
-        options._log_file = fopen(options.log_file, "a");
-        if (options._log_file == NULL) {
-            fprintf(stderr, "Can't open log_file '%s': %s\n", options.log_file, strerror(errno));
-            clax_abort();
-        }
-
-        dup2(fileno(options._log_file), STDERR_FILENO);
-    }
-
-    setbuf(stdout, NULL);
 
     clax_log("Option: root=%s", options.root);
     clax_log("Option: entropy_file=%s", options.entropy_file);
@@ -410,6 +425,7 @@ int main(int argc, char **argv)
         clax_loop_ssl(&clax_ctx);
     }
 
+cleanup:
     fflush(stdout);
     fclose(stdout);
 
