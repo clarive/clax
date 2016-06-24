@@ -192,7 +192,7 @@ int clax_parse_options(opt *options, int argc, char **argv)
                 strncpy(options->root, argv[0], sizeof(options->root));
             }
             else {
-                char *root = clax_strjoin("/", cwd, argv[0]);
+                char *root = clax_strjoin("/", cwd, argv[0], NULL);
 
                 strncpy(options->root, root, sizeof(options->root));
             }
