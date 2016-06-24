@@ -282,6 +282,11 @@ void clax_san_path(char *buf)
             continue;
         }
 
+        if ((p = strstr(buf, "\\")) != NULL) {
+            *p = '/';
+            continue;
+        }
+
         break;
     }
 }
@@ -656,6 +661,8 @@ char *clax_detect_root(char *root, size_t root_size, char **argv)
 
     GetModuleFileName(NULL, root, root_size);
 
+    clax_san_path(root);
+
 #else
 
     char *p = clax_detect_exe_from_proc(root, root_size);
@@ -667,6 +674,10 @@ char *clax_detect_root(char *root, size_t root_size, char **argv)
 #endif
 
     dirname(root);
+
+    if (clax_strcatdir(root, root_size, "/") < 0) {
+        return NULL;
+    }
 
     return root;
 }

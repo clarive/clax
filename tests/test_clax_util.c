@@ -259,6 +259,10 @@ TEST_START(clax_san_path_fixes_path)
 {
     char buf[1024];
 
+    strcpy(buf, "nothing");
+    clax_san_path(buf);
+    ASSERT_STR_EQ(buf, "nothing");
+
     strcpy(buf, "/");
     clax_san_path(buf);
     ASSERT_STR_EQ(buf, "/");
@@ -292,6 +296,16 @@ TEST_START(clax_san_path_fixes_path)
     clax_san_path(buf);
     ASSERT_STR_EQ(buf, "/foo/bar/baz");
     ASSERT_EQ(strlen(buf), 12);
+
+    strcpy(buf, "C:\\foo\\\\bar//baz");
+    clax_san_path(buf);
+    ASSERT_STR_EQ(buf, "C:/foo/bar/baz");
+    ASSERT_EQ(strlen(buf), 14);
+
+    strcpy(buf, "C:\\clax\\clax.log");
+    clax_san_path(buf);
+    ASSERT_STR_EQ(buf, "C:/clax/clax.log");
+    ASSERT_EQ(strlen(buf), 16);
 }
 TEST_END
 
@@ -504,18 +518,12 @@ TEST_START(appends new string)
 {
     char str[255] = "";
 
-    int ok = clax_strcat(str, 255, "hello");
+    int ok = clax_strcat(str, sizeof(str), "hello");
 
     ASSERT_EQ(ok, 0);
     ASSERT_STR_EQ(str, "hello");
-}
-TEST_END
 
-TEST_START(appends another string)
-{
-    char str[255] = "hello";
-
-    int ok = clax_strcat(str, sizeof(str), " there");
+    ok = clax_strcat(str, sizeof(str), " there");
 
     ASSERT_EQ(ok, 0);
     ASSERT_STR_EQ(str, "hello there");
@@ -533,9 +541,9 @@ TEST_START(appends empty string)
 }
 TEST_END
 
-TEST_START(appends string that is too big)
+TEST_START(returns error when string does not fit)
 {
-    char str[7] = "hello";
+    char str[6] = "hello";
 
     int ok = clax_strcat(str, sizeof(str), " there");
 

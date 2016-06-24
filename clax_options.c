@@ -52,8 +52,6 @@ int clax_config_handler(void *ctx, const char *section, const char *name, const 
 
     if (MATCH("", "root")) {
         strncpy(options->root, value, sizeof_struct_member(opt, root));
-    } else if (MATCH("", "log_file")) {
-        strncpy(options->log_file, value, sizeof_struct_member(opt, log_file));
     } else if (MATCH("ssl", "enabled")) {
         if (strcmp(value, "yes") == 0) {
             options->ssl = 1;
@@ -90,10 +88,16 @@ int clax_parse_options(opt *options, int argc, char **argv)
     while ((c = getopt(argc, argv, "h:l:c:")) != -1) {
         switch (c) {
         case 'c':
-            strncpy(options->config_file, optarg, sizeof(options->config_file));
+            if (clax_strcat(options->config_file, sizeof(options->config_file), optarg) < 0) {
+                return -1;
+            }
+            clax_san_path(options->config_file);
             break;
         case 'l':
-            strncpy(options->log_file, optarg, sizeof(options->log_file));
+            if (clax_strcat(options->log_file, sizeof(options->log_file), optarg) < 0) {
+                return -1;
+            }
+            clax_san_path(options->log_file);
             break;
         case '?':
         case 'h':
@@ -129,6 +133,9 @@ int clax_parse_options(opt *options, int argc, char **argv)
         clax_log("Can't detect root directory: %s", strerror(errno));
         return -1;
     }
+
+    clax_san_path(options->root);
+
     clax_log("Detected root directory: %s", options->root);
 
     clax_log("Changing directory to '%s'", options->root);
