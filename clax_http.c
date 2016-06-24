@@ -487,7 +487,10 @@ int send_cb_wrapper(send_cb_t send_cb, void *ctx, const unsigned char *buf, size
     int ret;
 
 #ifdef MVS
-    b = clax_etoa_alloc(buf, len);
+    int is_interactive = isatty(fileno(stdin));
+    if (!is_interactive) {
+        b = clax_etoa_alloc(buf, len);
+    }
 #endif
 
     ret = send_cb(ctx, b, len);
