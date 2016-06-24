@@ -1,0 +1,3 @@
+MVS=1
+
+-include Makefile
