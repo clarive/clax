@@ -399,15 +399,28 @@ int main(int argc, char **argv)
             _exit(255);
         }
         else {
-            fprintf(stdout,
-                    "HTTP/1.1 500 System Error\r\n"
-                    "Content-Type: text/plain\r\n"
-                    "Content-Length: %d\r\n"
-                    "\r\n"
-                    "%s\n",
-                    (int)(len + 1),
-                    error
+            char buf[1024];
+            char *b = buf;
+
+            snprintf(buf, sizeof(buf),
+                "HTTP/1.1 500 System Error\r\n"
+                "Content-Type: text/plain\r\n"
+                "Content-Length: %d\r\n"
+                "\r\n"
+                "%s\n",
+                (int)(len + 1),
+                error
             );
+
+#ifdef MVS
+            b = clax_etoa_alloc(buf, strlen(buf));
+#endif
+
+            fprintf(stdout, "%s", b);
+
+#ifdef MVS
+            free(b);
+#endif
             goto cleanup;
         }
     }

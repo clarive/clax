@@ -504,9 +504,9 @@ TEST_START(appends new string)
 {
     char str[255] = "";
 
-    int copied = clax_strcat(str, 255, "hello");
+    int ok = clax_strcat(str, 255, "hello");
 
-    ASSERT_EQ(copied, 5);
+    ASSERT_EQ(ok, 0);
     ASSERT_STR_EQ(str, "hello");
 }
 TEST_END
@@ -515,10 +515,21 @@ TEST_START(appends another string)
 {
     char str[255] = "hello";
 
-    int copied = clax_strcat(str, sizeof(str), " there");
+    int ok = clax_strcat(str, sizeof(str), " there");
 
-    ASSERT_EQ(copied, 6);
+    ASSERT_EQ(ok, 0);
     ASSERT_STR_EQ(str, "hello there");
+}
+TEST_END
+
+TEST_START(appends empty string)
+{
+    char str[255] = "hello";
+
+    int ok = clax_strcat(str, sizeof(str), "");
+
+    ASSERT_EQ(ok, 0);
+    ASSERT_STR_EQ(str, "hello");
 }
 TEST_END
 
@@ -526,10 +537,54 @@ TEST_START(appends string that is too big)
 {
     char str[7] = "hello";
 
-    int copied = clax_strcat(str, sizeof(str), " there");
+    int ok = clax_strcat(str, sizeof(str), " there");
 
-    ASSERT_EQ(copied, 1);
-    ASSERT_STR_EQ(str, "hello ");
+    ASSERT_EQ(ok, -1);
+    ASSERT_STR_EQ(str, "hello");
+}
+TEST_END
+
+TEST_START(contatenates file paths)
+{
+    char str[255] = {0};
+    int ok = -1;
+
+    ok = clax_strcatfile(str, sizeof(str), "one");
+
+    ASSERT_EQ(ok, 0);
+    ASSERT_STR_EQ(str, "one");
+
+    ok = clax_strcatfile(str, sizeof(str), "two");
+
+    ASSERT_EQ(ok, 0);
+    ASSERT_STR_EQ(str, "one/two");
+
+    ok = clax_strcatfile(str, sizeof(str), "/three");
+
+    ASSERT_EQ(ok, 0);
+    ASSERT_STR_EQ(str, "one/two/three");
+}
+TEST_END
+
+TEST_START(contatenates dir paths)
+{
+    char str[255] = {0};
+    int ok = -1;
+
+    ok = clax_strcatdir(str, sizeof(str), "one");
+
+    ASSERT_EQ(ok, 0);
+    ASSERT_STR_EQ(str, "one/");
+
+    ok = clax_strcatdir(str, sizeof(str), "two");
+
+    ASSERT_EQ(ok, 0);
+    ASSERT_STR_EQ(str, "one/two/");
+
+    ok = clax_strcatdir(str, sizeof(str), "/three/");
+
+    ASSERT_EQ(ok, 0);
+    ASSERT_STR_EQ(str, "one/two/three/");
 }
 TEST_END
 
@@ -550,5 +605,18 @@ TEST_START(creates intermediate directories)
     free(tempdir);
 }
 TEST_END
+
+#ifndef _WIN32
+TEST_START(detects root if absolute)
+{
+    char root[1024] = {0};
+    char *argv[1] = {"/hello/world"};
+
+    clax_detect_exe_from_argv(root, sizeof(root), argv);
+
+    ASSERT_STR_EQ(root, "/hello/world/");
+}
+TEST_END
+#endif
 
 SUITE_END

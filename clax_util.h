@@ -82,7 +82,7 @@ char *clax_atoe_alloc(char *from, size_t from_len);
 #endif
 
 unsigned char *clax_slurp_alloc(char *filename, size_t *olen);
-size_t clax_strcat(char *dst, size_t dst_max_len, char *src);
+int clax_strcat(char *dst, size_t dst_max_len, char *src);
 
 int clax_is_path_d(const char *path);
 int clax_is_path_f(const char *path);
@@ -92,8 +92,14 @@ int clax_rmdir_r(const char *path);
 int clax_touch(const char *path);
 
 const char *clax_strerror(int error);
-char *clax_detect_root(char **argv, char *root, size_t root_size);
 char *clax_strncatt(char *dst, size_t max_len, char *src);
 int clax_chdir(char *path);
+
+char *clax_detect_root(char *root, size_t root_size, char **argv);
+char *clax_detect_exe_from_argv(char *root, size_t root_size, char **argv);
+char *clax_detect_exe_from_proc(char *root, size_t root_size);
+
+int clax_strcatfile(char *dst, size_t dst_max_len, char *src);
+int clax_strcatdir(char *dst, size_t dst_max_len, char *src);
 
 #endif

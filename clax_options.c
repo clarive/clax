@@ -120,7 +120,12 @@ int clax_parse_options(opt *options, int argc, char **argv)
         }
     }
 
-    if (clax_detect_root(argv, options->root, sizeof_struct_member(opt, root)) == NULL) {
+    clax_log("Command line arguments:");
+    for (int i = 0; i < argc; i++) {
+        clax_log("%s", argv[i]);
+    }
+
+    if (clax_detect_root(options->root, sizeof_struct_member(opt, root), argv) == NULL) {
         clax_log("Can't detect root directory: %s", strerror(errno));
         return -1;
     }
@@ -133,23 +138,15 @@ int clax_parse_options(opt *options, int argc, char **argv)
     }
 
     if (strlen(options->config_file) == 0) {
-        char *path_to_config = clax_strjoin("/", options->root, "clax.ini", NULL);
-        if (path_to_config) {
-            if (clax_is_path_f(path_to_config)) {
-                clax_log("Detected configuration file '%s'", path_to_config);
+        if (clax_strcatfile(options->config_file, sizeof_struct_member(opt, config_file), "clax.ini") != 0) {
+            return -1;
+        }
 
-                int copied = clax_strcat(options->config_file, sizeof_struct_member(opt, config_file), path_to_config);
-
-                free(path_to_config);
-
-                if (copied < strlen(path_to_config)) {
-                    clax_log("Path to configuration file is too long");
-                    return -1;
-                }
-            }
+        if (clax_is_path_f(options->config_file)) {
+            clax_log("Detected configuration file '%s'", options->config_file);
         }
         else {
-            return -1;
+            options->config_file[0] = 0;
         }
     }
 

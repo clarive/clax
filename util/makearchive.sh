@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+#set -x
 
 VERSION=`cat VERSION | tr -d "\012"`
 

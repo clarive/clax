@@ -202,25 +202,64 @@ char *clax_strcat_alloc(char *dst, char *src)
     return res;
 }
 
-size_t clax_strcat(char *dst, size_t dst_max_len, char *src)
+int clax_strcat(char *dst, size_t dst_max_len, char *src)
 {
     size_t orig_len = strlen(dst);
     size_t src_len = strlen(src);
-    size_t to_copy = src_len;
 
-    if (orig_len + to_copy > dst_max_len - 1) {
-        to_copy = dst_max_len - orig_len - 1;
-    }
-
-    if (to_copy > 0) {
-        strncat(dst, src, to_copy);
-        dst[orig_len + to_copy] = 0;
-
-        return to_copy;
-    }
-    else {
+    if (src_len == 0) {
         return 0;
     }
+
+    if (orig_len + src_len > dst_max_len - 1) {
+        return -1;
+    }
+
+    strcat(dst, src);
+
+    return 0;
+}
+
+int clax_strcatfile(char *dst, size_t dst_max_len, char *src)
+{
+    if (strlen(dst) == 0) {
+        TRY clax_strcat(dst, dst_max_len, src) GOTO;
+    }
+    else {
+        if (dst[strlen(dst) - 1] != '/') {
+            if (src[0] != '/') {
+                TRY clax_strcat(dst, dst_max_len, "/") GOTO;
+            }
+
+            TRY clax_strcat(dst, dst_max_len, src) GOTO;
+        }
+        else {
+            if (*src == '/') {
+                src++;
+            }
+
+            TRY clax_strcat(dst, dst_max_len, src) GOTO;
+        }
+    }
+
+    return 0;
+
+error:
+    errno = ENAMETOOLONG;
+    return -1;
+}
+
+int clax_strcatdir(char *dst, size_t dst_max_len, char *src)
+{
+    if (clax_strcatfile(dst, dst_max_len, src) != 0) {
+        return -1;
+    }
+
+    if (src[strlen(src) - 1] != '/') {
+        return clax_strcatfile(dst, dst_max_len, "/");
+    }
+
+    return 0;
 }
 
 void clax_san_path(char *buf)
@@ -611,38 +650,46 @@ int clax_touch(const char *path)
     }
 }
 
-char *clax_detect_root(char **argv, char *root, size_t root_size)
+char *clax_detect_root(char *root, size_t root_size, char **argv)
 {
 #ifdef _WIN32
+
     GetModuleFileName(NULL, root, root_size);
+
 #else
-    if (readlink("/proc/self/exe", root, root_size) == -1) {
-        getcwd(root, root_size);
+    char *p = clax_detect_exe_from_proc(root, root_size);
 
-        if (argv[0][0] == '/') {
-            int copied = clax_strcat(root, root_size, argv[0]);
-
-            if (copied < strlen(argv[0])) {
-                errno = ENAMETOOLONG;
-                return NULL;
-            }
-        }
-        else {
-            char *joined = clax_strjoin("/", root, argv[0], NULL);
-
-            int copied = clax_strcat(root, root_size, joined);
-
-            free(joined);
-
-            if (copied < strlen(joined)) {
-                errno = ENAMETOOLONG;
-                return NULL;
-            }
-        }
+    if (p == NULL) {
+        clax_detect_exe_from_argv(root, root_size, argv);
     }
+
 #endif
 
     dirname(root);
+
+    return root;
+}
+
+char *clax_detect_exe_from_proc(char *root, size_t root_size)
+{
+    if (readlink("/proc/self/exe", root, root_size) == -1) {
+        return NULL;
+    }
+
+    return root;
+}
+
+char *clax_detect_exe_from_argv(char *root, size_t root_size, char **argv)
+{
+    if (argv && argv[0] && argv[0][0] != '/') {
+        getcwd(root, root_size);
+
+        fprintf(stderr, root);
+    }
+
+    if (clax_strcatdir(root, root_size, argv[0]) != 0) {
+        return NULL;
+    }
 
     return root;
 }
