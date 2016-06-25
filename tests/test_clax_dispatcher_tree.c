@@ -498,7 +498,11 @@ TEST_START(serves file with crc32)
 
     clax_dispatch_download(&clax_ctx, &request, &response);
 
+#ifdef MVS
+    ASSERT_STR_EQ(clax_kv_list_find(&response.headers, "X-Clax-CRC32"), "2166a346")
+#else
     ASSERT_STR_EQ(clax_kv_list_find(&response.headers, "X-Clax-CRC32"), "3610a686")
+#endif
 
     clax_http_request_free(&request);
     clax_http_response_free(&response);
