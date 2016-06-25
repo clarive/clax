@@ -202,7 +202,7 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
                                         "\"path\":\"%s\","
                                         "\"dir\":false,"
                                         "\"last_modified\":\"%s\","
-                                        "\"size\":\"%s\""
+                                        "\"size\":%s"
                                     "}", name, fullpath, last_modified_buf, size_buf);
                         }
                     }
