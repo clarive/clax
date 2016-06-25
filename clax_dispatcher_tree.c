@@ -362,10 +362,7 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
                         clax_log("utime on file '%s' failed: %s", fpath, strerror(errno));
                 }
 
-                res->status_code = 200;
-                clax_kv_list_push(&res->headers, "Content-Type", "application/json");
-
-                clax_big_buf_append_str(&res->body, "{\"message\":\"ok\"}");
+                clax_dispatch_success(clax_ctx, req, res);
             }
 
             free(fpath);
@@ -383,10 +380,7 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
                 clax_dispatch_system_error(clax_ctx, req, res, "Can't create directory");
             }
             else {
-                res->status_code = 200;
-                clax_kv_list_push(&res->headers, "Content-Type", "application/json");
-
-                clax_big_buf_append_str(&res->body, "{\"message\":\"ok\"}");
+                clax_dispatch_success(clax_ctx, req, res);
             }
             free(fullpath);
         }
@@ -428,9 +422,7 @@ void clax_dispatch_delete(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
             free(error);
         }
         else {
-            res->status_code = 200;
-            clax_kv_list_push(&res->headers, "Content-Type", "application/json");
-            clax_big_buf_append_str(&res->body, "{\"message\":\"ok\"}");
+            clax_dispatch_success(clax_ctx, req, res);
         }
     }
     else {

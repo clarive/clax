@@ -62,6 +62,13 @@ typedef struct {
     void (*fn)(clax_ctx_t *, clax_http_request_t *, clax_http_response_t *);
 } clax_dispatcher_action_t;
 
+void clax_dispatch_success(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
+{
+    clax_kv_list_push(&res->headers, "Content-Type", "application/json");
+    res->status_code = 200;
+    clax_big_buf_append_str(&res->body, "{\"message\":\"ok\"}");
+}
+
 void clax_dispatch_not_found(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     clax_kv_list_push(&res->headers, "Content-Type", "text/plain");
