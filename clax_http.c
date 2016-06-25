@@ -25,6 +25,7 @@
 #include <unistd.h>
 
 #ifdef _WIN32
+#include <ws2tcpip.h>
 #include <windows.h>
 #else
 #include <arpa/inet.h>
@@ -734,6 +735,18 @@ int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_c
 
     clax_http_request_init(&request, clax_ctx->options->root);
     clax_http_response_init(&response, clax_ctx->options->root, 1024 * 1024);
+
+    struct sockaddr addr;
+    struct sockaddr_in *addr_in;
+    socklen_t len = sizeof(addr);
+
+    getpeername(fileno(stdout), &addr, &len);
+    addr_in = (struct sockaddr_in *)&addr;
+
+    char *ip_str = inet_ntoa(addr_in->sin_addr);
+    int port = ntohs(addr_in->sin_port);
+
+    clax_log("Connection from '%s:%d'", ip_str, port);
 
     clax_log("Reading & parsing request...");
     if (clax_http_read_parse(ctx, recv_cb, &parser, &request) < 0) {
