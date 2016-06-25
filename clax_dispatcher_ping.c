@@ -17,7 +17,11 @@
  *  along with Clax.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLAX_H
-#define CLAX_H
+#include "clax_dispatcher_ping.h"
 
-#endif
+void clax_dispatch_ping(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
+{
+    res->status_code = 200;
+    clax_kv_list_push(&res->headers, "Content-Type", "application/json");
+    clax_big_buf_append_str(&res->body, "{\"message\":\"pong\"}");
+}

@@ -17,7 +17,15 @@
  *  along with Clax.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLAX_H
-#define CLAX_H
+#include <string.h> /* memset */
 
-#endif
+#include "clax_ctx.h"
+
+void clax_ctx_init(clax_ctx_t *ctx)
+{
+    memset(ctx, 0, sizeof(clax_ctx_t));
+}
+
+void clax_ctx_free(clax_ctx_t *ctx)
+{
+}

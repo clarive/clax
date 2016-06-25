@@ -28,6 +28,7 @@
 #include "http-parser/http_parser.h"
 #include "multipart-parser-c/multipart_parser.h"
 #include "clax.h"
+#include "clax_ctx.h"
 #include "clax_util.h"
 #include "clax_http_multipart.h"
 

@@ -40,6 +40,7 @@
 #include "mbedtls/ssl_cache.h"
 
 #include "clax.h"
+#include "clax_ctx.h"
 #include "clax_errors.h"
 #include "clax_options.h"
 #include "clax_http.h"
@@ -387,8 +388,9 @@ int main(int argc, char **argv)
     signal(SIGINT, term);
     setbuf(stdout, NULL);
 
-    memset(&clax_ctx, 0, sizeof(clax_ctx_t));
     clax_options_init(&options);
+    clax_ctx_init(&clax_ctx);
+    clax_ctx.options = &options;
 
     int ok = clax_parse_options(&options, argc, argv);
     if (ok < 0) {
@@ -432,8 +434,6 @@ int main(int argc, char **argv)
         }
     }
 
-    clax_ctx.options = &options;
-
     clax_log("Option: root=%s", options.root);
     clax_log("Option: entropy_file=%s", options.entropy_file);
     clax_log("Option: log_file=%s", options.log_file);
@@ -449,6 +449,7 @@ cleanup:
     fflush(stdout);
     fclose(stdout);
 
+    clax_ctx_free(&clax_ctx);
     clax_options_free(&options);
 
     _exit(0);

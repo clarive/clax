@@ -17,7 +17,12 @@
  *  along with Clax.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLAX_H
-#define CLAX_H
+#ifndef CLAX_DISPATCHER_COMMAND_H
+#define CLAX_DISPATCHER_COMMAND_H
+
+#include "clax_ctx.h"
+#include "clax_http.h"
+
+void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res);
 
 #endif

@@ -17,7 +17,16 @@
  *  along with Clax.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLAX_H
-#define CLAX_H
+#ifndef CLAX_CTX_H
+#define CLAX_CTX_H
+
+#include "clax_options.h"
+
+typedef struct {
+    opt* options;
+} clax_ctx_t;
+
+void clax_ctx_init(clax_ctx_t *ctx);
+void clax_ctx_free(clax_ctx_t *ctx);
 
 #endif

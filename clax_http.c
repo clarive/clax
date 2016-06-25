@@ -35,6 +35,7 @@
 #include "multipart-parser-c/multipart_parser.h"
 #include "base64/base64.h"
 #include "clax.h"
+#include "clax_ctx.h"
 #include "clax_dispatcher.h"
 #include "clax_http.h"
 #include "clax_http_multipart.h"
