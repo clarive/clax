@@ -102,4 +102,8 @@ char *clax_detect_exe_from_proc(char *root, size_t root_size);
 int clax_strcatfile(char *dst, size_t dst_max_len, const char *src);
 int clax_strcatdir(char *dst, size_t dst_max_len, const char *src);
 
+char *clax_sprintf_alloc(const char *fmt, ...);
+
+char *clax_str_alloc(size_t len);
+
 #endif

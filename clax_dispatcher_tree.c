@@ -29,8 +29,14 @@
 #include <time.h>
 #include <utime.h>
 #include <errno.h>
+#include <dirent.h> /* DIR */
+
+#ifdef MVS
+#include "scandir.h"
+#endif
 
 #ifdef _WIN32
+# include "scandir.h"
 # include <windows.h>
 #endif
 
@@ -43,6 +49,46 @@
 #include "clax_dispatcher_tree.h"
 #include "clax_util.h"
 
+char *clax_last_modified(const char *path, char *buf, size_t max_len)
+{
+    struct stat st;
+    struct tm last_modified_time;
+    struct tm *last_modified_time_p;
+
+    if (stat(path, &st) != 0) {
+        return NULL;
+    }
+
+    if (!clax_is_path_d(path) && !clax_is_path_f(path)) {
+        return NULL;
+    }
+
+    last_modified_time_p = gmtime_r(&st.st_mtime, &last_modified_time);
+
+    strftime(buf, max_len, "%a, %d %b %Y %H:%M:%S GMT", last_modified_time_p);
+
+    return buf;
+}
+
+char *clax_file_size(const char *path, char *buf, size_t max_len)
+{
+    FILE *fh = fopen(path, "rb");
+    size_t size;
+
+    if (fh == NULL) {
+        return NULL;
+    }
+
+    fseek(fh, 0L, SEEK_END);
+    size = ftell(fh);
+    fseek(fh, 0L, SEEK_SET);
+
+    fclose(fh);
+
+    snprintf(buf, max_len, "%d", (int)size);
+
+    return buf;
+}
 void clax_dispatch_tree(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     if (req->method == HTTP_HEAD || req->method == HTTP_GET) {
@@ -58,55 +104,146 @@ void clax_dispatch_tree(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_htt
 
 void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
-    char *file = req->path_info + strlen("/tree/");
+    char *path = req->path_info + strlen("/tree/");
 
     char size_buf[255];
     char base_buf[255];
     char last_modified_buf[30];
-    struct stat st;
-    struct tm last_modified_time;
-    struct tm *last_modified_time_p;
-    size_t size;
 
-    if (stat(file, &st) != 0) {
+    if (!clax_is_path_d(path) && !clax_is_path_f(path)) {
         clax_dispatch_not_found(clax_ctx, req, res);
         return;
     }
 
-    if (!clax_is_path_d(file) && !clax_is_path_f(file)) {
-        clax_dispatch_not_found(clax_ctx, req, res);
-        return;
-    }
-
-    last_modified_time_p = gmtime_r(&st.st_mtime, &last_modified_time);
-
-    strftime(last_modified_buf, sizeof(last_modified_buf), "%a, %d %b %Y %H:%M:%S GMT", last_modified_time_p);
+    clax_last_modified((const char *)path, last_modified_buf, sizeof(last_modified_buf));
     clax_kv_list_push(&res->headers, "Last-Modified", last_modified_buf);
 
-    if (clax_is_path_d(file)) {
+    if (clax_is_path_d(path)) {
         res->status_code = 200;
-        clax_kv_list_push(&res->headers, "Content-Type", "application/vnd.clarive-clax.folder");
+
+        char *content_type = "application/vnd.clarive-clax.folder";
+        const char *accept = clax_kv_list_find(&req->headers, "Accept");
+
+        if (accept && strstr(accept, "text/html")) {
+            content_type = "text/html";
+        }
+
+        int is_html = strcmp(content_type, "text/html") == 0;
+
+        clax_kv_list_push(&res->headers, "Content-Type", content_type);
+
+        if (req->method == HTTP_GET) {
+            if (is_html) {
+                clax_big_buf_append_str(&res->body, "<html>\n");
+                clax_big_buf_append_str(&res->body, "<head><title>Index of /</title></head>\n");
+                clax_big_buf_append_str(&res->body, "<body bgcolor=\"white\">\n");
+                clax_big_buf_append_str(&res->body, "<h1>Index of /</h1><hr>");
+                clax_big_buf_append_str(&res->body, "<table>\n");
+                clax_big_buf_append_str(&res->body, "<tr><td><a href=\"../\">../</a></td><td>Last Modified</td><td>Size</td></tr>\n");
+            }
+            else {
+                clax_big_buf_append_str(&res->body, "[");
+            }
+
+            struct dirent **namelist;
+            int n;
+
+            n = scandir(path, &namelist, 0, alphasort);
+
+            if (n >= 0) {
+                for (int i = 0; i < n; i++) {
+                    char *name = namelist[i]->d_name;
+
+                    if (strcmp(name, ".") == 0)
+                        continue;
+                    if (strcmp(name, "..") == 0)
+                        continue;
+
+                    size_t fullpath_maxlen = strlen(path) + strlen(name) + 2;
+                    char *fullpath = clax_str_alloc(fullpath_maxlen);
+
+                    clax_strcatfile(fullpath, fullpath_maxlen, path);
+                    clax_strcatfile(fullpath, fullpath_maxlen, name);
+
+                    char *line;
+                    char last_modified_buf[30];
+                    clax_last_modified(fullpath, last_modified_buf, sizeof(last_modified_buf));
+
+                    if (clax_is_path_d(fullpath)) {
+                        clax_strcatdir(fullpath, fullpath_maxlen, "/");
+
+                        if (is_html) {
+                            line = clax_sprintf_alloc("<tr><td><a href=\"%s/\">%s/</a></td><td><pre>%s</pre></td><td><pre>-</pre></td></tr>\n",
+                                    name, name, last_modified_buf);
+                        }
+                        else {
+                            line = clax_sprintf_alloc(
+                                    "{"
+                                        "\"name\":\"%s\","
+                                        "\"path\":\"%s\","
+                                        "\"dir\":true,"
+                                        "\"last_modified\":\"%s\""
+                                    "}", name, fullpath, last_modified_buf);
+                        }
+                    }
+                    else if (clax_is_path_f(fullpath)) {
+                        char size_buf[30];
+                        clax_file_size(fullpath, size_buf, sizeof(size_buf));
+
+                        if (is_html) {
+                            line = clax_sprintf_alloc("<tr><td><a href=\"%s\">%s</a></td><td><pre>%s</pre></td><td><pre>%s</pre></td></tr>\n",
+                                    name, name, last_modified_buf, size_buf);
+                        }
+                        else {
+                            line = clax_sprintf_alloc(
+                                    "{"
+                                        "\"name\":\"%s\","
+                                        "\"path\":\"%s\","
+                                        "\"dir\":false,"
+                                        "\"last_modified\":\"%s\","
+                                        "\"size\":\"%s\""
+                                    "}", name, fullpath, last_modified_buf, size_buf);
+                        }
+                    }
+
+                    clax_big_buf_append_str(&res->body, line);
+                    free(line);
+
+                    free(fullpath);
+
+                    free(namelist[n]);
+                }
+
+                free(namelist);
+            }
+
+            if (is_html) {
+                clax_big_buf_append_str(&res->body, "</table>\n");
+                clax_big_buf_append_str(&res->body, "<hr></body>\n");
+                clax_big_buf_append_str(&res->body, "</html>\n");
+            }
+            else {
+                clax_big_buf_append_str(&res->body, "]");
+            }
+        }
+
         return;
     }
 
-    unsigned long crc32 = clax_crc32_calc_file(file);
+    unsigned long crc32 = clax_crc32_calc_file(path);
     char crc32_hex[9] = {0};
     snprintf(crc32_hex, sizeof(crc32_hex), "%lx", crc32);
 
-    FILE *fh = fopen(file, "rb");
+    clax_file_size(path, size_buf, sizeof(size_buf));
+
+    FILE *fh = fopen(path, "rb");
 
     if (fh == NULL) {
         clax_dispatch_not_found(clax_ctx, req, res);
         return;
     }
 
-    fseek(fh, 0L, SEEK_END);
-    size = ftell(fh);
-    fseek(fh, 0L, SEEK_SET);
-
-    snprintf(size_buf, sizeof(size_buf), "%d", (int)size);
-
-    char *base = basename(file);
+    char *base = basename(path);
     strcpy(base_buf, "attachment; filename=\"");
     strcat(base_buf, base);
     strcat(base_buf, "\"");
@@ -281,3 +418,4 @@ void clax_dispatch_delete(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
         return;
     }
 }
+

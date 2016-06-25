@@ -731,3 +731,47 @@ int clax_chdir(char *path)
 
     return 0;
 }
+
+char *clax_sprintf_alloc(const char *fmt, ...)
+{
+   int size = 0;
+   char *p = NULL;
+   va_list ap;
+
+   /* Determine required size */
+
+   va_start(ap, fmt);
+   size = vsnprintf(p, size, fmt, ap);
+   va_end(ap);
+
+   if (size < 0)
+       return NULL;
+
+   size++;             /* For '\0' */
+   p = malloc(size);
+   if (p == NULL)
+       return NULL;
+
+   va_start(ap, fmt);
+   size = vsnprintf(p, size, fmt, ap);
+   if (size < 0) {
+       free(p);
+       return NULL;
+   }
+   va_end(ap);
+
+   return p;
+}
+
+char *clax_str_alloc(size_t len)
+{
+    char *p = malloc(len + 1);
+
+    if (p == NULL) {
+        return NULL;
+    }
+
+    p[0] = 0;
+
+    return p;
+}
