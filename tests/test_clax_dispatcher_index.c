@@ -42,7 +42,7 @@ TEST_START(returns info)
     clax_http_response_t response;
 
     clax_ctx_init(&clax_ctx);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     request.method = HTTP_GET;

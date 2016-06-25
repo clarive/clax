@@ -642,18 +642,13 @@ error:
     return -1;
 }
 
-void clax_http_request_init(clax_http_request_t *request)
+void clax_http_request_init(clax_http_request_t *request, char *tempdir)
 {
     memset(request, 0, sizeof(clax_http_request_t));
 
     clax_kv_list_init(&request->headers);
     clax_kv_list_init(&request->query_params);
     clax_kv_list_init(&request->body_params);
-
-    char *tempdir = NULL;
-    if (request->clax_ctx && request->clax_ctx->options) {
-        tempdir = request->clax_ctx->options->root;
-    }
 
     clax_http_multipart_list_init(&request->multiparts, tempdir);
 }
@@ -737,10 +732,8 @@ int clax_http_dispatch(clax_ctx_t *clax_ctx, send_cb_t send_cb, recv_cb_t recv_c
 
     http_parser_init(&parser, HTTP_REQUEST);
 
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, clax_ctx->options->root);
     clax_http_response_init(&response, clax_ctx->options->root, 1024 * 1024);
-
-    request.clax_ctx = clax_ctx;
 
     clax_log("Reading & parsing request...");
     if (clax_http_read_parse(ctx, recv_cb, &parser, &request) < 0) {

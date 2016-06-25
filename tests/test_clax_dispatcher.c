@@ -45,7 +45,7 @@ TEST_START(sets_404_on_unknown_path)
     clax_http_request_t request;
     clax_http_response_t response;
 
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     strcpy(request.path_info, "/unknown-path");
@@ -73,7 +73,7 @@ TEST_START(returns_bad_request_when_wrong_params)
 
     memset(&clax_ctx, 0, sizeof(clax_ctx_t));
     clax_options_init(&options);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     request.method = HTTP_POST;

@@ -58,8 +58,6 @@ typedef struct {
   char message_done;
   char is_complete;
   char continue_expected;
-
-  clax_ctx_t *clax_ctx;
 } clax_http_request_t;
 
 typedef struct {
@@ -77,7 +75,7 @@ typedef int (*send_cb_t)(void *ctx, const unsigned char *buf, size_t len);
 
 /* Public */
 
-void clax_http_request_init(clax_http_request_t *request);
+void clax_http_request_init(clax_http_request_t *request, char *tempdir);
 void clax_http_request_free(clax_http_request_t *request);
 void clax_http_response_init(clax_http_response_t *response, char *tempdir, size_t max_size);
 void clax_http_response_free(clax_http_response_t *response);

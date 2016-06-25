@@ -42,7 +42,7 @@ TEST_START(saves_upload_to_file)
     clax_http_response_t response;
 
     clax_ctx_init(&clax_ctx);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
@@ -84,7 +84,7 @@ TEST_START(saves_upload_to_file_with_another_name)
     clax_http_response_t response;
 
     clax_ctx_init(&clax_ctx);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
@@ -129,7 +129,7 @@ TEST_START(saves_upload_to_another_dir)
     clax_http_response_t response;
 
     clax_ctx_init(&clax_ctx);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
@@ -174,7 +174,7 @@ TEST_START(rejects_upload_if_crc_fails)
     clax_http_response_t response;
 
     clax_ctx_init(&clax_ctx);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
@@ -216,7 +216,7 @@ TEST_START(accepts_upload_with_correct_crc)
     clax_http_response_t response;
 
     clax_ctx_init(&clax_ctx);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
@@ -257,7 +257,7 @@ TEST_START(saves_upload_with_passed_time)
     clax_http_response_t response;
 
     clax_ctx_init(&clax_ctx);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
@@ -305,7 +305,7 @@ TEST_START(creates directory)
     clax_http_response_t response;
 
     clax_ctx_init(&clax_ctx);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
@@ -342,7 +342,7 @@ TEST_START(returns ok when file exists)
     clax_http_response_t response;
 
     clax_ctx_init(&clax_ctx);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
@@ -376,7 +376,7 @@ TEST_START(returns ok when directory exists)
     clax_http_response_t response;
 
     clax_ctx_init(&clax_ctx);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
@@ -410,7 +410,7 @@ TEST_START(serves_404_when_file_not_found)
     clax_http_response_t response;
 
     clax_ctx_init(&clax_ctx);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
@@ -442,7 +442,7 @@ TEST_START(serves_file_as_attachment)
     clax_http_response_t response;
 
     clax_ctx_init(&clax_ctx);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
@@ -483,7 +483,7 @@ TEST_START(serves file with crc32)
     clax_http_response_t response;
 
     clax_ctx_init(&clax_ctx);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
@@ -520,7 +520,7 @@ TEST_START(deletes file)
     clax_http_response_t response;
 
     clax_ctx_init(&clax_ctx);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];
@@ -559,7 +559,7 @@ TEST_START(returns error when deleting unknown file)
     clax_http_response_t response;
 
     clax_ctx_init(&clax_ctx);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
     clax_http_response_init(&response, NULL, 0);
 
     char cwd[1024];

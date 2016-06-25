@@ -87,7 +87,7 @@ TEST_START(parse_returns_error_when_error)
     clax_http_request_t request;
 
     http_parser_init(&parser, HTTP_REQUEST);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
 
     int rv = _parse(&parser, &request, "foobarbaz");
 
@@ -103,7 +103,7 @@ TEST_START(parse_returns_0_when_need_more)
     clax_http_request_t request;
 
     http_parser_init(&parser, HTTP_REQUEST);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
 
     int rv = _parse(&parser, &request, "GET / HTTP/1.1\r\n");
 
@@ -119,7 +119,7 @@ TEST_START(parse_returns_ok_chunks)
     clax_http_request_t request;
 
     http_parser_init(&parser, HTTP_REQUEST);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
 
     int rv = _parse(&parser, &request, "GET / ");
     ASSERT_EQ(request.headers_done, 0);
@@ -157,7 +157,7 @@ TEST_START(parse_returns_done_when_100_continue)
     clax_http_request_t request;
 
     http_parser_init(&parser, HTTP_REQUEST);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
 
     int rv = _parse(&parser, &request, "GET / HTTP/1.1\r\n");
     rv = _parse(&parser, &request, "Host: localhost\r\nConnection: close\r\nContent-Length: 5\r\nExpect: 100-continue\r\n\r\n");
@@ -174,7 +174,7 @@ TEST_START(parse_returns_ok)
     clax_http_request_t request;
 
     http_parser_init(&parser, HTTP_REQUEST);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
 
     int rv = _parse(&parser, &request, "GET / HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n");
     ASSERT_EQ(rv, 1)
@@ -189,7 +189,7 @@ TEST_START(parse_returns_error_when_path_has_zeros)
     clax_http_request_t request;
 
     http_parser_init(&parser, HTTP_REQUEST);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
 
     int rv = _parse(&parser, &request, "GET /%00 HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n");
     ASSERT_EQ(rv, -1)
@@ -204,7 +204,7 @@ TEST_START(parse_saves_request)
     clax_http_request_t request;
 
     http_parser_init(&parser, HTTP_REQUEST);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
 
     _parse(&parser, &request, "GET /the%20re?foo=bar HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n");
 
@@ -227,7 +227,7 @@ TEST_START(parse_saves_body)
     clax_http_request_t request;
 
     http_parser_init(&parser, HTTP_REQUEST);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
 
     _parse(&parser, &request, "POST / HTTP/1.1\r\n");
     _parse(&parser, &request, "Host: localhost\r\n");
@@ -248,7 +248,7 @@ TEST_START(parse_parses_query_string)
     clax_http_request_t request;
 
     http_parser_init(&parser, HTTP_REQUEST);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
 
     _parse(&parser, &request, "GET /?foo=&foo=&foo=bar&=bar HTTP/1.1\r\n");
     _parse(&parser, &request, "Host: localhost\r\n");
@@ -275,7 +275,7 @@ TEST_START(parse_parses_form_body)
     clax_http_request_t request;
 
     http_parser_init(&parser, HTTP_REQUEST);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
 
     _parse(&parser, &request, "POST / HTTP/1.1\r\n");
     _parse(&parser, &request, "Host: localhost\r\n");
@@ -304,7 +304,7 @@ TEST_START(parse_parses_form_body_with_decoding)
     clax_http_request_t request;
 
     http_parser_init(&parser, HTTP_REQUEST);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
 
     _parse(&parser, &request, "POST / HTTP/1.1\r\n");
     _parse(&parser, &request, "Host: localhost\r\n");
@@ -327,7 +327,7 @@ TEST_START(parse_parses_multipart_body)
     unsigned char content[1024];
 
     http_parser_init(&parser, HTTP_REQUEST);
-    clax_http_request_init(&request);
+    clax_http_request_init(&request, NULL);
 
     _parse(&parser, &request, "POST / HTTP/1.1\r\n");
     _parse(&parser, &request, "Host: localhost\r\n");
