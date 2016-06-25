@@ -79,7 +79,7 @@ const char *clax_http_status_message(int code)
     return "Unknown";
 }
 
-int message_complete_cb(http_parser *p)
+int on_http_parser_message_complete(http_parser *p)
 {
     clax_http_request_t *req = p->data;
 
@@ -88,7 +88,7 @@ int message_complete_cb(http_parser *p)
     return 0;
 }
 
-int headers_complete_cb(http_parser *p)
+int on_http_parser_headers_complete(http_parser *p)
 {
     clax_http_request_t *req = p->data;
 
@@ -107,7 +107,7 @@ int headers_complete_cb(http_parser *p)
     return 0;
 }
 
-int header_field_cb(http_parser *p, const char *buf, size_t len)
+int on_http_parser_header_field(http_parser *p, const char *buf, size_t len)
 {
     clax_http_request_t *req = p->data;
 
@@ -124,7 +124,7 @@ int header_field_cb(http_parser *p, const char *buf, size_t len)
     return 0;
 }
 
-int header_value_cb(http_parser *p, const char *buf, size_t len)
+int on_http_parser_header_value(http_parser *p, const char *buf, size_t len)
 {
     clax_http_request_t *req = p->data;
 
@@ -151,7 +151,7 @@ int header_value_cb(http_parser *p, const char *buf, size_t len)
     return 0;
 }
 
-int request_url_cb(http_parser *p, const char *buf, size_t len)
+int on_http_parser_url(http_parser *p, const char *buf, size_t len)
 {
     clax_http_request_t *request = p->data;
     struct http_parser_url u;
@@ -207,68 +207,6 @@ int request_url_cb(http_parser *p, const char *buf, size_t len)
     }
 
     return 0;
-}
-
-void clax_http_parse_urlencoded(clax_kv_list_t *params, const char *buf, size_t len)
-{
-    const char *key = NULL;
-    size_t key_len = 0;
-    const char *val = NULL;
-    size_t val_len = 0;
-    char mode = PARAM_MODE_KEY;
-
-    const char *b = buf;
-
-    int j;
-    for (j = 0; j < len; j++) {
-        if (b[j] == '&') {
-            mode = PARAM_MODE_KEY;
-
-            if (key_len || val_len) {
-                char *k = clax_buf2str(key, key_len);
-                clax_http_url_decode(k);
-                char *v = clax_buf2str(val, val_len);
-                clax_http_url_decode(v);
-
-                clax_kv_list_push(params, k, v);
-
-                free(k);
-                free(v);
-            }
-
-            key = NULL;
-            key_len = 0;
-            val = NULL;
-            val_len = 0;
-        }
-        else if (b[j] == '=') {
-            mode = PARAM_MODE_VAL;
-        }
-        else if (mode == PARAM_MODE_KEY) {
-            if (key == NULL)
-                key = b + j;
-
-            key_len++;
-        }
-        else if (mode == PARAM_MODE_VAL) {
-            if (val == NULL)
-                val = b + j;
-
-            val_len++;
-        }
-    }
-
-    if (key_len || val_len) {
-        char *k = clax_buf2str(key, key_len);
-        clax_http_url_decode(k);
-        char *v = clax_buf2str(val, val_len);
-        clax_http_url_decode(v);
-
-        clax_kv_list_push(params, k, v);
-
-        free(k);
-        free(v);
-    }
 }
 
 int on_multipart_header_name(multipart_parser* p, const char *buf, size_t len)
@@ -345,7 +283,7 @@ int on_body_end(multipart_parser* p)
     return 0;
 }
 
-int clax_http_body(http_parser *p, const char *buf, size_t len)
+int on_http_parser_body(http_parser *p, const char *buf, size_t len)
 {
     clax_http_request_t *req = p->data;
 
@@ -390,6 +328,68 @@ int clax_http_body(http_parser *p, const char *buf, size_t len)
     }
 
     return 0;
+}
+
+void clax_http_parse_urlencoded(clax_kv_list_t *params, const char *buf, size_t len)
+{
+    const char *key = NULL;
+    size_t key_len = 0;
+    const char *val = NULL;
+    size_t val_len = 0;
+    char mode = PARAM_MODE_KEY;
+
+    const char *b = buf;
+
+    int j;
+    for (j = 0; j < len; j++) {
+        if (b[j] == '&') {
+            mode = PARAM_MODE_KEY;
+
+            if (key_len || val_len) {
+                char *k = clax_buf2str(key, key_len);
+                clax_http_url_decode(k);
+                char *v = clax_buf2str(val, val_len);
+                clax_http_url_decode(v);
+
+                clax_kv_list_push(params, k, v);
+
+                free(k);
+                free(v);
+            }
+
+            key = NULL;
+            key_len = 0;
+            val = NULL;
+            val_len = 0;
+        }
+        else if (b[j] == '=') {
+            mode = PARAM_MODE_VAL;
+        }
+        else if (mode == PARAM_MODE_KEY) {
+            if (key == NULL)
+                key = b + j;
+
+            key_len++;
+        }
+        else if (mode == PARAM_MODE_VAL) {
+            if (val == NULL)
+                val = b + j;
+
+            val_len++;
+        }
+    }
+
+    if (key_len || val_len) {
+        char *k = clax_buf2str(key, key_len);
+        clax_http_url_decode(k);
+        char *v = clax_buf2str(val, val_len);
+        clax_http_url_decode(v);
+
+        clax_kv_list_push(params, k, v);
+
+        free(k);
+        free(v);
+    }
 }
 
 size_t clax_http_url_decode(char *str)
@@ -440,15 +440,15 @@ size_t clax_http_url_decode(char *str)
     return new_len;
 }
 
-static http_parser_settings settings =
+static http_parser_settings http_parser_callbacks =
   {//.on_message_begin = message_begin_cb
-  .on_header_field = header_field_cb
-  ,.on_header_value = header_value_cb
-  ,.on_url = request_url_cb
+  .on_header_field = on_http_parser_header_field
+  ,.on_header_value = on_http_parser_header_value
+  ,.on_url = on_http_parser_url
   /*,.on_status = response_status_cb*/
-  ,.on_body = clax_http_body
-  ,.on_headers_complete = headers_complete_cb
-  ,.on_message_complete = message_complete_cb
+  ,.on_body = on_http_parser_body
+  ,.on_headers_complete = on_http_parser_headers_complete
+  ,.on_message_complete = on_http_parser_message_complete
   /*,.on_chunk_header = chunk_header_cb*/
   /*,.on_chunk_complete = chunk_complete_cb*/
   };
@@ -458,7 +458,7 @@ int clax_http_parse(http_parser *parser, clax_http_request_t *request, const cha
     size_t nparsed;
 
     parser->data = request;
-    nparsed = http_parser_execute(parser, &settings, buf, len);
+    nparsed = http_parser_execute(parser, &http_parser_callbacks, buf, len);
 
     if (nparsed != len) {
         return -1;
