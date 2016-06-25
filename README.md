@@ -199,11 +199,23 @@ Required
 
     curl -F 'file=@path_to_file' http://clax-server/tree/
 
-### Delete file
+### Delete path
 
-    DELETE /tree/path/to/file
+    DELETE /tree/path/to/file_or_dir
 
-Delete file.
+Delete file or directory.
+
+#### URL Params
+
+Required
+
+None
+
+Optional
+
+* `recursive=1`
+
+    Remove directory recursively
 
 #### Response
 

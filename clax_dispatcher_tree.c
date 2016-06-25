@@ -89,6 +89,7 @@ char *clax_file_size(const char *path, char *buf, size_t max_len)
 
     return buf;
 }
+
 void clax_dispatch_tree(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     if (req->method == HTTP_HEAD || req->method == HTTP_GET) {
@@ -398,24 +399,42 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
 
 void clax_dispatch_delete(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
-    char *file = req->path_info + strlen("/tree/");
-    struct stat st;
+    char *path = req->path_info + strlen("/tree/");
+    char *error = NULL;
 
-    if (stat(file, &st) != 0 || !(st.st_mode & S_IFREG)) {
-        clax_dispatch_not_found(clax_ctx, req, res);
-        return;
-    }
+    int is_file = clax_is_path_f(path);
+    if (is_file || clax_is_path_d(path)) {
+        if (is_file) {
+            if (unlink(path) < 0) {
+                error = clax_sprintf_alloc("Can't delete file: %s", strerror(errno));
+            }
+        }
+        else {
+            char *recursive = clax_kv_list_find(&req->query_params, "recursive");
 
-    int ret = unlink(file);
+            if (recursive && strlen(recursive) && strcmp(recursive, "1") == 0) {
+                if (clax_rmpath_r(path) < 0) {
+                    error = clax_sprintf_alloc("Can't remove directory recursively: %s", strerror(errno));
+                }
+            }
+            else if (rmdir(path) < 0) {
+                error = clax_sprintf_alloc("Can't remove directory: %s", strerror(errno));
+            }
+        }
 
-    if (ret == 0) {
-        res->status_code = 200;
-        clax_kv_list_push(&res->headers, "Content-Type", "application/json");
-        clax_big_buf_append_str(&res->body, "{\"message\":\"ok\"}");
+        if (error) {
+            clax_dispatch_system_error(clax_ctx, req, res, error);
+
+            free(error);
+        }
+        else {
+            res->status_code = 200;
+            clax_kv_list_push(&res->headers, "Content-Type", "application/json");
+            clax_big_buf_append_str(&res->body, "{\"message\":\"ok\"}");
+        }
     }
     else {
-        clax_dispatch_system_error(clax_ctx, req, res, "Can't delete file");
-        return;
+        clax_dispatch_not_found(clax_ctx, req, res);
     }
 }
 

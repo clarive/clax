@@ -552,6 +552,80 @@ TEST_START(deletes file)
 }
 TEST_END
 
+TEST_START(deletes directory)
+{
+    clax_ctx_t clax_ctx;
+    clax_http_request_t request;
+    clax_http_response_t response;
+
+    clax_ctx_init(&clax_ctx);
+    clax_http_request_init(&request, NULL);
+    clax_http_response_init(&response, NULL, 0);
+
+    char *tmp_dirname = clax_mktmpdir_alloc();
+    char *path = clax_sprintf_alloc("%s/%s", tmp_dirname, "empty-dir");
+
+    char *path_info = clax_sprintf_alloc("/tree/%s", path);
+
+    clax_mkdir_p(path);
+
+    request.method = HTTP_DELETE;
+    strcpy(request.path_info, path_info);
+
+    clax_dispatch_delete(&clax_ctx, &request, &response);
+
+    ASSERT_EQ(response.status_code, 200)
+
+    clax_http_request_free(&request);
+    clax_http_response_free(&response);
+    clax_ctx_free(&clax_ctx);
+
+    ASSERT_EQ(access(path, F_OK), -1);
+
+    free(path);
+    free(path_info);
+    rmrf(tmp_dirname);
+}
+TEST_END
+
+TEST_START(deletes directory recursively)
+{
+    clax_ctx_t clax_ctx;
+    clax_http_request_t request;
+    clax_http_response_t response;
+
+    clax_ctx_init(&clax_ctx);
+    clax_http_request_init(&request, NULL);
+    clax_http_response_init(&response, NULL, 0);
+
+    char *tmp_dirname = clax_mktmpdir_alloc();
+    char *path = clax_sprintf_alloc("%s/%s", tmp_dirname, "empty-dir");
+
+    char *path_info = clax_sprintf_alloc("/tree/%s", tmp_dirname);
+    printf("path_info=%s\n", path_info);
+
+    clax_mkdir_p(path);
+
+    request.method = HTTP_DELETE;
+    strcpy(request.path_info, path_info);
+    clax_kv_list_push(&request.query_params, "recursive", "1");
+
+    clax_dispatch_delete(&clax_ctx, &request, &response);
+
+    ASSERT_EQ(response.status_code, 200)
+
+    clax_http_request_free(&request);
+    clax_http_response_free(&response);
+    clax_ctx_free(&clax_ctx);
+
+    ASSERT_EQ(access(tmp_dirname, F_OK), -1);
+
+    free(path);
+    free(path_info);
+    rmrf(tmp_dirname);
+}
+TEST_END
+
 TEST_START(returns error when deleting unknown file)
 {
     clax_ctx_t clax_ctx;
