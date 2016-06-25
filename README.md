@@ -7,6 +7,8 @@ requests from stdin and write responses to stdout, which makes it suitable for i
 
 - Debian GNU/Linux x86_64
 - Cygwin x86_64
+- Windows 2008, 2012
+- z/OS 390
 
 ## Compiling, testing and installing
 
@@ -22,23 +24,9 @@ Clax has a rich unit and functional test suites.
 
     usage: clax [options]
 
-    Options:
-
-       common
-       ------
-       -c <config_file>        path to configuration file
-       -z                      print default configuration
-       -r <root>               home directory (required, will chdir to it)
-       -l <log_file>           path to log file (default: stderr)
-       -a <username:password>  basic authentication credentials
-
-       ssl
-       ---
-       -n                      do not use ssl at all (default: on)
-       -k                      do not verify client certificate (default: on)
-       -t <cert_file>          path to cert file (required if ssl, CA included)
-       -p <key_file>           path to private key file (required if ssl)
-       -e <entropy_file>       path to entropy file (needed on some systems)
+       -l <log_file>     path to log file (REQUIRED)
+       -c <config_file>  path to configuration file (defaults to clax.ini
+                             in binary location directory)
 
 # API Documentation
 
@@ -126,8 +114,10 @@ There are several types of errors.
 
 ### Check if file exists
 
-    HEAD /tree/:filename
-    HEAD /tree/:some/:sub/:directory/:filename
+    HEAD /tree/filename
+    HEAD /tree/some/sub/directory/filename
+    HEAD /tree//absolute/path
+    HEAD /tree/C:/absolute/path
 
 Same as downloading a file without actually receiving the body.
 
@@ -146,8 +136,8 @@ Same as downloading a file without actually receiving the body.
 
 ### Download file
 
-    GET /tree/:filename
-    GET /tree/:some/:sub/:directory/:filename
+    GET /tree/filename
+    GET /tree/some/sub/directory/filename
 
 Download a file as attachment.
 
@@ -169,7 +159,7 @@ Download a file as attachment.
 ### Upload file
 
     POST /tree/
-    POST /tree/:some/:sub/:directory
+    POST /tree/some/sub/directory
 
 Upload file to the server via multipart form.
 
