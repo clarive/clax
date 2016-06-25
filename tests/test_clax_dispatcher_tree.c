@@ -287,11 +287,7 @@ TEST_START(saves_upload_with_passed_time)
 
     ASSERT_EQ(stat("foobar", &st), 0);
 
-#ifdef _WIN32
     ASSERT_EQ(st.st_mtime, 1234567890);
-#else
-    ASSERT_EQ(st.st_mtim.tv_sec, 1234567890);
-#endif
 
     chdir(cwd);
     rmrf(tmp_dirname);
