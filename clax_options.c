@@ -52,6 +52,10 @@ int clax_config_handler(void *ctx, const char *section, const char *name, const 
 
     if (MATCH("", "root")) {
         strncpy(options->root, value, sizeof_struct_member(opt, root));
+    } else if (MATCH("", "chdir")) {
+        if (strcmp(value, "yes") == 0) {
+            options->chdir = 1;
+        }
     } else if (MATCH("ssl", "enabled")) {
         if (strcmp(value, "yes") == 0) {
             options->ssl = 1;
@@ -124,11 +128,6 @@ int clax_parse_options(opt *options, int argc, char **argv)
         }
     }
 
-    clax_log("Command line arguments:");
-    for (int i = 0; i < argc; i++) {
-        clax_log("%s", argv[i]);
-    }
-
     if (clax_detect_root(options->root, sizeof_struct_member(opt, root), argv) == NULL) {
         clax_log("Can't detect root directory: %s", strerror(errno));
         return -1;
@@ -138,13 +137,19 @@ int clax_parse_options(opt *options, int argc, char **argv)
 
     clax_log("Detected root directory: %s", options->root);
 
-    clax_log("Changing directory to '%s'", options->root);
-    if (clax_chdir(options->root) < 0) {
-        clax_log("Error: cannot chdir to '%s': %s", options->root, strerror(errno));
-        return -1;
+    if (options->chdir) {
+        clax_log("Changing directory to '%s'", options->root);
+        if (clax_chdir(options->root) < 0) {
+            clax_log("Error: cannot chdir to '%s': %s", options->root, strerror(errno));
+            return -1;
+        }
     }
 
     if (strlen(options->config_file) == 0) {
+        if (clax_strcatfile(options->config_file, sizeof_struct_member(opt, config_file), options->root) != 0) {
+            return -1;
+        }
+
         if (clax_strcatfile(options->config_file, sizeof_struct_member(opt, config_file), "clax.ini") != 0) {
             return -1;
         }
@@ -160,23 +165,32 @@ int clax_parse_options(opt *options, int argc, char **argv)
     if (strlen(options->config_file)) {
         clax_log("Reading configuration file '%s'", options->config_file);
 
+        char *old_root = clax_strdup(options->root);
+
         if (ini_parse(options->config_file, clax_config_handler, options) < 0) {
             clax_log("Error: Can't parse ini file");
+
+            free(old_root);
+
             return -1;
         }
 
-        char cwd[1024];
-        getcwd(cwd, sizeof(cwd));
-
-        if (strcmp(options->root, cwd) != 0) {
+        if (strcmp(options->root, old_root) != 0) {
             clax_log("Root directory changed to '%s'", options->root);
 
-            clax_log("Changing directory to '%s'", options->root);
-            if (clax_chdir(options->root) < 0) {
-                clax_log("Error: cannot chdir to '%s': %s", options->root, strerror(errno));
-                return -1;
+            if (options->chdir) {
+                clax_log("Changing directory to '%s'", options->root);
+                if (clax_chdir(options->root) < 0) {
+                    clax_log("Error: cannot chdir to '%s': %s", options->root, strerror(errno));
+
+                    free(old_root);
+
+                    return -1;
+                }
             }
         }
+
+        free(old_root);
     }
 
     if (options->ssl) {

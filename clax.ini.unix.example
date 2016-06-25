@@ -1,4 +1,5 @@
 #root = /opt/clarive/clax
+#chdir = yes
 #log_file = /opt/clarive/logs/clax.log
 
 #[ssl]

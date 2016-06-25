@@ -1,4 +1,5 @@
 #root = C:\Users\clarive\Clax\
+#chdir = yes
 #log_file = C:\Users\clarive\Clax\clax.log
 
 #[ssl]

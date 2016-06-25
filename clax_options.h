@@ -24,6 +24,8 @@
 
 typedef struct {
     char root[255];
+    char chdir;
+
     char log_file[255];
     char config_file[255];
 
