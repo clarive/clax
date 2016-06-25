@@ -124,12 +124,12 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
 
         char *content_type = "application/vnd.clarive-clax.folder";
         const char *accept = clax_kv_list_find(&req->headers, "Accept");
+        int is_html = 0;
 
         if (accept && strstr(accept, "text/html")) {
-            content_type = "text/html";
+            is_html = 1;
+            content_type = "text/html; charset=utf-8";
         }
-
-        int is_html = strcmp(content_type, "text/html") == 0;
 
         clax_kv_list_push(&res->headers, "Content-Type", content_type);
 
