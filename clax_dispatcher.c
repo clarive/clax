@@ -160,13 +160,19 @@ void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_res
 
     size_t len = sizeof clax_dispatcher_actions / sizeof clax_dispatcher_actions[0];
 
+    clax_log("Matching request %s %s", http_method_str(req->method), path_info);
+
     for (int i = 0; i < len; i++) {
         clax_dispatcher_action_t *action = &clax_dispatcher_actions[i];
 
         size_t match = clax_dispatcher_match(path_info, path_info_len, action->path, strlen(action->path));
 
         if (match) {
+            clax_log("Action matched");
+
             if (action->method_mask & (1 << req->method)) {
+                clax_log("Method matched");
+
                 if (req->continue_expected) {
                     if (action->flags_mask & (1 << CLAX_DISPATCHER_FLAG_100_CONTINUE)) {
                         action->fn(clax_ctx, req, res);
