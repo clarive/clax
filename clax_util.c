@@ -202,7 +202,7 @@ char *clax_strcat_alloc(char *dst, char *src)
     return res;
 }
 
-int clax_strcat(char *dst, size_t dst_max_len, char *src)
+int clax_strcat(char *dst, size_t dst_max_len, const char *src)
 {
     size_t orig_len = strlen(dst);
     size_t src_len = strlen(src);
@@ -220,7 +220,7 @@ int clax_strcat(char *dst, size_t dst_max_len, char *src)
     return 0;
 }
 
-int clax_strcatfile(char *dst, size_t dst_max_len, char *src)
+int clax_strcatfile(char *dst, size_t dst_max_len, const char *src)
 {
     if (strlen(dst) == 0) {
         TRY clax_strcat(dst, dst_max_len, src) GOTO;
@@ -249,7 +249,7 @@ error:
     return -1;
 }
 
-int clax_strcatdir(char *dst, size_t dst_max_len, char *src)
+int clax_strcatdir(char *dst, size_t dst_max_len, const char *src)
 {
     if (clax_strcatfile(dst, dst_max_len, src) != 0) {
         return -1;

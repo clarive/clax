@@ -51,7 +51,12 @@ int clax_config_handler(void *ctx, const char *section, const char *name, const 
 #define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
 
     if (MATCH("", "root")) {
-        strncpy(options->root, value, sizeof_struct_member(opt, root));
+        options->root[0] = 0;
+
+        if (clax_strcatdir(options->root, sizeof_struct_member(opt, root), value) < 0) {
+            return -1;
+        }
+        clax_san_path(options->root);
     } else if (MATCH("", "chdir")) {
         if (strcmp(value, "yes") == 0) {
             options->chdir = 1;
@@ -65,11 +70,26 @@ int clax_config_handler(void *ctx, const char *section, const char *name, const 
             options->no_ssl_verify = 1;
         }
     } else if (MATCH("ssl", "cert_file")) {
-        strncpy(options->cert_file, value, sizeof_struct_member(opt, cert_file));
+        options->cert_file[0] = 0;
+
+        if (clax_strcatfile(options->cert_file, sizeof_struct_member(opt, cert_file), value) < 0) {
+            return -1;
+        }
+        clax_san_path(options->cert_file);
     } else if (MATCH("ssl", "key_file")) {
-        strncpy(options->key_file, value, sizeof_struct_member(opt, key_file));
+        options->key_file[0] = 0;
+
+        if (clax_strcatfile(options->key_file, sizeof_struct_member(opt, key_file), value) < 0) {
+            return -1;
+        }
+        clax_san_path(options->key_file);
     } else if (MATCH("ssl", "entropy_file")) {
-        strncpy(options->entropy_file, value, sizeof_struct_member(opt, entropy_file));
+        options->entropy_file[0] = 0;
+
+        if (clax_strcatfile(options->entropy_file, sizeof_struct_member(opt, entropy_file), value) < 0) {
+            return -1;
+        }
+        clax_san_path(options->entropy_file);
     } else if (MATCH("http_basic_auth", "username")) {
         options->basic_auth_username = clax_strdup(value);
     } else if (MATCH("http_basic_auth", "password")) {
@@ -92,13 +112,13 @@ int clax_parse_options(opt *options, int argc, char **argv)
     while ((c = getopt(argc, argv, "h:l:c:")) != -1) {
         switch (c) {
         case 'c':
-            if (clax_strcat(options->config_file, sizeof(options->config_file), optarg) < 0) {
+            if (clax_strcat(options->config_file, sizeof_struct_member(opt, config_file), optarg) < 0) {
                 return -1;
             }
             clax_san_path(options->config_file);
             break;
         case 'l':
-            if (clax_strcat(options->log_file, sizeof(options->log_file), optarg) < 0) {
+            if (clax_strcat(options->log_file, sizeof_struct_member(opt, log_file), optarg) < 0) {
                 return -1;
             }
             clax_san_path(options->log_file);

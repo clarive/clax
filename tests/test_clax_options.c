@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h> /* unlink */
 
 #include "u/u.h"
 
@@ -49,6 +50,57 @@ TEST_START(parses_config)
     ASSERT_STR_EQ(options.basic_auth_password, "password");
 
     clax_options_free(&options);
+}
+TEST_END
+
+TEST_START(sanitizes paths)
+{
+    opt options;
+
+    clax_options_init(&options);
+
+    char *filename = clax_mktmpfile_alloc("", NULL);
+
+    FILE *fh = fopen(filename, "w");
+    fprintf(fh, "root = C:\\some/////path");
+    fclose(fh);
+
+    char *argv[] = {"clax", "-l", "/dev/null", "-c", filename};
+    int ret = clax_parse_options(&options, sizeof_array(argv), argv);
+
+    ASSERT_EQ(ret, 0)
+
+    ASSERT_STR_EQ(options.root, "C:/some/path/")
+
+    clax_options_free(&options);
+    unlink(filename);
+    free(filename);
+}
+TEST_END
+
+TEST_START(overwrites values)
+{
+    opt options;
+
+    clax_options_init(&options);
+
+    char *filename = clax_mktmpfile_alloc("", NULL);
+
+    FILE *fh = fopen(filename, "w");
+    fprintf(fh, "root = some\n");
+    fprintf(fh, "root = other\n");
+    fclose(fh);
+
+    char *argv[] = {"clax", "-l", "/dev/null", "-c", filename};
+    int ret = clax_parse_options(&options, sizeof_array(argv), argv);
+
+    ASSERT_EQ(ret, 0)
+
+    ASSERT_STR_EQ(options.root, "other/")
+
+    clax_options_free(&options);
+    unlink(filename);
+    free(filename);
 }
 TEST_END
 
