@@ -147,23 +147,25 @@ int pclose2(popen2_t *child)
 
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | SYNCHRONIZE, FALSE, child->pid);
 
-    unsigned long int exit_code = 0;
+    unsigned long int exit_code = 255;
 
-    WaitForSingleObject(hProcess, INFINITE);
+    DWORD ret = WaitForSingleObject(hProcess, INFINITE);
 
-    int done = 0;
-    while (!done) {
-        if (GetExitCodeProcess(hProcess, &exit_code) == FALSE) {
-            PRINT_LAST_ERROR("GetExitCodeProcess failed");
+    if (ret == WAIT_OBJECT_0) {
+        int done = 0;
+        while (!done) {
+            if (GetExitCodeProcess(hProcess, &exit_code) == FALSE) {
+                PRINT_LAST_ERROR("GetExitCodeProcess failed");
 
-            exit_code = 255;
-            done++;
-        }
-        else if (exit_code == STILL_ACTIVE) {
-            continue;
-        }
-        else {
-            done++;
+                exit_code = 255;
+                done++;
+            }
+            else if (exit_code == STILL_ACTIVE) {
+                continue;
+            }
+            else {
+                done++;
+            }
         }
     }
 
