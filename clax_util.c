@@ -183,6 +183,24 @@ void clax_buf_append(unsigned char **dst, size_t *dst_len, const char *src, size
     }
 }
 
+char *clax_strn_append(char **dst, const char *src, size_t src_len)
+{
+    if (!*dst) {
+        *dst = malloc(src_len + 1);
+        memcpy((void *)*dst, (const void *)src, src_len);
+        *dst[src_len] = 0;
+    }
+    else {
+        size_t dst_len = strlen(*dst);
+
+        *dst = realloc((void *)*dst, dst_len + src_len + 1);
+        memcpy((void *)(*dst + dst_len), (const void *)src, src_len);
+        *dst[dst_len + src_len] = 0;
+    }
+
+    return *dst;
+}
+
 char *clax_strcat_alloc(char *dst, char *src)
 {
     char *res;

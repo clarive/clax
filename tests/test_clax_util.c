@@ -255,6 +255,20 @@ TEST_START(clax_buf_append_appends_buffer)
 }
 TEST_END
 
+TEST_START(clax_strn_append_appends_string)
+{
+    char *str = NULL;
+
+    clax_strn_append(&str, "foo", 3);
+    ASSERT_STR_EQ(str, "foo");
+
+    clax_strn_append(&str, "bar", 3);
+    ASSERT_STR_EQ(str, "foobar");
+
+    free(str);
+}
+TEST_END
+
 TEST_START(clax_san_path_fixes_path)
 {
     char buf[1024];

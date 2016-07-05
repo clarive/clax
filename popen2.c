@@ -30,6 +30,7 @@
 #endif
 
 #include "clax_util.h"
+#include "clax_log.h"
 #include "popen2.h"
 
 #define READ 0
@@ -107,10 +108,31 @@ int popen2(const char *cmdline, char **env, popen2_t *child)
     if (env) {
         int i = 0;
         char *p;
-        while ((p = env[i]) != NULL) {
+        while ((p = env[i++]) != NULL) {
+            char *rp_start = NULL;
+            char *rp_end = NULL;
+            if ((rp_start = strstr(p, "%")) != NULL) {
+                if ((rp_end = strstr(rp_start + 1, "%")) != NULL) {
+                    char *rp = clax_strndup(rp_start + 1, rp_end - rp_start - 1);
+
+                    char *old_value = getenv(rp);
+                    if (old_value) {
+                        clax_buf_append(&env_text, &env_text_len, p, rp_start - p);
+                        clax_buf_append(&env_text, &env_text_len, old_value, strlen(old_value));
+                        clax_buf_append(&env_text, &env_text_len, rp_end + 1, strlen(p) - (rp_end - p) - 1);
+                        clax_buf_append(&env_text, &env_text_len, "\0", 1);
+
+                        free(rp);
+
+                        continue;
+                    }
+                }
+            }
+
             clax_buf_append(&env_text, &env_text_len, p, strlen(p));
             clax_buf_append(&env_text, &env_text_len, "\0", 1);
         }
+        clax_buf_append(&env_text, &env_text_len, "\0", 1);
     }
 
     bSuccess = CreateProcess(NULL,
@@ -124,7 +146,7 @@ int popen2(const char *cmdline, char **env, popen2_t *child)
        &siStartInfo,
        &piProcInfo);
 
-    free(env);
+    free(env_text);
     free(cmd_line_exe);
 
     if (!bSuccess) {
@@ -189,7 +211,7 @@ int pclose2(popen2_t *child)
 
 #else
 
-int popen2(const char *cmdline, const char **environ, popen2_t *child)
+int popen2(const char *cmdline, char **env, popen2_t *child)
 {
     pid_t pid;
     int pipe_stdin[2], pipe_stdout[2];
@@ -213,7 +235,7 @@ int popen2(const char *cmdline, const char **environ, popen2_t *child)
         close(pipe_stdout[READ]);
         dup2(pipe_stdout[WRITE], WRITE);
 
-        execle("/bin/sh", "sh", "-c", cmdline, (char*)0, environ);
+        execle("/bin/sh", "sh", "-c", cmdline, (char*)0, env);
         exit(99);
     }
 

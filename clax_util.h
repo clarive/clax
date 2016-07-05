@@ -57,6 +57,7 @@ void clax_kv_list_dump(clax_kv_list_t *list);
 
 char *clax_buf2str(const char *buf, size_t len);
 void clax_str_append(char **dst, const char *src);
+char *clax_strn_append(char **dst, const char *src, size_t src_len);
 void clax_buf_append(unsigned char **dst, size_t *dst_len, const char *src, size_t src_len);
 void clax_hexdump(unsigned char *buf, size_t len);
 
