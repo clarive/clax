@@ -27,7 +27,7 @@ typedef struct {
     int out, in;
 } popen2_t;
 
-int popen2(const char *cmdline, popen2_t *child);
+int popen2(const char *cmdline, char **env, popen2_t *child);
 int pclose2(popen2_t *child);
 
 #endif

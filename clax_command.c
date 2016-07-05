@@ -85,12 +85,13 @@ int clax_command_start(command_ctx_t *ctx)
     int ret;
 
     char *command = ctx->command;
+    char **env = ctx->env;
 
     memset(&ctx->kid, 0, sizeof(popen2_t));
 
     clax_log("Running command '%s'", command);
 
-    ret = popen2(command, &ctx->kid);
+    ret = popen2((const char *)command, env, &ctx->kid);
     if (ret < 0) {
         clax_log("Command failed=%d", ret);
         return -1;

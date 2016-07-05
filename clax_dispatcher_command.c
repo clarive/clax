@@ -81,6 +81,36 @@ void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_
         command_ctx.timeout = atoi(timeout);
     }
 
+    char *env = clax_kv_list_find(&req->body_params, "env");
+    if (env && strlen(env)) {
+        int max_env = 20;
+        char *start = env;
+        char *end = NULL;
+        int i = 0;
+
+        if ((command_ctx.env = malloc(sizeof(char *) * max_env))) {
+            memset(command_ctx.env, 0, sizeof(char *) * max_env);
+
+            while (start && i < max_env) {
+                end = strstr(start, "\n");
+
+                if (end == NULL) {
+                    command_ctx.env[i] = clax_strdup(start);
+
+                    start = NULL;
+                }
+                else {
+                    command_ctx.env[i] = clax_strndup(start, end - start);
+
+                    start = end + 1;
+                }
+
+                i++;
+            }
+        }
+    }
+
+    /* TODO: free env */
     pid_t pid = clax_command_start(&command_ctx);
     if (pid <= 0) {
         clax_dispatch_system_error(clax_ctx, req, res, "Can't start command");

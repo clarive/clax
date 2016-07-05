@@ -29,6 +29,7 @@
 #include <sys/wait.h>
 #endif
 
+#include "clax_util.h"
 #include "popen2.h"
 
 #define READ 0
@@ -55,7 +56,7 @@
                                                                 \
     LocalFree(lpMsgBuf);
 
-int popen2(const char *cmdline, popen2_t *child)
+int popen2(const char *cmdline, char **env, popen2_t *child)
 {
     SECURITY_ATTRIBUTES saAttr;
 
@@ -101,21 +102,33 @@ int popen2(const char *cmdline, popen2_t *child)
     strcat(cmd_line_exe, cmdline);
     strcat(cmd_line_exe, cmd_end);
 
+    char *env_text = NULL;
+    size_t env_text_len = 0;
+    if (env) {
+        int i = 0;
+        char *p;
+        while ((p = env[i]) != NULL) {
+            clax_buf_append(&env_text, &env_text_len, p, strlen(p));
+            clax_buf_append(&env_text, &env_text_len, "\0", 1);
+        }
+    }
+
     bSuccess = CreateProcess(NULL,
        cmd_line_exe,
        NULL,
        NULL,
        TRUE,
        CREATE_NO_WINDOW,
-       NULL,
+       env_text,
        NULL,
        &siStartInfo,
        &piProcInfo);
 
+    free(env);
     free(cmd_line_exe);
 
     if (!bSuccess) {
-        PRINT_LAST_ERROR("CreateProcess failed");
+        /*PRINT_LAST_ERROR("CreateProcess failed");*/
 
         return -1;
     }
@@ -155,7 +168,7 @@ int pclose2(popen2_t *child)
         int done = 0;
         while (!done) {
             if (GetExitCodeProcess(hProcess, &exit_code) == FALSE) {
-                PRINT_LAST_ERROR("GetExitCodeProcess failed");
+                /*PRINT_LAST_ERROR("GetExitCodeProcess failed");*/
 
                 exit_code = 255;
                 done++;
@@ -176,7 +189,7 @@ int pclose2(popen2_t *child)
 
 #else
 
-int popen2(const char *cmdline, popen2_t *child)
+int popen2(const char *cmdline, const char **environ, popen2_t *child)
 {
     pid_t pid;
     int pipe_stdin[2], pipe_stdout[2];
@@ -200,7 +213,7 @@ int popen2(const char *cmdline, popen2_t *child)
         close(pipe_stdout[READ]);
         dup2(pipe_stdout[WRITE], WRITE);
 
-        execl("/bin/sh", "sh", "-c", cmdline, (char*)0);
+        execle("/bin/sh", "sh", "-c", cmdline, (char*)0, environ);
         exit(99);
     }
 

@@ -20,10 +20,11 @@
 #ifndef CLAX_COMMAND_H
 #define CLAX_COMMAND_H
 
-#include "clax_http.h"
 #include "popen2.h"
+#include "clax_http.h"
 
 typedef struct {
+    char **env;
     char command[1024];
     int timeout;
     popen2_t kid;
