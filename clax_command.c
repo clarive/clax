@@ -80,6 +80,172 @@ void clax_kill_kid(popen2_t *kid)
 #endif
 }
 
+void clax_command_init(command_ctx_t *command_ctx) {
+    memset(command_ctx, 0, sizeof(command_ctx_t));
+}
+
+void clax_command_free(command_ctx_t *command_ctx) {
+    if (command_ctx->env) {
+        int i = 0;
+        while (command_ctx->env[i] != NULL) {
+            free(command_ctx->env[i]);
+
+            i++;
+        }
+
+        free(command_ctx->env);
+    }
+}
+
+int clax_command_init_env(command_ctx_t *command_ctx, char **env)
+{
+    size_t len = 0;
+    char *p;
+
+    if (env == NULL)
+        return 0;
+
+    while ((p = env[len++]) != NULL);
+
+    if ((command_ctx->env = malloc(sizeof(char *) * len)) != NULL) {
+        memset(command_ctx->env, 0, sizeof(char *) * len);
+
+        int i = 0;
+        while (env[i] != NULL) {
+            command_ctx->env[i] = clax_strdup(env[i]);
+
+            i++;
+        }
+    }
+    else {
+        return -1;
+    }
+
+    return 0;
+}
+
+const char *clax_command_get_env(command_ctx_t *ctx, const char *key)
+{
+    char **env = ctx->env;
+
+    int i = 0;
+    while (env[i] != NULL) {
+        if (strncmp(env[i], key, strlen(key)) == 0 && *(env[i] + strlen(key)) == '=') {
+            return env[i] + strlen(key) + 1;
+        }
+
+        i++;
+    }
+
+    return NULL;
+}
+
+char *clax_command_set_env_pair(command_ctx_t *ctx, const char *pair)
+{
+    char *end;
+
+    if ((end = strstr(pair, "=")) != NULL) {
+        char *key = clax_strndup(pair, end - pair);
+
+        char *p = clax_command_set_env(ctx, key, end + 1);
+
+        free(key);
+
+        return p;
+    }
+
+    return NULL;
+}
+
+char *clax_command_set_env(command_ctx_t *ctx, const char *key, const char *val)
+{
+    char **env = ctx->env;
+
+    int i = 0;
+    while (env[i] != NULL) {
+        if (strncmp(env[i], key, strlen(key)) == 0 && *(env[i] + strlen(key)) == '=') {
+            char *p = NULL;
+            char *val_e = clax_command_env_expand_a(ctx, val);
+
+            clax_strapp_a(&p, key);
+            clax_strapp_a(&p, "=");
+            clax_strapp_a(&p, val_e);
+
+            free(val_e);
+            free(env[i]);
+            env[i] = p;
+
+            return p;
+        }
+
+        i++;
+    }
+
+    size_t len = 0;
+    char *p;
+    while ((p = ctx->env[len++]) != NULL);
+
+    if ((ctx->env = realloc(ctx->env, sizeof(char *) * (len + 1))) != NULL) {
+        ctx->env[len] = NULL;
+
+        char *p = NULL;
+
+        char *val_e = clax_command_env_expand_a(ctx, val);
+
+        clax_strapp_a(&p, key);
+        clax_strapp_a(&p, "=");
+        clax_strapp_a(&p, val_e);
+
+        ctx->env[len - 1] = p;
+
+        free(val_e);
+    }
+
+    return NULL;
+}
+
+char *clax_command_env_expand_a(command_ctx_t *ctx, const char *val)
+{
+    char *rp_start = NULL;
+    char *rp_end = NULL;
+    char *key = NULL;
+
+    if ((rp_start = strstr(val, "%")) != NULL) {
+        if ((rp_end = strstr(rp_start + 1, "%")) != NULL) {
+            key = clax_strndup(rp_start + 1, rp_end - rp_start - 1);
+        }
+    }
+
+    if ((rp_start = strstr(val, "$")) != NULL) {
+        if ((rp_end = strstr(rp_start + 1, ":")) != NULL) {
+            rp_end--;
+            key = clax_strndup(rp_start + 1, rp_end - rp_start);
+        }
+        else {
+            rp_end = val + strlen(val) - 1;
+            key = clax_strdup(rp_start + 1);
+        }
+    }
+
+    if (key) {
+        char *old_value = clax_command_get_env(ctx, key);
+
+        free(key);
+
+        if (old_value) {
+            char *val_expanded = NULL;
+
+            clax_strnapp_a(&val_expanded, val, rp_start - val);
+            clax_strnapp_a(&val_expanded, old_value, strlen(old_value));
+            clax_strnapp_a(&val_expanded, rp_end + 1, strlen(val) - (rp_end - val) - 1);
+
+            return val_expanded;
+        }
+    }
+
+    return clax_strdup(val);
+}
+
 int clax_command_start(command_ctx_t *ctx)
 {
     int ret;

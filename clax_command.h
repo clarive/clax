@@ -30,6 +30,13 @@ typedef struct {
     popen2_t kid;
 } command_ctx_t;
 
+void clax_command_init(command_ctx_t *command_ctx);
+void clax_command_free(command_ctx_t *command_ctx);
+int clax_command_init_env(command_ctx_t *command_ctx, char **env);
+char *clax_command_set_env(command_ctx_t *command_ctx, const char *key, const char *val);
+char *clax_command_set_env_pair(command_ctx_t *ctx, const char *pair);
+char *clax_command_env_expand_a(command_ctx_t *ctx, const char *val);
+
 int clax_command_start(command_ctx_t *ctx);
 int clax_command_read_va(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, ...);
 int clax_command_read(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list a_list);

@@ -183,41 +183,37 @@ void clax_buf_append(unsigned char **dst, size_t *dst_len, const char *src, size
     }
 }
 
-char *clax_strn_append(char **dst, const char *src, size_t src_len)
+char *clax_strapp_a(char **dst, const char *src)
 {
-    if (!*dst) {
+    return clax_strnapp_a(dst, src, strlen(src));
+}
+
+char *clax_strnapp_a(char **dst, const char *src, size_t src_len)
+{
+    if (dst == NULL || src == NULL) {
+        return NULL;
+    }
+
+    if (*dst == NULL) {
         *dst = malloc(src_len + 1);
-        memcpy((void *)*dst, (const void *)src, src_len);
-        *dst[src_len] = 0;
+
+        if (*dst) {
+            memcpy((void *)*dst, (const void *)src, src_len);
+            (*dst)[src_len] = 0;
+        }
     }
     else {
         size_t dst_len = strlen(*dst);
 
         *dst = realloc((void *)*dst, dst_len + src_len + 1);
-        memcpy((void *)(*dst + dst_len), (const void *)src, src_len);
-        *dst[dst_len + src_len] = 0;
+
+        if (*dst) {
+            memcpy((void *)(*dst + dst_len), (const void *)src, src_len);
+            (*dst)[dst_len + src_len] = 0;
+        }
     }
 
     return *dst;
-}
-
-char *clax_strcat_alloc(char *dst, char *src)
-{
-    char *res;
-    size_t src_len = strlen(src);
-
-    if (dst == NULL) {
-        res = malloc(src_len + 1);
-        strcpy(res, src);
-    }
-    else {
-        size_t dst_len = strlen(dst);
-
-        res = realloc(dst, dst_len + src_len + 1);
-        strcat(res, src);
-    }
-
-    return res;
 }
 
 int clax_strcat(char *dst, size_t dst_max_len, const char *src)

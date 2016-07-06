@@ -107,31 +107,15 @@ int popen2(const char *cmdline, char **env, popen2_t *child)
     size_t env_text_len = 0;
     if (env) {
         int i = 0;
-        char *p;
-        while ((p = env[i++]) != NULL) {
-            char *rp_start = NULL;
-            char *rp_end = NULL;
-            if ((rp_start = strstr(p, "%")) != NULL) {
-                if ((rp_end = strstr(rp_start + 1, "%")) != NULL) {
-                    char *rp = clax_strndup(rp_start + 1, rp_end - rp_start - 1);
-
-                    char *old_value = getenv(rp);
-                    if (old_value) {
-                        clax_buf_append(&env_text, &env_text_len, p, rp_start - p);
-                        clax_buf_append(&env_text, &env_text_len, old_value, strlen(old_value));
-                        clax_buf_append(&env_text, &env_text_len, rp_end + 1, strlen(p) - (rp_end - p) - 1);
-                        clax_buf_append(&env_text, &env_text_len, "\0", 1);
-
-                        free(rp);
-
-                        continue;
-                    }
-                }
-            }
+        while (env[i] != NULL) {
+            char *p = env[i];
 
             clax_buf_append(&env_text, &env_text_len, p, strlen(p));
             clax_buf_append(&env_text, &env_text_len, "\0", 1);
+
+            i++;
         }
+
         clax_buf_append(&env_text, &env_text_len, "\0", 1);
     }
 

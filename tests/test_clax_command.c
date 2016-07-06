@@ -158,6 +158,160 @@ TEST_START(kills command after timeout)
 }
 TEST_END
 
+TEST_START(clax_command_init_env - inits environment)
+{
+    command_ctx_t ctx;
+
+    clax_command_init(&ctx);
+
+    char *env[] = {"foo=bar", "bar=baz", NULL};
+
+    clax_command_init_env(&ctx, env);
+
+    ASSERT_STR_EQ(ctx.env[0], "foo=bar");
+    ASSERT_STR_EQ(ctx.env[1], "bar=baz");
+    ASSERT_NULL(ctx.env[2]);
+
+    clax_command_free(&ctx);
+}
+TEST_END
+
+TEST_START(clax_command_set_env - sets new environment)
+{
+    command_ctx_t ctx;
+
+    clax_command_init(&ctx);
+
+    char *env[] = {NULL};
+
+    clax_command_init_env(&ctx, env);
+
+    clax_command_set_env(&ctx, "foo", "baz");
+
+    ASSERT_STR_EQ(ctx.env[0], "foo=baz");
+
+    clax_command_free(&ctx);
+}
+TEST_END
+
+TEST_START(clax_command_set_env - overwrites environment)
+{
+    command_ctx_t ctx;
+
+    clax_command_init(&ctx);
+
+    char *env[] = {"foo=bar", "bar=baz", NULL};
+
+    clax_command_init_env(&ctx, env);
+
+    clax_command_set_env(&ctx, "foo", "baz");
+
+    ASSERT_STR_EQ(ctx.env[0], "foo=baz");
+
+    clax_command_free(&ctx);
+}
+TEST_END
+
+TEST_START(clax_command_set_env_pair - sets environment from pair)
+{
+    command_ctx_t ctx;
+
+    clax_command_init(&ctx);
+
+    char *env[] = {"foo=bar", "bar=baz", NULL};
+
+    clax_command_init_env(&ctx, env);
+
+    clax_command_set_env_pair(&ctx, "foo=baz");
+
+    ASSERT_STR_EQ(ctx.env[0], "foo=baz");
+
+    clax_command_free(&ctx);
+}
+TEST_END
+
+TEST_START(clax_command_get_env - gets environment)
+{
+    command_ctx_t ctx;
+
+    clax_command_init(&ctx);
+
+    char *env[] = {"foo=bar", "bar=baz", NULL};
+
+    clax_command_init_env(&ctx, env);
+
+    char *val = clax_command_get_env(&ctx, "foo");
+
+    ASSERT_STR_EQ(val, "bar");
+
+    clax_command_free(&ctx);
+}
+TEST_END
+
+TEST_START(clax_command_env_expand_a - expands win environment)
+{
+    command_ctx_t ctx;
+
+    clax_command_init(&ctx);
+
+    char *env[] = {"foo=bar", NULL};
+
+    clax_command_init_env(&ctx, env);
+
+    char *new_val = clax_command_env_expand_a(&ctx, "%foo%;baz");
+
+    ASSERT_STR_EQ(new_val, "bar;baz");
+
+    free(new_val);
+
+    clax_command_free(&ctx);
+}
+TEST_END
+
+TEST_START(clax_command_env_expand_a - expands unix environment)
+{
+    command_ctx_t ctx;
+
+    clax_command_init(&ctx);
+
+    char *env[] = {"foo=bar", NULL};
+
+    clax_command_init_env(&ctx, env);
+
+    char *new_val = clax_command_env_expand_a(&ctx, "$foo:baz");
+
+    ASSERT_STR_EQ(new_val, "bar:baz");
+
+    free(new_val);
+
+    new_val = clax_command_env_expand_a(&ctx, "$foo");
+
+    ASSERT_STR_EQ(new_val, "bar");
+
+    free(new_val);
+
+    clax_command_free(&ctx);
+}
+TEST_END
+
+TEST_START(clax_command_set_env - sets env with expansion)
+{
+    command_ctx_t ctx;
+
+    clax_command_init(&ctx);
+
+    char *env[] = {"foo=bar", "bar=baz", NULL};
+
+    clax_command_init_env(&ctx, env);
+
+    clax_command_set_env(&ctx, "foo", "%foo%;baz");
+
+    ASSERT_STR_EQ(ctx.env[0], "foo=bar;baz");
+
+    clax_command_free(&ctx);
+}
+TEST_END
+
 #ifndef _WIN32
 TEST_START(kills command after timeout without any output)
 {

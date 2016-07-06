@@ -45,6 +45,8 @@
 
 static command_ctx_t command_ctx;
 
+extern char **environ;
+
 void clax_command_read_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
 {
     command_ctx_t *command_ctx = ctx;
@@ -66,7 +68,7 @@ void clax_command_read_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
 
 void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
-    memset(&command_ctx, 0, sizeof(command_ctx_t));
+    clax_command_init(&command_ctx);
 
     char *command = clax_kv_list_find(&req->body_params, "command");
     if (!command || !strlen(command)) {
@@ -83,29 +85,27 @@ void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_
 
     char *env = clax_kv_list_find(&req->body_params, "env");
     if (env && strlen(env)) {
-        int max_env = 20;
         char *start = env;
         char *end = NULL;
-        int i = 0;
 
-        if ((command_ctx.env = malloc(sizeof(char *) * max_env))) {
-            memset(command_ctx.env, 0, sizeof(char *) * max_env);
+        clax_command_init_env(&command_ctx, environ);
 
-            while (start && i < max_env) {
-                end = strstr(start, "\n");
+        while (start) {
+            end = strstr(start, "\n");
 
-                if (end == NULL) {
-                    command_ctx.env[i] = clax_strdup(start);
+            if (end == NULL) {
+                clax_command_set_env_pair(&command_ctx, start);
 
-                    start = NULL;
-                }
-                else {
-                    command_ctx.env[i] = clax_strndup(start, end - start);
+                start = NULL;
+            }
+            else {
+                char *p = clax_strndup(start, end - start);
 
-                    start = end + 1;
-                }
+                clax_command_set_env_pair(&command_ctx, p);
 
-                i++;
+                free(p);
+
+                start = end + 1;
             }
         }
     }
