@@ -52,6 +52,7 @@ typedef struct {
   multipart_parser_settings multipart_callbacks;
   char multipart_boundary[70];
   clax_http_multipart_list_t multiparts;
+  int multipart_status;
 
     /* Flags */
   char headers_done;

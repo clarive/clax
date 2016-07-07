@@ -260,9 +260,11 @@ int on_part_data(multipart_parser* p, const char *buf, size_t len)
 
     clax_http_multipart_t *multipart = clax_http_multipart_list_last(&request->multiparts);
 
-    clax_big_buf_append(&multipart->bbuf, (const unsigned char *)buf, len);
+    int ret = clax_big_buf_append(&multipart->bbuf, (const unsigned char *)buf, len);
 
-    return 0;
+    request->multipart_status = ret;
+
+    return ret;
 }
 
 int on_part_data_end(multipart_parser* p)
@@ -272,9 +274,7 @@ int on_part_data_end(multipart_parser* p)
     clax_http_multipart_t *multipart = clax_http_multipart_list_last(&request->multiparts);
     multipart->done++;
 
-    clax_big_buf_close(&multipart->bbuf);
-
-    return 0;
+    return clax_big_buf_close(&multipart->bbuf);
 }
 
 int on_body_end(multipart_parser* p)
@@ -314,7 +314,12 @@ int on_http_parser_body(http_parser *p, const char *buf, size_t len)
         size_t nparsed = multipart_parser_execute(req->multipart_parser, buf, len);
 
         if (nparsed != len) {
-            clax_log("Multipart failed, state=%d!");
+            clax_log("Multipart parsing failed");
+            return -1;
+        }
+
+        if (req->multipart_status != 0) {
+            clax_log("Multipart processing failed");
             return -1;
         }
     } else {
