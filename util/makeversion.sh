@@ -3,11 +3,11 @@
 if which git && [ -d ".git" ]; then
     VERSION="`date +%Y%m%d`-`git rev-parse --short HEAD`"
 
-    cp clax_version.h.template clax_version.h
-    sed -i "s/CLAX_VERSION \".*\"/CLAX_VERSION \"$VERSION\"/" clax_version.h
-
     echo $VERSION > VERSION
 fi
+
+cp clax_version.h.template clax_version.h
+sed -i "s/CLAX_VERSION \".*\"/CLAX_VERSION \"$VERSION\"/" clax_version.h
 
 if [ "$OS" = "" ] && [ "$ARCH" = "" ]; then
     if [ "$WINDOWS" = "1" ]; then
