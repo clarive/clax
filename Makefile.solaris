@@ -1,0 +1,5 @@
+CC = gcc
+CFLAGS= -DGETOPT_INDEX_1 -lsocket -lnsl
+
+-include Makefile
+

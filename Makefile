@@ -3,7 +3,7 @@ SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
 COVERAGE_GRAPH=$(SOURCES:.c=.gcno)
 COVERAGE_DATA=$(SOURCES:.c=.gcda)
-CFLAGS= -Icontrib -Icontrib/mbedtls
+CFLAGS += -Icontrib -Icontrib/mbedtls
 LFLAGS=
 LIBS=contrib/*/*.o
 

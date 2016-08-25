@@ -1,0 +1,4 @@
+CFLAGS= -DGETOPT_INDEX_1
+
+-include Makefile
+
