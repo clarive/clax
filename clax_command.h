@@ -33,6 +33,7 @@ typedef struct {
 void clax_command_init(command_ctx_t *command_ctx);
 void clax_command_free(command_ctx_t *command_ctx);
 int clax_command_init_env(command_ctx_t *command_ctx, char **env);
+const char *clax_command_get_env(command_ctx_t *ctx, const char *key);
 char *clax_command_set_env(command_ctx_t *command_ctx, const char *key, const char *val);
 char *clax_command_set_env_pair(command_ctx_t *ctx, const char *pair);
 char *clax_command_env_expand_a(command_ctx_t *ctx, const char *val);

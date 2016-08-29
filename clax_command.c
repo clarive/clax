@@ -128,6 +128,9 @@ const char *clax_command_get_env(command_ctx_t *ctx, const char *key)
 {
     char **env = ctx->env;
 
+    if (env == NULL)
+        return NULL;
+
     int i = 0;
     while (env[i] != NULL) {
         if (strncmp(env[i], key, strlen(key)) == 0 && *(env[i] + strlen(key)) == '=') {
@@ -228,7 +231,7 @@ char *clax_command_env_expand_a(command_ctx_t *ctx, const char *val)
     }
 
     if (key) {
-        char *old_value = clax_command_get_env(ctx, key);
+        const char *old_value = clax_command_get_env(ctx, key);
 
         free(key);
 

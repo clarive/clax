@@ -230,6 +230,22 @@ TEST_START(clax_command_set_env_pair - sets environment from pair)
 }
 TEST_END
 
+TEST_START(clax_command_get_env - correctly handles NULL environment)
+{
+    command_ctx_t ctx;
+
+    clax_command_init(&ctx);
+
+    clax_command_init_env(&ctx, NULL);
+
+    char *val = clax_command_get_env(&ctx, "foo");
+
+    ASSERT_NULL(val);
+
+    clax_command_free(&ctx);
+}
+TEST_END
+
 TEST_START(clax_command_get_env - gets environment)
 {
     command_ctx_t ctx;
