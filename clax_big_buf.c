@@ -128,9 +128,7 @@ int clax_big_buf_write_file(clax_big_buf_t *bbuf, char *fpath)
         return ret;
     }
     else {
-        char abs_path[PATH_MAX];
-
-        clax_log("Saving to file '%s'", realpath(fpath, abs_path));
+        clax_log("Saving to file '%s'", fpath);
 
         FILE *fh;
 
