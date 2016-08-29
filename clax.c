@@ -184,7 +184,7 @@ int dev_random_entropy_poll(void *data, unsigned char *output,
 
 void clax_loop_ssl(clax_ctx_t *clax_ctx)
 {
-    int ret;
+    int ret = 0;
     char pers[] = "clax_server";
 
 #ifdef MVS
@@ -213,8 +213,8 @@ void clax_loop_ssl(clax_ctx_t *clax_ctx)
 
     clax_log("Loading the server cert and key...");
 
-    unsigned char *file;
-    size_t file_len;
+    unsigned char *file = NULL;
+    size_t file_len = 0;
 
     clax_log("Loading '%s'...", options.cert_file);
     file = clax_slurp_alloc(options.cert_file, &file_len);

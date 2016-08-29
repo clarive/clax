@@ -7,7 +7,6 @@ SUITE_START(ssl)
 
 TEST_START(rejects not ssl request)
 {
-    int rcount;
     char output[1024];
     char cmd[1024];
 
@@ -15,7 +14,7 @@ TEST_START(rejects not ssl request)
 
     sprintf(cmd, CMD " -c %s -l " DEVNULL, fpath);
 
-    rcount = execute(cmd, "GET /\r\nContent-Length: 0\r\n\r\n", output, sizeof(output));
+    execute(cmd, "GET /\r\nContent-Length: 0\r\n\r\n", output, sizeof(output));
 
     fprintf(stderr, "%s\n", output);
 
