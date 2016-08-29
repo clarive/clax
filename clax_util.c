@@ -36,6 +36,7 @@
 #endif
 
 #include "clax.h"
+#include "clax_log.h"
 #include "clax_util.h"
 #include "clax_platform.h"
 
@@ -675,8 +676,6 @@ char *clax_detect_root(char *root, size_t root_size, char **argv)
 
     GetModuleFileName(NULL, root, root_size);
 
-    clax_san_path(root);
-
 #else
 
     char *p = clax_detect_exe_from_proc(root, root_size);
@@ -687,7 +686,10 @@ char *clax_detect_root(char *root, size_t root_size, char **argv)
 
 #endif
 
-    dirname(root);
+    clax_san_path(root);
+
+    char *dir = dirname(root);
+    strcpy(root, dir);
 
     if (clax_strcatdir(root, root_size, "/") < 0) {
         return NULL;
@@ -698,19 +700,29 @@ char *clax_detect_root(char *root, size_t root_size, char **argv)
 
 char *clax_detect_exe_from_proc(char *root, size_t root_size)
 {
-#ifdef _WIN32
+#ifdef __APPLE__
 
-    return NULL;
+    uint32_t size = root_size;
+
+    if (_NSGetExecutablePath(root, &size) == 0) {
+        return root;
+    }
 
 #else
 
-    if (readlink("/proc/self/exe", root, root_size) == -1) {
-        return NULL;
+    if (readlink("/proc/self/exe", root, root_size) != -1) {
+        return root;
+    }
+    else if (readlink("/proc/curproc/exe", root, root_size) != -1) {
+        return root;
+    }
+    else if (readlink("/proc/curproc/file", root, root_size) != -1) {
+        return root;
     }
 
-    return root;
-
 #endif
+
+    return NULL;
 }
 
 char *clax_detect_exe_from_argv(char *root, size_t root_size, char **argv)
