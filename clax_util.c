@@ -676,6 +676,10 @@ char *clax_detect_root(char *root, size_t root_size, char **argv)
 
     GetModuleFileName(NULL, root, root_size);
 
+#elif defined(__sun) && defined(__SVR4)
+
+    root = getexecname();
+
 #else
 
     char *p = clax_detect_exe_from_proc(root, root_size);
