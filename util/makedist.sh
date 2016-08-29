@@ -26,14 +26,16 @@ if [ "$WINDOWS" = "1" ]; then
 
     zip -r $ARCHIVE $DIST/
 else
-    ARCHIVE="$DIST.tar.gz"
+    TAR="$DIST.tar"
+    ARCHIVE="$TAR.gz"
     rm -rf $DIST/
     mkdir $DIST
 
     cp clax $DIST/
     cp clax.ini.unix.example $DIST/clax.ini
 
-    tar czf $ARCHIVE $DIST/
+    tar cf $TAR $DIST/ || exit 255
+    gzip $TAR || exit 255
 fi
 
 echo
