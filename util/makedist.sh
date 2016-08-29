@@ -7,7 +7,7 @@ elif uname -a | grep 'OS/390'; then
     OS=zos
     ARCH=`uname -m`
 else
-    OS=linux
+    OS=`uname -s | tr '[:upper:]' '[:lower:]'`
     ARCH=`uname -m`
 fi
 

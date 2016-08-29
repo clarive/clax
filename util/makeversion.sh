@@ -11,7 +11,7 @@ if [ ! -f 'VERSION' ]; then
     exit 255
 fi
 
-VERSION=`cat VERSION | tr -d "\n"`
+VERSION=`cat VERSION | tr -d "\012"`
 
 sed "s/CLAX_VERSION \".*\"/CLAX_VERSION \"$VERSION\"/" clax_version.h.template > clax_version.h
 
@@ -23,7 +23,7 @@ if [ "$OS" = "" ] && [ "$ARCH" = "" ]; then
         OS=zos
         ARCH=`uname -m`
     else
-        OS=linux
+        OS=`uname -s | tr '[:upper:]' '[:lower:]'`
         ARCH=`uname -m`
     fi
 fi
