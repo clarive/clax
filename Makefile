@@ -47,7 +47,7 @@ all: version lib $(PROGRAM)
 version:
 	OS=$(OS) ARCH=$(ARCH) WINDOWS=$(WINDOWS) sh util/makeversion.sh
 
-lib: mbedtls jsmn http-parser multipart-parser-c inih base64 slre $(OBJECTS)
+lib: mbedtls http-parser multipart-parser-c inih base64 slre $(OBJECTS)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS)
@@ -64,9 +64,6 @@ endif
 
 inih:
 	$(MAKE) -C contrib/inih CC="$(CC)" CFLAGS="$(CFLAGS)"
-
-jsmn:
-	$(MAKE) -C contrib/jsmn CC="$(CC)" CFLAGS="-DJSMN_PARENT_LINKS"
 
 mbedtls:
 	$(MAKE) -C contrib/mbedtls -f Makefile.clax CC="$(CC)" CFLAGS="$(CFLAGS) -D__STRING_CODE_SET__=\"ISO8859-1\""
@@ -141,7 +138,6 @@ clean:
 distclean:
 	$(MAKE) clean
 	$(MAKE) -C contrib/mbedtls clean
-	$(MAKE) -C contrib/jsmn clean
 	$(MAKE) -C contrib/http-parser clean
 	$(MAKE) -C contrib/multipart-parser-c clean
 	$(MAKE) -C contrib/inih clean
