@@ -1,13 +1,19 @@
 #!/bin/sh
 
-if which git && [ -d ".git" ]; then
-    VERSION="`date +%Y%m%d`-`git rev-parse --short HEAD`"
+if which git > /dev/null && [ -d ".git" ]; then
+    GIT_VERSION="`date +%Y%m%d`-`git rev-parse --short HEAD`"
 
-    echo $VERSION > VERSION
+    echo $GIT_VERSION > VERSION
 fi
 
-cp clax_version.h.template clax_version.h
-sed -i "s/CLAX_VERSION \".*\"/CLAX_VERSION \"$VERSION\"/" clax_version.h
+if [ ! -f 'VERSION' ]; then
+    echo 'Error: VERSION file does not exist';
+    exit 255
+fi
+
+VERSION=`cat VERSION | tr -d "\n"`
+
+sed "s/CLAX_VERSION \".*\"/CLAX_VERSION \"$VERSION\"/" clax_version.h.template > clax_version.h
 
 if [ "$OS" = "" ] && [ "$ARCH" = "" ]; then
     if [ "$WINDOWS" = "1" ]; then
