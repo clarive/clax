@@ -22,7 +22,7 @@ Windows package already has `wininetd.exe` file in it and sample configuration f
 4. Configure `clax.ini`
 5. Check that `http://localhost:11801` is returning "Hello world" message
 
-## Linux
+## Unix
 
 ### inetd
 
@@ -32,11 +32,18 @@ Windows package already has `wininetd.exe` file in it and sample configuration f
     clax 11801/tcp
     ```
 
-2. Add the following line to `/etc/inetd.conf`
+2. Create configuration
 
     ```
     clax     stream tcp nowait <user> <path-to>/clax clax -c <path-to>/clax.ini
     ```
+
+    1. Linux/FreeBSD/etc: add the previous line to `/etc/inetd.conf`
+
+    2. Solaris: execute the following commands
+
+        inetconv -f -i <path-to>/inetd.clax
+        inetadm -e svc:/network/clax/tcp:default
 
 3. Restart `inetd`
 4. Check that `http://localhost:11801` is returning "Hello world" message

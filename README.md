@@ -6,8 +6,11 @@ requests from stdin and write responses to stdout, which makes it suitable for i
 ## Tested Platforms
 
 - Debian GNU/Linux x86_64
+- FreeBSD 10.3
+- Mac OS 10.9 Mavericks
 - Cygwin x86_64
 - Windows 2008, 2012
+- Solaris 10 i86pc
 - z/OS 390
 
 ## Compiling, testing and installing
