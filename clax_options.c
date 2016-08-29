@@ -107,14 +107,8 @@ int clax_parse_options(opt *options, int argc, char **argv)
 
     optarg = NULL;
     opterr = optopt = 0;
-
-#ifdef GETOPT_INDEX_1
     optind = 1;
-#else
-    optind = 0;
-#endif
 
-    opterr = 0;
     while ((c = getopt(argc, argv, "h:l:c:")) != -1) {
         switch (c) {
         case 'c':
