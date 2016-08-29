@@ -54,7 +54,7 @@
 
 opt options;
 
-void _exit(int code)
+void clax_exit(int code)
 {
     if (options._log_file) {
         clax_log("Closing log file '%s'", options.log_file);
@@ -68,7 +68,7 @@ void _exit(int code)
 
 void clax_abort()
 {
-    _exit(255);
+    clax_exit(255);
 }
 
 void term(int dummy)
@@ -405,7 +405,7 @@ int main(int argc, char **argv)
                 clax_usage();
             }
 
-            _exit(255);
+            clax_exit(255);
         }
         else {
             char buf[1024];
@@ -452,5 +452,5 @@ cleanup:
     clax_ctx_free(&clax_ctx);
     clax_options_free(&options);
 
-    _exit(0);
+    clax_exit(0);
 }
