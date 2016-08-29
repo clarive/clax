@@ -712,7 +712,7 @@ char *clax_detect_exe_from_proc(char *root, size_t root_size)
 
     root = getexecname();
 
-#else
+#elif !defined(_WIN32)
 
     if (readlink("/proc/self/exe", root, root_size) != -1) {
         return root;
