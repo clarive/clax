@@ -129,6 +129,7 @@ TEST_START(delete file)
 {
     char output[1024];
     char request[1024];
+    char config[1024];
     char body[] = "--------------------------0e6bb0a28f620f98\r\n"
                   "Content-Disposition: form-data; name=\"file\"; filename=\"foobar\"\r\n"
                   "\r\n"
@@ -144,8 +145,11 @@ TEST_START(delete file)
 
     char *tmpdir = clax_mktmpdir_alloc();
 
+    sprintf(config, "root=%s\nchdir=yes", tmpdir);
+    char *config_fpath = write_tmp_file_a(config);
+
     char command[1024];
-    sprintf(command, CMD " -r %s -l " DEVNULL, tmpdir);
+    sprintf(command, CMD " -c %s -l " DEVNULL, config_fpath);
 
     execute(command, request, output, sizeof(output));
 
@@ -162,6 +166,8 @@ TEST_START(delete file)
 
     free(fpath);
     rmrf(tmpdir);
+
+    rmrf(config_fpath);
 }
 TEST_END
 
