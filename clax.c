@@ -211,7 +211,7 @@ void clax_loop_ssl(clax_ctx_t *clax_ctx)
     mbedtls_debug_set_threshold(DEBUG_LEVEL);
 #endif
 
-    clax_log("Loading the server cert. and key...");
+    clax_log("Loading the server cert and key...");
 
     unsigned char *file;
     size_t file_len;
@@ -220,7 +220,7 @@ void clax_loop_ssl(clax_ctx_t *clax_ctx)
     file = clax_slurp_alloc(options.cert_file, &file_len);
 
     if (file == NULL) {
-        clax_log("Can't load cert_file: %s", options.cert_file);
+        clax_log("Can't load cert_file '%s': %s", options.cert_file, strerror(errno));
         goto exit;
     }
 

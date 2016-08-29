@@ -19,7 +19,7 @@ TEST_START(simple command)
             "\r\n"
             "%s", (int)strlen(body), body);
 
-    int rcount = execute(CMD " -r . -l " DEVNULL, request, output, sizeof(output));
+    int rcount = execute(CMD " -l " DEVNULL, request, output, sizeof(output));
 
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
@@ -43,7 +43,7 @@ TEST_START(command failure)
             "\r\n"
             "%s", (int)strlen(body), body);
 
-    int rcount = execute(CMD " -r . -l " DEVNULL, request, output, sizeof(output));
+    int rcount = execute(CMD " -l " DEVNULL, request, output, sizeof(output));
     output[rcount] = 0;
 
     ASSERT(rcount > 0);

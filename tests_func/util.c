@@ -12,6 +12,8 @@
 #include "clax_util.h"
 #include "util.h"
 
+extern char **environ;
+
 int http_message_done = 0;
 int util_message_complete_cb(http_parser *p)
 {
@@ -54,7 +56,7 @@ int execute(char *command, char *request, char *obuf, size_t olen)
     popen2_t ctx;
     char *r = request;
 
-    ret = popen2(command, &ctx);
+    ret = popen2(command, environ, &ctx);
     if (ret < 0) {
         fprintf(stderr, "Command '%s' failed=%d", command, ret);
         return -1;
@@ -112,4 +114,32 @@ int execute(char *command, char *request, char *obuf, size_t olen)
     }
 
     return offset;
+}
+
+char *write_tmp_file_a(char *content)
+{
+    FILE *fh;
+    char *fpath;
+
+    fpath = clax_mktmpfile_alloc(NULL, ".fileXXX");
+
+    if (fpath == NULL) {
+        return NULL;
+    }
+
+    fh = fopen(fpath, "wb");
+
+    if (fh == NULL) {
+        return NULL;
+    }
+
+    if (fwrite(content, 1, strlen(content), fh) != strlen(content)) {
+        fclose(fh);
+        free(fpath);
+        return NULL;
+    }
+
+    fclose(fh);
+
+    return fpath;
 }

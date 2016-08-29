@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
+#include <limits.h>
 
 #include "clax_log.h"
 #include "clax_big_buf.h"
@@ -127,7 +128,9 @@ int clax_big_buf_write_file(clax_big_buf_t *bbuf, char *fpath)
         return ret;
     }
     else {
-        clax_log("Saving to file '%s'", fpath);
+        char abs_path[PATH_MAX];
+
+        clax_log("Saving to file '%s'", realpath(fpath, abs_path));
 
         FILE *fh;
 

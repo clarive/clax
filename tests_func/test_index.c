@@ -10,7 +10,7 @@ TEST_START(index_page)
     int rcount;
     char output[1024];
 
-    rcount = execute(CMD " -r . -l " DEVNULL, "GET /\r\nContent-Length: 0\r\n\r\n", output, sizeof(output));
+    rcount = execute(CMD " -l " DEVNULL, "GET /\r\nContent-Length: 0\r\n\r\n", output, sizeof(output));
 
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
@@ -22,7 +22,7 @@ TEST_START(ping)
     int rcount;
     char output[1024];
 
-    rcount = execute(CMD " -r . -l " DEVNULL, "GET /ping\r\n\r\n", output, sizeof(output));
+    rcount = execute(CMD " -l " DEVNULL, "GET /ping\r\n\r\n", output, sizeof(output));
 
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
@@ -36,7 +36,7 @@ TEST_START(not found)
     int rcount;
     char output[1024];
 
-    rcount = execute(CMD " -r . -l " DEVNULL, "GET /unknown\r\n\r\n", output, sizeof(output));
+    rcount = execute(CMD " -l " DEVNULL, "GET /unknown\r\n\r\n", output, sizeof(output));
 
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
@@ -49,7 +49,7 @@ TEST_START(method not allowed)
     int rcount;
     char output[1024];
 
-    rcount = execute(CMD " -r . -l " DEVNULL, "POST /\r\n\r\n", output, sizeof(output));
+    rcount = execute(CMD " -l " DEVNULL, "POST /\r\n\r\n", output, sizeof(output));
 
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))

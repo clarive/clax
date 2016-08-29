@@ -15,6 +15,7 @@ TEST_START(upload)
 {
     char output[1024];
     char request[1024];
+    char config[1024];
     char body[] = "--------------------------0e6bb0a28f620f98\r\n"
                   "Content-Disposition: form-data; name=\"file\"; filename=\"foobar\"\r\n"
                   "\r\n"
@@ -30,8 +31,11 @@ TEST_START(upload)
 
     char *tmpdir = clax_mktmpdir_alloc();
 
+    sprintf(config, "root=%s\nchdir=yes", tmpdir);
+    char *fpath = write_tmp_file_a(config);
+
     char command[1024];
-    sprintf(command, CMD " -r %s -l " DEVNULL, tmpdir);
+    sprintf(command, CMD " -c %s -l " DEVNULL, fpath);
 
     int rcount = execute(command, request, output, sizeof(output));
 
@@ -39,11 +43,13 @@ TEST_START(upload)
     ASSERT(util_parse_http_response(output, rcount))
 
     struct stat st;
-    char *fpath = clax_strjoin("/", tmpdir, "foobar", NULL);
-    ASSERT(stat(fpath, &st) == 0 && (st.st_mode & S_IFREG));
+    char *new_fpath = clax_strjoin("/", tmpdir, "foobar", NULL);
+    ASSERT(stat(new_fpath, &st) == 0 && (st.st_mode & S_IFREG));
 
-    free(fpath);
+    free(new_fpath);
     rmrf(tmpdir);
+
+    rmrf(fpath);
 }
 TEST_END
 
@@ -51,6 +57,7 @@ TEST_START(upload_with_different_name)
 {
     char output[1024];
     char request[1024];
+    char config[1024];
     char body[] = "--------------------------0e6bb0a28f620f98\r\n"
                   "Content-Disposition: form-data; name=\"file\"; filename=\"foobar\"\r\n"
                   "\r\n"
@@ -66,8 +73,11 @@ TEST_START(upload_with_different_name)
 
     char *tmpdir = clax_mktmpdir_alloc();
 
+    sprintf(config, "root=%s\nchdir=yes", tmpdir);
+    char *fpath = write_tmp_file_a(config);
+
     char command[1024];
-    sprintf(command, CMD " -r %s -l" DEVNULL, tmpdir);
+    sprintf(command, CMD " -c %s -l " DEVNULL, fpath);
 
     int rcount = execute(command, request, output, sizeof(output));
 
@@ -77,11 +87,13 @@ TEST_START(upload_with_different_name)
     ASSERT_MATCHES(output, "200 OK")
 
     struct stat st;
-    char *fpath = clax_strjoin("/", tmpdir, "another-name", NULL);
-    ASSERT(stat(fpath, &st) == 0 && (st.st_mode & S_IFREG));
+    char *newname_fpath = clax_strjoin("/", tmpdir, "another-name", NULL);
+    ASSERT(stat(newname_fpath, &st) == 0 && (st.st_mode & S_IFREG));
 
-    free(fpath);
+    free(newname_fpath);
     rmrf(tmpdir);
+
+    rmrf(fpath);
 }
 TEST_END
 
@@ -89,7 +101,7 @@ TEST_START(download)
 {
     char output[1024];
 
-    int rcount = execute(CMD " -r . -l" DEVNULL, "GET /tree/main.c\r\n\r\n", output, sizeof(output));
+    int rcount = execute(CMD " -l" DEVNULL, "GET /tree/main.c\r\n\r\n", output, sizeof(output));
 
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
@@ -104,7 +116,7 @@ TEST_START(download_not_found)
 {
     char output[1024];
 
-    int rcount = execute(CMD " -r . -l" DEVNULL, "GET /tree/unlikely-to-exist\r\n\r\n", output, sizeof(output));
+    int rcount = execute(CMD " -l" DEVNULL, "GET /tree/unlikely-to-exist\r\n\r\n", output, sizeof(output));
 
     ASSERT(rcount > 0);
     ASSERT(util_parse_http_response(output, rcount))
@@ -157,7 +169,7 @@ TEST_START(delete not found)
 {
     char output[1024];
 
-    int rcount = execute(CMD " -r . -l" DEVNULL, "DELETE /tree/unlikely-to-exist\r\n\r\n", output, sizeof(output));
+    int rcount = execute(CMD " -l" DEVNULL, "DELETE /tree/unlikely-to-exist\r\n\r\n", output, sizeof(output));
     output[rcount] = 0;
 
     ASSERT(rcount > 0);

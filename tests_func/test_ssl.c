@@ -9,11 +9,19 @@ TEST_START(rejects not ssl request)
 {
     int rcount;
     char output[1024];
+    char cmd[1024];
 
-    rcount = execute(CMD " -s -t ssl/server.crt -k ssl/server.key -r . ", "GET /\r\nContent-Length: 0\r\n\r\n", output, sizeof(output));
+    char *fpath = write_tmp_file_a("[ssl]\nenabled=yes\ncert_file=ssl/server-with-ca.pem\nkey_file=ssl/server.key\n");
 
-    ASSERT(rcount < 0);
+    sprintf(cmd, CMD " -c %s -l " DEVNULL, fpath);
+
+    rcount = execute(cmd, "GET /\r\nContent-Length: 0\r\n\r\n", output, sizeof(output));
+
+    fprintf(stderr, "%s\n", output);
+
     ASSERT_NULL(strstr(output, "200 OK"));
+
+    rmrf(fpath);
 }
 TEST_END
 

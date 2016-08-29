@@ -4,6 +4,7 @@
 int util_parse_http_response(char *buf, size_t len);
 int execute(char *command, char *request, char *obuf, size_t olen);
 char *mktmpdir();
+char *write_tmp_file_a(char *content);
 int rmrf(char *path);
 
 #ifdef _WIN32
