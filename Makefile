@@ -81,10 +81,10 @@ slre:
 	$(MAKE) -C contrib/slre CC="$(CC)" CFLAGS="$(CFLAGS)"
 
 tests: lib
-	$(MAKE) -C tests
+	$(MAKE) -C tests CC="$(CC)" CFLAGS="$(CFLAGS)"
 
 tests_func: tests
-	$(MAKE) -C tests_func
+	$(MAKE) -C tests_func CC="$(CC)" CFLAGS="$(CFLAGS)"
 
 check: tests
 	$(MAKE) -C tests check

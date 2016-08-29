@@ -1,7 +1,7 @@
 PROGRAM=test
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
-CFLAGS= -I../contrib -I../contrib/mbedtls -I../
+override CFLAGS += -I../contrib -I../contrib/mbedtls -I../
 LFLAGS=
 LIBS=../clax_*.o \
 	 ../popen2.o \
