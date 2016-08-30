@@ -42,9 +42,9 @@ else
 endif
 endif
 
-all: version lib $(PROGRAM)
+all: clax_version.h lib $(PROGRAM)
 
-version:
+clax_version.h:
 	OS=$(OS) ARCH=$(ARCH) WINDOWS=$(WINDOWS) sh util/makeversion.sh
 
 lib: mbedtls http-parser multipart-parser-c inih base64 slre snprintf $(OBJECTS)
@@ -56,7 +56,7 @@ $(PROGRAM): $(OBJECTS)
 ifneq ($(MVS),1)
 depend: .depend
 
-.depend: $(SOURCES)
+.depend: clax_version.h $(SOURCES)
 	$(CC) $(CFLAGS) -MM $^ > .depend
 
 -include .depend
@@ -131,6 +131,7 @@ dist: all
 clean:
 	$(RMF)  $(PROGRAM) $(OBJECTS)
 	$(RMF)  *.exe
+	$(RMF)  VERSION clax_version.h
 	$(RMF)  .depend
 	$(RMF)  *.gcno *.gcda
 	$(RMRF) coverage
