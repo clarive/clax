@@ -15,18 +15,7 @@ VERSION=`cat VERSION | tr -d "\012"`
 
 sed "s/CLAX_VERSION \".*\"/CLAX_VERSION \"$VERSION\"/" clax_version.h.template > clax_version.h
 
-if [ "$OS" = "" ] && [ "$ARCH" = "" ]; then
-    if [ "$WINDOWS" = "1" ]; then
-        OS=windows
-        ARCH=x86_64
-    elif uname -a | grep 'OS/390'; then
-        OS=zos
-        ARCH=`uname -m`
-    else
-        OS=`uname -s | tr '[:upper:]' '[:lower:]'`
-        ARCH=`uname -m`
-    fi
-fi
+. util/detect-os.sh
 
 sed "s/CLAX_OS \".*\"/CLAX_OS \"$OS\"/" clax_version.h > clax_version.h.2
 mv clax_version.h.2 clax_version.h

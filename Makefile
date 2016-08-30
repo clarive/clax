@@ -126,7 +126,7 @@ archive: version
 	sh util/makearchive.sh
 
 dist: all
-	sh util/makedist.sh WINDOWS=$(WINDOWS) WINDOWS_CMD=$(WINDOWS_CMD)
+	sh util/makedist.sh OS=$(OS) ARCH=$(ARCH) WINDOWS=$(WINDOWS) WINDOWS_CMD=$(WINDOWS_CMD)
 
 clean:
 	$(RMF)  $(PROGRAM) $(OBJECTS)

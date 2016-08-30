@@ -1,15 +1,6 @@
 #!/bin/bash
 
-if [ "$WINDOWS" = "1" ]; then
-    OS=windows
-    ARCH=x86_64
-elif uname -a | grep 'OS/390'; then
-    OS=zos
-    ARCH=`uname -m`
-else
-    OS=`uname -s | tr '[:upper:]' '[:lower:]'`
-    ARCH=`uname -m`
-fi
+. util/detect-os.sh
 
 VERSION=`cat VERSION | tr -d "\012"`
 
