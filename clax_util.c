@@ -30,6 +30,7 @@
 #include <libgen.h> /* dirname */
 
 #ifdef _WIN32
+# define HAVE_SNPRINTF
 # include <windows.h>
 #else
 # include <sys/types.h>

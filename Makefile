@@ -47,7 +47,7 @@ all: version lib $(PROGRAM)
 version:
 	OS=$(OS) ARCH=$(ARCH) WINDOWS=$(WINDOWS) sh util/makeversion.sh
 
-lib: mbedtls http-parser multipart-parser-c inih base64 slre $(OBJECTS)
+lib: mbedtls http-parser multipart-parser-c inih base64 slre snprintf $(OBJECTS)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS)
@@ -79,6 +79,9 @@ base64:
 
 slre:
 	$(MAKE) -C contrib/slre CC="$(CC)" CFLAGS="$(CFLAGS)"
+
+snprintf:
+	$(MAKE) -C contrib/snprintf CC="$(CC)" CFLAGS="$(CFLAGS)"
 
 tests: lib
 	$(MAKE) -C tests CC="$(CC)" CFLAGS="$(CFLAGS)"
@@ -143,3 +146,4 @@ distclean:
 	$(MAKE) -C contrib/inih clean
 	$(MAKE) -C contrib/base64 clean
 	$(MAKE) -C contrib/slre clean
+	$(MAKE) -C contrib/snprintf clean
