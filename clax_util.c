@@ -35,6 +35,7 @@
 # include <sys/types.h>
 #endif
 
+#include "snprintf/snprintf.h"
 #include "clax.h"
 #include "clax_log.h"
 #include "clax_util.h"
@@ -766,33 +767,19 @@ int clax_chdir(char *path)
 
 char *clax_sprintf_alloc(const char *fmt, ...)
 {
-   int size = 0;
-   char *p = NULL;
-   va_list ap;
+    char *p = NULL;
+    va_list ap;
 
-   /* Determine required size */
+    va_start(ap, fmt);
 
-   va_start(ap, fmt);
-   size = vsnprintf(p, size, fmt, ap);
-   va_end(ap);
+    int ret = vasprintf(&p, fmt, ap);
+    if (ret == -1) {
+        p = NULL;
+    }
 
-   if (size < 0)
-       return NULL;
+    va_end(ap);
 
-   size++;             /* For '\0' */
-   p = malloc(size);
-   if (p == NULL)
-       return NULL;
-
-   va_start(ap, fmt);
-   size = vsnprintf(p, size, fmt, ap);
-   if (size < 0) {
-       free(p);
-       return NULL;
-   }
-   va_end(ap);
-
-   return p;
+    return p;
 }
 
 char *clax_str_alloc(size_t len)

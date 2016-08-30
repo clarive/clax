@@ -24,53 +24,30 @@
 #include <unistd.h>
 #include <time.h>
 
+#include "snprintf/snprintf.h"
 #include "clax_platform.h"
 
-int clax_log_(const char *file, int line, const char *func_, char *fmt, ...)
+int clax_log_(const char *file, int line, const char *func, char *fmt, ...)
 {
-    int size;
     int ret;
-    char *cp;
     va_list args;
-    char func[1024];
+    char timestr[255];
     time_t epoch;
     struct tm *timeinfo;
-#ifdef VSNPRINTF_NON_POSIX
-    char *pcp;
-#endif
-
-    strcpy(func, func_);
-
-    va_start(args, fmt);
-#ifdef VSNPRINTF_NON_POSIX
-    pcp = (char *)calloc( 65536, sizeof(char));
-    if( pcp != NULL ) {
-        size = vsnprintf(pcp, 0, fmt, args) + 1;
-    }
-    else {
-        return 0;
-    }
-#else
-    size = vsnprintf(NULL, 0, fmt, args) + 1;
-#endif
-    va_end(args);
+    char *p = NULL;
 
     time(&epoch);
     timeinfo = localtime(&epoch);
+    strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S", timeinfo);
 
     va_start(args, fmt);
-    cp = (char *)calloc(size, sizeof(char));
-    if (cp != NULL && vsnprintf(cp, size, fmt, args) > 0) {
-        char timestr[255];
-        strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S", timeinfo);
 
-        ret = fprintf(stderr, "%s:%d:%s:%d:%s(): %s\n", timestr, getpid(), file, line, func, cp);
+    ret = vasprintf(&p, fmt, args);
+    if (ret != -1) {
+        ret = fprintf(stderr, "%s:%d:%s:%d:%s(): %s\n", timestr, getpid(), file, line, func, p);
     }
-    else {
-        ret = 0;
-    }
+
     va_end(args);
-    free(cp);
 
     return ret;
 }
