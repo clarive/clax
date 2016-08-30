@@ -300,13 +300,14 @@ int clax_command_read(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list
 
     va_copy(a_list, a_list_);
 
+    alarm_fired = 0;
+
     if (timeout) {
         clax_log("Setting command timeout=%d", timeout);
 
 #if defined(_WIN32)
         SetTimer(NULL, 0, timeout * 1000, (TIMERPROC)TimerProc);
 #else
-        alarm_fired = 0;
         signal(SIGALRM, clax_command_timeout);
         alarm(timeout);
 #endif
@@ -329,8 +330,7 @@ int clax_command_read(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list
         if (ret < 0) {
             if (errno == EAGAIN) {
 
-                /* 0.2s */
-                usleep(200000);
+                usleep(0.2 * 1000000);
 
                 continue;
             }
@@ -350,7 +350,14 @@ int clax_command_read(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list
 #endif
     };
 
-    return clax_command_close(ctx);
+    int exit_code = clax_command_close(ctx);
+
+    if (alarm_fired) {
+        ctx->timeout_fired = 1;
+        exit_code = 255;
+    }
+
+    return exit_code;
 }
 
 int clax_command_close(command_ctx_t *ctx)

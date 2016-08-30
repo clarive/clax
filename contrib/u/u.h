@@ -188,15 +188,22 @@ int u_ok;
         }                                             \
     } while (0);
 
-#define ASSERT_MATCHES(got, re)                                         \
-    do {                                                                \
-        char *u_val = (char *)got;                                      \
-        _ASSERT(slre_match(re, u_val, strlen(u_val), NULL, 0, 0) >= 0)  \
-                                                                        \
-        if (!u_ok) {                                                    \
-            printf("    # " #got ":\n");                                \
-            printf("    # not matches " # re "\n");                     \
-        }                                                               \
+#define ASSERT_MATCHES(got, re)                                             \
+    do {                                                                    \
+        char *u_val = (char *)got;                                          \
+        if (u_val != NULL) {                                                \
+            _ASSERT(slre_match(re, u_val, strlen(u_val), NULL, 0, 0) >= 0)  \
+                                                                            \
+            if (!u_ok) {                                                    \
+                printf("    # " #got ":\n");                                \
+                printf("    # not matches " # re "\n");                     \
+            }                                                               \
+        } else {                                                            \
+            u_local_tests++;                                                \
+            NOT_OK                                                          \
+            printf("    # " #got ":\n");                                    \
+            printf("    # is NULL\n");                                      \
+        }                                                                   \
     } while (0);
 
 #define ASSERT_NOT_MATCHES(got, re)                                    \

@@ -150,11 +150,12 @@ TEST_START(kills command after timeout)
 
     clax_command_read_va(&ctx, command_vaargs_cb);
 
-    clax_command_close(&ctx);
+    int exit_code = clax_command_close(&ctx);
 
     double end = get_time();
 
     ASSERT(end - start < 3)
+    ASSERT(exit_code != 0)
 }
 TEST_END
 

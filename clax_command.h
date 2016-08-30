@@ -27,6 +27,7 @@ typedef struct {
     char **env;
     char command[1024];
     int timeout;
+    int timeout_fired;
     popen2_t kid;
 } command_ctx_t;
 

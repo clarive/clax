@@ -234,8 +234,9 @@ Optional
 
     POST /command
 
-Runs a command returns the chunks of the output. `X-Clax-PID` holds the process `PID` and `X-Clax-Exit` holds the exit
-code.
+Runs a command and returns the chunks of the output. The special trailing headers provide information when command
+finishes. `X-Clax-PID` holds the process `PID`, `X-Clax-Exit` holds the exit code and `X-Clax-Status` holds the
+execution status, which can be `success`, `error` or `timeout`.
 
 #### Data Params
 
@@ -251,7 +252,7 @@ Optional
 
     HTTP/1.1 200 OK
     Transfer-Encoding: chunked
-    Trailer: X-Clax-Exit
+    Trailer: X-Clax-Exit, X-Clax-Status
     X-Clax-PID: 10566
 
     4
@@ -259,6 +260,7 @@ Optional
 
     0
     X-Clax-Exit: 0
+    X-Clax-Status: success
 
 #### Example
 

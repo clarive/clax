@@ -51,14 +51,26 @@ void clax_command_read_cb(void *ctx, clax_http_chunk_cb_t chunk_cb, ...)
 {
     command_ctx_t *command_ctx = ctx;
     va_list a_list;
-    char buf[32];
+    char buf[255];
+    char *status;
 
     va_start(a_list, chunk_cb);
 
     int exit_code = clax_command_read(command_ctx, chunk_cb, a_list);
 
+    if (command_ctx->timeout_fired) {
+        status = "timeout";
+    }
+    else if (exit_code != 0) {
+        status = "error";
+    }
+    else {
+        status = "success";
+    }
+
     /* Chunked trailing header */
-    snprintf(buf, sizeof(buf), "X-Clax-Exit: %d", exit_code);
+    snprintf(buf, sizeof(buf), "X-Clax-Exit: %d\r\nX-Clax-Status: %s", exit_code, status);
+
     chunk_cb(buf, 0, a_list);
 
     va_end(a_list);
@@ -124,7 +136,7 @@ void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_
     char buf_pid[15];
     snprintf(buf_pid, sizeof(buf_pid), "%d", pid);
 
-    clax_kv_list_push(&res->headers, "Trailer", "X-Clax-Exit");
+    clax_kv_list_push(&res->headers, "Trailer", "X-Clax-Exit, X-Clax-Status");
     clax_kv_list_push(&res->headers, "X-Clax-PID", buf_pid);
 
     res->body_cb_ctx = &command_ctx;
