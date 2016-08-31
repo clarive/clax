@@ -1,5 +1,8 @@
 #!/bin/bash
 
+OS=`cat OS | tr -d "\012"`
+ARCH=`cat ARCH | tr -d "\012"`
+
 . util/detect-os.sh
 
 VERSION=`cat VERSION | tr -d "\012"`

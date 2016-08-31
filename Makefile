@@ -131,7 +131,7 @@ dist: all
 clean:
 	$(RMF)  $(PROGRAM) $(OBJECTS)
 	$(RMF)  *.exe
-	$(RMF)  clax_version.h
+	$(RMF)  clax_version.h OS ARCH
 	$(RMF)  .depend
 	$(RMF)  *.gcno *.gcda
 	$(RMRF) coverage
