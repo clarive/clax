@@ -225,7 +225,7 @@ char *clax_command_env_expand_a(command_ctx_t *ctx, const char *val)
             key = clax_strndup(rp_start + 1, rp_end - rp_start);
         }
         else {
-            rp_end = val + strlen(val) - 1;
+            rp_end = (char *)(val + strlen(val) - 1);
             key = clax_strdup(rp_start + 1);
         }
     }

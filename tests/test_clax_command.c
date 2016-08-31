@@ -239,7 +239,7 @@ TEST_START(clax_command_get_env - correctly handles NULL environment)
 
     clax_command_init_env(&ctx, NULL);
 
-    char *val = clax_command_get_env(&ctx, "foo");
+    const char *val = clax_command_get_env(&ctx, "foo");
 
     ASSERT_NULL(val);
 
@@ -257,7 +257,7 @@ TEST_START(clax_command_get_env - gets environment)
 
     clax_command_init_env(&ctx, env);
 
-    char *val = clax_command_get_env(&ctx, "foo");
+    const char *val = clax_command_get_env(&ctx, "foo");
 
     ASSERT_STR_EQ(val, "bar");
 
