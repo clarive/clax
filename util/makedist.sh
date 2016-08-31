@@ -15,7 +15,7 @@ if [ "$WINDOWS" = "1" ]; then
     cp contrib/wininetd/* $DIST/
     cp clax.ini.win.example $DIST/clax.ini
 
-    zip -r $ARCHIVE $DIST/
+    zip -r $ARCHIVE $DIST/ || exit 255
 else
     TAR="$DIST.tar"
     ARCHIVE="$TAR.gz"

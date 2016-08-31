@@ -126,7 +126,7 @@ archive: clax_version.h
 	sh util/makearchive.sh
 
 dist: all
-	sh util/makedist.sh OS=$(OS) ARCH=$(ARCH) WINDOWS=$(WINDOWS) WINDOWS_CMD=$(WINDOWS_CMD)
+	OS=$(OS) ARCH=$(ARCH) WINDOWS=$(WINDOWS) WINDOWS_CMD=$(WINDOWS_CMD) sh util/makedist.sh
 
 clean:
 	$(RMF)  $(PROGRAM) $(OBJECTS)
