@@ -1,0 +1,5 @@
+WINDOWS=1
+CC=i686-w64-mingw32-gcc
+CFLAGS += -DHAVE_SNPRINTF
+
+-include Makefile

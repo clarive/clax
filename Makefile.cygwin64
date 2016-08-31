@@ -1,0 +1,4 @@
+WINDOWS=1
+CC=x86_64-pc-cygwin-gcc
+
+-include Makefile
