@@ -26,7 +26,7 @@ else
     cp clax.ini.unix.example $DIST/clax.ini
 
     tar cf $TAR $DIST/ || exit 255
-    gzip $TAR || exit 255
+    gzip -f $TAR || exit 255
 fi
 
 echo
