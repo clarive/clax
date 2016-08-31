@@ -35,7 +35,6 @@
 # include <sys/types.h>
 #endif
 
-#include "snprintf/snprintf.h"
 #include "clax.h"
 #include "clax_log.h"
 #include "clax_util.h"

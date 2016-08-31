@@ -25,9 +25,12 @@
 
 #if defined(_WIN32)
 
+# include "snprintf/snprintf.h"
+
 unsigned int sleep(unsigned int seconds);
 
 #if defined(__MINGW64_VERSION_MAJOR)
+
 # if defined(_USE_32BIT_TIME_T)
 #  define gmtime_s _gmtime32_s
 # else
@@ -43,6 +46,10 @@ unsigned int sleep(unsigned int seconds);
 # define localtime_r(tp, tm) ((localtime_s((tm), (tp)) == 0) ? (tm) : NULL)
 #endif
 
+#endif
+
+#if defined(__unix__)
+# include "snprintf/snprintf.h"
 #endif
 
 #endif

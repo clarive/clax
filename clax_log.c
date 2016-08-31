@@ -24,7 +24,6 @@
 #include <unistd.h>
 #include <time.h>
 
-#include "snprintf/snprintf.h"
 #include "clax_platform.h"
 
 int clax_log_(const char *file, int line, const char *func, char *fmt, ...)
