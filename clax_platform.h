@@ -25,8 +25,6 @@
 
 #if defined(_WIN32)
 
-# include "snprintf/snprintf.h"
-
 unsigned int sleep(unsigned int seconds);
 
 #if defined(__MINGW64_VERSION_MAJOR)
@@ -49,7 +47,11 @@ unsigned int sleep(unsigned int seconds);
 #endif
 
 #if defined(__unix__)
+
+#ifndef __CYGWIN__
 # include "snprintf/snprintf.h"
+#endif
+
 #endif
 
 #endif
