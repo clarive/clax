@@ -1,4 +1,4 @@
 CC=gcc
-CFLAGS=-lsocket -lnsl
+CFLAGS=-lsocket -lnsl -DHAVE_SNPRINTF
 
 -include Makefile

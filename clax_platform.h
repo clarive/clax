@@ -49,6 +49,7 @@ unsigned int sleep(unsigned int seconds);
 #if defined(__unix__)
 
 #if !defined(__CYGWIN__) && !defined(__NetBSD__)
+# include <stdarg.h>
 # include "snprintf/snprintf.h"
 #endif
 
