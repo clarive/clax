@@ -130,7 +130,7 @@ TEST_START(returns trailing headers when timeout)
 
     request.method = HTTP_POST;
     strcpy(request.path_info, "/command");
-    clax_kv_list_push(&request.body_params, "command", "sleep 5");
+    clax_kv_list_push(&request.body_params, "command", "echo foo; sleep 1; echo bar; sleep 1");
     clax_kv_list_push(&request.body_params, "timeout", "1");
 
     clax_dispatch_command(&clax_ctx, &request, &response);
