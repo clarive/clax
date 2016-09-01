@@ -71,5 +71,6 @@ check-coverage:
 
 clean:
 	$(RMF) $(PROGRAM) $(OBJECTS) *.exe
+	$(RMF) a.out
 	$(RMF) *.gcno *.gcda
 	$(RMF) .depend

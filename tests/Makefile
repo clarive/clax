@@ -70,5 +70,6 @@ check-coverage:
 
 clean:
 	$(RMF) $(PROGRAM) $(OBJECTS)
+	$(RMF) a.out
 	$(RMF) *.gcno *.gcda
 	$(RMF) .depend

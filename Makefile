@@ -130,7 +130,7 @@ dist: all
 
 clean:
 	$(RMF)  $(PROGRAM) $(OBJECTS)
-	$(RMF)  *.exe
+	$(RMF)  a.out *.exe
 	$(RMF)  clax_version.h OS ARCH
 	$(RMF)  .depend
 	$(RMF)  *.gcno *.gcda
