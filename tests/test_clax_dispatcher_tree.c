@@ -316,6 +316,8 @@ TEST_START(creates directory)
 
     clax_dispatch_upload(&clax_ctx, &request, &response);
 
+    chdir(cwd);
+
     ASSERT_EQ(response.status_code, 200);
 
     char *resultpath = clax_strjoin("/", tmp_dirname, "foo", NULL);
@@ -326,7 +328,6 @@ TEST_START(creates directory)
     clax_http_response_free(&response);
     clax_ctx_free(&clax_ctx);
 
-    chdir(cwd);
     rmrf(tmp_dirname);
 }
 TEST_END
