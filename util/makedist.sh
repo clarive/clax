@@ -1,7 +1,12 @@
 #!/bin/bash
 
-OS=`cat OS | tr -d "\012"`
-ARCH=`cat ARCH | tr -d "\012"`
+if [ -f OS ]; then
+    OS=`cat OS | tr -d "\012"`
+fi
+
+if [ -f ARCH ]; then
+    ARCH=`cat ARCH | tr -d "\012"`
+fi
 
 . util/detect-os.sh
 
