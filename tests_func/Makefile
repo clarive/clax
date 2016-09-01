@@ -60,7 +60,7 @@ depend: .depend
 endif
 
 lib:
-	$(MAKE) -C ../
+	$(MAKE) -C ../ OS=$(OS) ARCH=$(ARCH)
 
 check: $(PROGRAM)
 	./$(PROGRAM)
