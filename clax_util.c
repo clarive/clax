@@ -608,9 +608,11 @@ int clax_is_path_d(const char *path)
 {
     struct stat path_stat;
 
-    stat(path, &path_stat);
+    if (stat(path, &path_stat) == 0) {
+        return S_ISDIR(path_stat.st_mode);
+    }
 
-    return S_ISDIR(path_stat.st_mode);
+    return 0;
 }
 
 int clax_rmdir(const char *path)
