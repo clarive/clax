@@ -42,12 +42,12 @@ else
 endif
 endif
 
-all: clax_version.h lib $(PROGRAM)
+all: lib $(PROGRAM)
 
 clax_version.h:
 	OS=$(OS) ARCH=$(ARCH) WINDOWS=$(WINDOWS) sh util/makeversion.sh
 
-lib: mbedtls http-parser multipart-parser-c inih base64 slre snprintf $(OBJECTS)
+lib: clax_version.h mbedtls http-parser multipart-parser-c inih base64 slre snprintf $(OBJECTS)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS)
