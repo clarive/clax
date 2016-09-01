@@ -36,7 +36,7 @@ TEST_START(parses_config)
 
     clax_options_init(&options);
 
-    char *argv[] = {"clax", "-l", "/dev/null", "-c", "config.ini"};
+    char *argv[] = {"clax", "-l", DEVNULL, "-c", "config.ini"};
     int ret = clax_parse_options(&options, sizeof_array(argv), argv);
 
     ASSERT_EQ(ret, 0)
@@ -65,7 +65,7 @@ TEST_START(sanitizes paths)
     fprintf(fh, "root = C:\\some/////path");
     fclose(fh);
 
-    char *argv[] = {"clax", "-l", "/dev/null", "-c", filename};
+    char *argv[] = {"clax", "-l", DEVNULL, "-c", filename};
     int ret = clax_parse_options(&options, sizeof_array(argv), argv);
 
     ASSERT_EQ(ret, 0)
@@ -91,7 +91,7 @@ TEST_START(overwrites values)
     fprintf(fh, "root = other\n");
     fclose(fh);
 
-    char *argv[] = {"clax", "-l", "/dev/null", "-c", filename};
+    char *argv[] = {"clax", "-l", DEVNULL, "-c", filename};
     int ret = clax_parse_options(&options, sizeof_array(argv), argv);
 
     ASSERT_EQ(ret, 0)
@@ -110,7 +110,7 @@ TEST_START(returns_error_when_config_not_found)
 
     clax_options_init(&options);
 
-    char *argv[] = {"clax", "-l", "/dev/null", "-c", "unknown.ini"};
+    char *argv[] = {"clax", "-l", DEVNULL, "-c", "unknown.ini"};
     int ret = clax_parse_options(&options, sizeof_array(argv), argv);
 
     ASSERT_EQ(ret, -1)
@@ -125,11 +125,11 @@ TEST_START(parses_log_file)
 
     clax_options_init(&options);
 
-    char *argv[] = {"clax", "-l", "/dev/null"};
+    char *argv[] = {"clax", "-l", DEVNULL};
     int ret = clax_parse_options(&options, sizeof_array(argv), argv);
 
     ASSERT_EQ(ret, 0)
-    ASSERT_STR_EQ(options.log_file, "/dev/null")
+    ASSERT_STR_EQ(options.log_file, DEVNULL)
 
     clax_options_free(&options);
 }
