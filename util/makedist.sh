@@ -20,6 +20,7 @@ if [ "$WINDOWS" = "1" ]; then
     mkdir $DIST
 
     cp clax.exe $DIST/
+    cp VERSION $DIST/
     cp contrib/wininetd/* $DIST/
     cp clax.ini.win.example $DIST/clax.ini
 
@@ -31,6 +32,7 @@ else
     mkdir $DIST
 
     cp clax $DIST/
+    cp VERSION $DIST/
     cp clax.ini.unix.example $DIST/clax.ini
 
     tar cf $TAR $DIST/ || exit 255
