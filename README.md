@@ -9,7 +9,7 @@ requests from stdin and write responses to stdout, which makes it suitable for i
 - FreeBSD 10.3
 - Mac OS 10.9 Mavericks
 - Cygwin x86_64
-- Windows 2008, 2012
+- Windows 2003, 2008, 2012
 - Solaris 10 i86pc
 - z/OS 390
 
