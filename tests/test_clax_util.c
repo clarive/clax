@@ -628,6 +628,29 @@ TEST_START(creates intermediate directories)
 }
 TEST_END
 
+TEST_START(removes path recursively)
+{
+    char *path = "/foo/bar/baz/";
+    char *tempdir = clax_mktmpdir_alloc();
+
+    char *fullpath = clax_strjoin("/", tempdir, path, NULL);
+
+    clax_mkdir_p(fullpath);
+
+    char *filename = clax_strjoin("/", fullpath, "file", NULL);
+
+    FILE *fh = fopen(filename, "w");
+    fclose(fh);
+
+    clax_rmpath_r(tempdir);
+
+    ASSERT_EQ(clax_is_path_d(tempdir), 0);
+
+    free(fullpath);
+    free(tempdir);
+}
+TEST_END
+
 #ifndef _WIN32
 TEST_START(detects root if absolute)
 {

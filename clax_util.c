@@ -651,7 +651,7 @@ int clax_rmpath_r(const char *path)
             continue;
 
         char *p = clax_strjoin("/", path, d->d_name, NULL);
-        clax_rmdir_r(p);
+        clax_rmpath_r(p);
         free(p);
 
         break;
