@@ -250,6 +250,47 @@ TEST_START(accepts_upload_with_correct_crc)
 }
 TEST_END
 
+TEST_START(accepts_upload_with_correct_crc padded)
+{
+    clax_ctx_t clax_ctx;
+    clax_http_request_t request;
+    clax_http_response_t response;
+
+    clax_ctx_init(&clax_ctx);
+    clax_http_request_init(&request, NULL);
+    clax_http_response_init(&response, NULL, 0);
+
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+
+    char *tmp_dirname = clax_mktmpdir_alloc();
+    chdir(tmp_dirname);
+
+    request.method = HTTP_POST;
+    strcpy(request.path_info, "/tree/");
+    clax_kv_list_push(&request.query_params, "crc", "0f5cb862");
+    strcpy(request.multipart_boundary, "---boundary");
+
+    clax_http_multipart_t *multipart = clax_http_multipart_list_push(&request.multiparts);
+
+    clax_kv_list_push(&multipart->headers, "Content-Disposition", "form-data; name=\"file\"; filename=\"foobar\"");
+
+    clax_big_buf_append(&multipart->bbuf, (const unsigned char *)"RLXK0tyT", 8);
+
+    clax_dispatch_upload(&clax_ctx, &request, &response);
+
+    ASSERT_EQ(response.status_code, 200)
+    ASSERT_EQ(access("foobar", F_OK), 0);
+
+    clax_http_request_free(&request);
+    clax_http_response_free(&response);
+    clax_ctx_free(&clax_ctx);
+
+    chdir(cwd);
+    rmrf(tmp_dirname);
+}
+TEST_END
+
 TEST_START(saves_upload_with_passed_time)
 {
     clax_ctx_t clax_ctx;
@@ -503,6 +544,47 @@ TEST_START(serves file with crc32)
     ASSERT_STR_EQ(clax_kv_list_find(&response.headers, "X-Clax-CRC32"), "2166a346")
 #else
     ASSERT_STR_EQ(clax_kv_list_find(&response.headers, "X-Clax-CRC32"), "3610a686")
+#endif
+
+    clax_http_request_free(&request);
+    clax_http_response_free(&response);
+    clax_ctx_free(&clax_ctx);
+
+    chdir(cwd);
+    rmrf(tmp_dirname);
+}
+TEST_END
+
+TEST_START(serves file with padded crc32)
+{
+    clax_ctx_t clax_ctx;
+    clax_http_request_t request;
+    clax_http_response_t response;
+
+    clax_ctx_init(&clax_ctx);
+    clax_http_request_init(&request, NULL);
+    clax_http_response_init(&response, NULL, 0);
+
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+
+    char *tmp_dirname = clax_mktmpdir_alloc();
+    chdir(tmp_dirname);
+
+    FILE *fp = fopen("foo", "wb");
+    char *buf = "RLXK0tyT";
+    fwrite(buf, 1, strlen(buf), fp);
+    fclose(fp);
+
+    request.method = HTTP_GET;
+    strcpy(request.path_info, "/tree/foo");
+
+    clax_dispatch_download(&clax_ctx, &request, &response);
+
+#ifdef MVS
+    ASSERT_STR_EQ(clax_kv_list_find(&response.headers, "X-Clax-CRC32"), "2166a346")
+#else
+    ASSERT_STR_EQ(clax_kv_list_find(&response.headers, "X-Clax-CRC32"), "0f5cb862")
 #endif
 
     clax_http_request_free(&request);

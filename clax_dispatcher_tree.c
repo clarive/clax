@@ -240,7 +240,7 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
 
     unsigned long crc32 = clax_crc32_calc_file(path);
     char crc32_hex[9] = {0};
-    snprintf(crc32_hex, sizeof(crc32_hex), "%lx", crc32);
+    snprintf(crc32_hex, sizeof(crc32_hex), "%08lx", crc32);
 
     clax_file_size(path, size_buf, sizeof(size_buf));
 
