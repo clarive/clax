@@ -926,15 +926,16 @@ int clax_http_connect_to_proxy(char *hostname, char *port, int timeout)
     struct addrinfo hints;
     struct addrinfo *addrs, *addr;
     int sockfd;
+    int rv;
 
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = 0;
-    hints.ai_protocol = 0;
+    hints.ai_protocol = IPPROTO_TCP;
 
-    if (getaddrinfo(hostname, port, &hints, &addrs) != 0) {
-        clax_log("Can't resolve '%s:%s': %s", hostname, port, strerror(errno));
+    if ((rv = getaddrinfo(hostname, port, &hints, &addrs)) != 0) {
+        clax_log("Can't resolve '%s:%s': %d - %s", hostname, port, rv, strerror(errno));
         return -1;
     }
 
@@ -967,7 +968,7 @@ int clax_http_proxy_write_request_body(clax_http_request_t *req, int sockfd)
         size_t offset = 0;
         size_t wcount = 0;
 
-        while ((wcount = write(sockfd, req->body + offset, req->body_len - offset)) > 0) {
+        while ((wcount = send(sockfd, req->body + offset, req->body_len - offset, 0)) > 0) {
             offset += wcount;
         }
 
@@ -982,10 +983,10 @@ int clax_http_proxy_write_request_body(clax_http_request_t *req, int sockfd)
 int clax_http_proxy_write_request(char *hostname, char *port, int sockfd, clax_http_request_t *req, char *hops)
 {
     const char *method = http_method_str(req->method);
-    TRY write(sockfd, method, strlen(method)) GOTO;
-    TRY write(sockfd, " ", 1) GOTO;
-    TRY write(sockfd, req->url, strlen(req->url)) GOTO;
-    TRY write(sockfd, " HTTP/1.1\r\n", 11) GOTO;
+    TRY send(sockfd, method, strlen(method), 0) GOTO;
+    TRY send(sockfd, " ", 1, 0) GOTO;
+    TRY send(sockfd, req->url, strlen(req->url), 0) GOTO;
+    TRY send(sockfd, " HTTP/1.1\r\n", 11, 0) GOTO;
 
     clax_kv_list_item_t *header;
     size_t header_iter = 0;
@@ -995,25 +996,25 @@ int clax_http_proxy_write_request(char *hostname, char *port, int sockfd, clax_h
             continue;
         }
 
-        TRY write(sockfd, header->key, strlen(header->key)) GOTO;
-        TRY write(sockfd, ": ", 2) GOTO;
+        TRY send(sockfd, header->key, strlen(header->key), 0) GOTO;
+        TRY send(sockfd, ": ", 2, 0) GOTO;
 
         if (strcmp(header->key, "Host") == 0) {
-            TRY write(sockfd, hostname, strlen(hostname)) GOTO;
-            TRY write(sockfd, ":", 1) GOTO;
-            TRY write(sockfd, port, strlen(port)) GOTO;
+            TRY send(sockfd, hostname, strlen(hostname), 0) GOTO;
+            TRY send(sockfd, ":", 1, 0) GOTO;
+            TRY send(sockfd, port, strlen(port), 0) GOTO;
         }
         else if (strcmp(header->key, "X-Hops") == 0 && hops) {
-            TRY write(sockfd, hops, strlen(hops)) GOTO;
+            TRY send(sockfd, hops, strlen(hops), 0) GOTO;
         }
         else {
-            TRY write(sockfd, header->val, strlen(header->val)) GOTO;
+            TRY send(sockfd, header->val, strlen(header->val), 0) GOTO;
         }
 
-        TRY write(sockfd, "\r\n", 2) GOTO;
+        TRY send(sockfd, "\r\n", 2, 0) GOTO;
     }
 
-    TRY write(sockfd, "\r\n", 2) GOTO;
+    TRY send(sockfd, "\r\n", 2, 0) GOTO;
 
     TRY clax_http_proxy_write_request_body(req, sockfd) GOTO;
 
@@ -1071,6 +1072,11 @@ void clax_http_dispatch_proxy(clax_ctx_t *clax_ctx, http_parser *parser, clax_ht
 
     clax_log("Connecting to proxy %s:%s (%d)", hostname, port, atoi(hop_timeout));
 
+#ifdef _WIN32
+    WSADATA wsaData;
+    WSAStartup(MAKEWORD(2, 2), &wsaData);
+#endif
+
     int sockfd = clax_http_connect_to_proxy(hostname, port, atoi(hop_timeout));
 
     if (sockfd < 0) {
@@ -1088,13 +1094,17 @@ void clax_http_dispatch_proxy(clax_ctx_t *clax_ctx, http_parser *parser, clax_ht
 
     clax_log("Proxy request written. Waiting for response...");
 
-    shutdown(sockfd, 1);
+#ifdef _WIN32
+    shutdown(sockfd, SD_SEND);
+#else
+    shutdown(sockfd, SHUT_WR);
+#endif
 
     unsigned char buffer[1024];
     memset(buffer, 0, sizeof(buffer) * sizeof(char));
 
     while (1) {
-        int rcount = read(sockfd, buffer, sizeof(buffer));
+        int rcount = recv(sockfd, buffer, sizeof(buffer), 0);
 
         if (rcount < 0) {
             clax_log("Error during reading from proxy: %s", strerror(errno));
@@ -1132,7 +1142,7 @@ void clax_http_dispatch_proxy(clax_ctx_t *clax_ctx, http_parser *parser, clax_ht
                     goto error;
                 }
 
-                TRY write(sockfd, buf, ret) GOTO;
+                TRY send(sockfd, buf, ret, 0) GOTO;
 
                 ret = clax_http_parse(parser, req, (char *)buf, ret);
 
@@ -1159,6 +1169,10 @@ error:
     free(hops);
     free(hostname);
     free(port);
+
+#ifdef _WIN32
+    WSACleanup();
+#endif
 
     return;
 }
