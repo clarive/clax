@@ -846,6 +846,8 @@ int clax_connect(int sockfd, struct addrinfo *addr, int timeout)
 {
     fd_set fds;
     struct timeval tv;
+
+#ifndef _WIN32
     long flags;
 
     if ((flags = fcntl(sockfd, F_GETFL, NULL)) < 0) {
@@ -857,6 +859,7 @@ int clax_connect(int sockfd, struct addrinfo *addr, int timeout)
         clax_log("Error fcntl: %s", strerror(errno));
         return -1;
     }
+#endif
 
     if (connect(sockfd, addr->ai_addr, addr->ai_addrlen) < 0) {
         if (errno == EINPROGRESS) {
@@ -894,6 +897,7 @@ int clax_connect(int sockfd, struct addrinfo *addr, int timeout)
                }
             }
 
+#ifndef _WIN32
             if ((flags = fcntl(sockfd, F_GETFL, NULL)) < 0) {
                 clax_log("Error fcntl: %s", strerror(errno));
                 return -1;
@@ -903,6 +907,7 @@ int clax_connect(int sockfd, struct addrinfo *addr, int timeout)
                 clax_log("Error fcntl: %s", strerror(errno));
                 return -1;
             }
+#endif
         }
         else {
             return -1;
