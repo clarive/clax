@@ -844,31 +844,42 @@ int clax_http_is_proxy(clax_http_request_t *req)
 
 int clax_http_connect_to_proxy(char *hostname, char *port)
 {
-    int sockfd, portno;
-    struct sockaddr_in serv_addr;
-    struct hostent *server;
+    struct addrinfo hints;
+    struct addrinfo *addrs, *addr;
+    int sockfd;
+    char addr_hr[100];
 
-    portno = atoi(port);
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) {
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = 0;
+    hints.ai_protocol = 0;
+
+    if (getaddrinfo(hostname, port, &hints, &addrs) != 0) {
+        clax_log("Can't resolve '%s:%s': %s", hostname, port, strerror(errno));
         return -1;
     }
 
-    server = gethostbyname(hostname);
-    if (server == NULL) {
+    for (addr = addrs; addr != NULL; addr = addr->ai_next) {
+        sockfd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+        if (sockfd == -1)
+            continue;
+
+        /*void *ptr = &((struct sockaddr_in *)addr->ai_addr)->sin_addr;*/
+        /*inet_ntop(addr->ai_family, ptr, addr_hr, sizeof(addr_hr));*/
+
+        if (connect(sockfd, addr->ai_addr, addr->ai_addrlen) != -1)
+            break;
+
+        close(sockfd);
+    }
+
+    if (addr == NULL) {
+        clax_log("Could not connect: %s", strerror(errno));
         return -1;
     }
 
-    memset((char *)&serv_addr, 0, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    memcpy((char *)server->h_addr,
-         (char *)&serv_addr.sin_addr.s_addr,
-         server->h_length);
-    serv_addr.sin_port = htons(portno);
-
-    if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-        return -1;
-    }
+    freeaddrinfo(addrs);
 
     return sockfd;
 }
@@ -962,6 +973,11 @@ void clax_http_dispatch_proxy(clax_ctx_t *clax_ctx, http_parser *parser, clax_ht
     if (hostname == NULL || strlen(hostname) == 0) {
         clax_dispatch_bad_request(clax_ctx, req, res, "Invalid X-Hops header");
         TRY clax_http_write_response(ctx, send_cb, res) GOTO;
+
+        free(hops);
+        free(hostname);
+        free(port);
+
         return;
     }
 
@@ -980,6 +996,7 @@ void clax_http_dispatch_proxy(clax_ctx_t *clax_ctx, http_parser *parser, clax_ht
     if (sockfd < 0) {
         clax_dispatch_bad_gateway(clax_ctx, req, res);
         TRY clax_http_write_response(ctx, send_cb, res) GOTO;
+        return;
     }
 
     clax_log("Connected to proxy");
@@ -991,14 +1008,22 @@ void clax_http_dispatch_proxy(clax_ctx_t *clax_ctx, http_parser *parser, clax_ht
 
     clax_log("Proxy request written. Waiting for response...");
 
+    shutdown(sockfd, 1);
+
     unsigned char buffer[1024];
     memset(buffer, 0, sizeof(buffer) * sizeof(char));
 
     while (1) {
         int rcount = read(sockfd, buffer, sizeof(buffer));
 
-        if (rcount <= 0) {
+        if (rcount < 0) {
+            clax_log("Error during reading from proxy: %s", strerror(errno));
             goto error;
+        }
+
+        if (rcount == 0) {
+            clax_log("Done reading from proxy");
+            break;
         }
 
         TRY send_cb_wrapper(send_cb, ctx, buffer, rcount) GOTO;
@@ -1012,8 +1037,6 @@ void clax_http_dispatch_proxy(clax_ctx_t *clax_ctx, http_parser *parser, clax_ht
             do {
                 memset(buf, 0, sizeof(buf));
                 ret = recv_cb(ctx, buf, sizeof(buf));
-
-                clax_log("RECV_CB=%d", ret);
 
                 if (ret == EAGAIN) {
                     clax_log("EAGAIN");
