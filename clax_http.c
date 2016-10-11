@@ -842,12 +842,81 @@ int clax_http_is_proxy(clax_http_request_t *req)
     return 1;
 }
 
-int clax_http_connect_to_proxy(char *hostname, char *port)
+int clax_connect(int sockfd, struct addrinfo *addr, int timeout)
+{
+    fd_set fds;
+    struct timeval tv;
+    long flags;
+
+    if ((flags = fcntl(sockfd, F_GETFL, NULL)) < 0) {
+        clax_log("Error fcntl: %s", strerror(errno));
+        return -1;
+    }
+    flags |= O_NONBLOCK;
+    if (fcntl(sockfd, F_SETFL, flags) < 0) {
+        clax_log("Error fcntl: %s", strerror(errno));
+        return -1;
+    }
+
+    if (connect(sockfd, addr->ai_addr, addr->ai_addrlen) < 0) {
+        if (errno == EINPROGRESS) {
+            while (1) {
+               tv.tv_sec = timeout || 15;
+               tv.tv_usec = 0;
+
+               FD_ZERO(&fds);
+               FD_SET(sockfd, &fds);
+
+               int rv = select(sockfd + 1, NULL, &fds, NULL, &tv);
+               if (rv < 0 && errno != EINTR) {
+                  clax_log("Error connecting: %s", strerror(errno));
+                  return -1;
+               }
+               else if (rv > 0) {
+                  int optval;
+                  socklen_t optlen = sizeof(optval);
+
+                  if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void *)(&optval), &optlen) < 0) {
+                     clax_log("Socket options error: %s", strerror(errno));
+                     return -1;
+                  }
+
+                  if (optval) {
+                     clax_log("Socket error: %s", strerror(optval));
+                     return -1;
+                  }
+
+                  break;
+               }
+               else {
+                  clax_log("Connection timeout");
+                  return -1;
+               }
+            }
+
+            if ((flags = fcntl(sockfd, F_GETFL, NULL)) < 0) {
+                clax_log("Error fcntl: %s", strerror(errno));
+                return -1;
+            }
+            flags &= (~O_NONBLOCK);
+            if (fcntl(sockfd, F_SETFL, flags) < 0) {
+                clax_log("Error fcntl: %s", strerror(errno));
+                return -1;
+            }
+        }
+        else {
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+int clax_http_connect_to_proxy(char *hostname, char *port, int timeout)
 {
     struct addrinfo hints;
     struct addrinfo *addrs, *addr;
     int sockfd;
-    char addr_hr[100];
 
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_INET;
@@ -865,17 +934,15 @@ int clax_http_connect_to_proxy(char *hostname, char *port)
         if (sockfd == -1)
             continue;
 
-        /*void *ptr = &((struct sockaddr_in *)addr->ai_addr)->sin_addr;*/
-        /*inet_ntop(addr->ai_family, ptr, addr_hr, sizeof(addr_hr));*/
-
-        if (connect(sockfd, addr->ai_addr, addr->ai_addrlen) != -1)
+        if (clax_connect(sockfd, addr, timeout) == 0) {
             break;
+        }
 
         close(sockfd);
     }
 
     if (addr == NULL) {
-        clax_log("Could not connect: %s", strerror(errno));
+        clax_log("Could not connect");
         return -1;
     }
 
@@ -953,6 +1020,7 @@ void clax_http_dispatch_proxy(clax_ctx_t *clax_ctx, http_parser *parser, clax_ht
     char *hostname = NULL;
     char *port = NULL;
     char *hops = clax_strdup(clax_kv_list_find(&req->headers, "X-Hops"));
+    char *hop_timeout = clax_kv_list_find(&req->headers, "X-Hop-Timeout");
     char *sep;
 
     if (hops == NULL || strlen(hops) == 0) {
@@ -989,9 +1057,12 @@ void clax_http_dispatch_proxy(clax_ctx_t *clax_ctx, http_parser *parser, clax_ht
         port = clax_strdup("80");
     }
 
-    clax_log("Connecting to proxy %s:%s", hostname, port);
+    if (hop_timeout == NULL)
+        hop_timeout = "";
 
-    int sockfd = clax_http_connect_to_proxy(hostname, port);
+    clax_log("Connecting to proxy %s:%s (%d)", hostname, port, atoi(hop_timeout));
+
+    int sockfd = clax_http_connect_to_proxy(hostname, port, atoi(hop_timeout));
 
     if (sockfd < 0) {
         clax_dispatch_bad_gateway(clax_ctx, req, res);
