@@ -861,40 +861,44 @@ int clax_connect(int sockfd, struct addrinfo *addr, int timeout)
     }
 #endif
 
+    if (!timeout) {
+        timeout = 15;
+    }
+
     if (connect(sockfd, addr->ai_addr, addr->ai_addrlen) < 0) {
         if (errno == EINPROGRESS) {
             while (1) {
-               tv.tv_sec = timeout || 15;
-               tv.tv_usec = 0;
+                tv.tv_sec = timeout;
+                tv.tv_usec = 0;
 
-               FD_ZERO(&fds);
-               FD_SET(sockfd, &fds);
+                FD_ZERO(&fds);
+                FD_SET(sockfd, &fds);
 
-               int rv = select(sockfd + 1, NULL, &fds, NULL, &tv);
-               if (rv < 0 && errno != EINTR) {
-                  clax_log("Error connecting: %s", strerror(errno));
-                  return -1;
-               }
-               else if (rv > 0) {
-                  int optval;
-                  socklen_t optlen = sizeof(optval);
+                int rv = select(sockfd + 1, NULL, &fds, NULL, &tv);
+                if (rv < 0 && errno != EINTR) {
+                   clax_log("Error connecting: %s", strerror(errno));
+                   return -1;
+                }
+                else if (rv > 0) {
+                   int optval;
+                   socklen_t optlen = sizeof(optval);
 
-                  if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void *)(&optval), &optlen) < 0) {
-                     clax_log("Socket options error: %s", strerror(errno));
-                     return -1;
-                  }
+                   if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void *)(&optval), &optlen) < 0) {
+                      clax_log("Socket options error: %s", strerror(errno));
+                      return -1;
+                   }
 
-                  if (optval) {
-                     clax_log("Socket error: %s", strerror(optval));
-                     return -1;
-                  }
+                   if (optval) {
+                      clax_log("Socket error: %s", strerror(optval));
+                      return -1;
+                   }
 
-                  break;
-               }
-               else {
-                  clax_log("Connection timeout");
-                  return -1;
-               }
+                   break;
+                }
+                else {
+                   clax_log("Connection timeout");
+                   return -1;
+                }
             }
 
 #ifndef _WIN32
