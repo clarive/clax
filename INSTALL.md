@@ -9,7 +9,7 @@ Windows package already has `wininetd.exe` file in it and sample configuration f
 1. Copy `wininetd.conf` to `C:\Windows\` and adjust the paths accordingly
 
     ```
-    11801 none C:\Users\clarive\clax.exe -c C:/Users/clarive/clax.ini
+    11801 none C:\Users\clarive\clax.exe -l C:/Users/clarive/clax.log
     ```
 
 2. Install `wininetd.exe` service. This can be done using a `wininetd-install.bat` file (run as administrator).
@@ -35,7 +35,7 @@ Windows package already has `wininetd.exe` file in it and sample configuration f
 2. Create configuration
 
     ```
-    clax     stream tcp nowait <user> <path-to>/clax clax -c <path-to>/clax.ini
+    clax     stream tcp nowait <user> <path-to>/clax clax -l <path-to>/clax.log
     ```
 
     1. Linux/FreeBSD/etc: add the previous line to `/etc/inetd.conf`
@@ -66,7 +66,7 @@ Windows package already has `wininetd.exe` file in it and sample configuration f
         wait            = no
         user            = <user>
         server          = <path-to>/clax
-        server_args     = -c <path-to>/clax.ini
+        server_args     = -l <path-to>/clax.log
         log_on_failure  += USERID
     }
     ```
