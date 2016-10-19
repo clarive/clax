@@ -1139,7 +1139,6 @@ void clax_http_dispatch_proxy(clax_ctx_t *clax_ctx, http_parser *parser, clax_ht
                 }
                 else if (ret == 0) {
                     clax_log("Connection closed");
-                    goto error;
                 }
 
                 TRY send(sockfd, buf, ret, 0) GOTO;
