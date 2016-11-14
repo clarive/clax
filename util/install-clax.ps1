@@ -95,7 +95,7 @@ download $release.downloadUrl $outputPath
 
 backupPreviousInstallation
 
-$unzippedPath = unzip $outputPath $claxHome
+$unzippedPath = (unzip $outputPath $claxHome | Out-String).trim()
 
 Write-Debug "Preparing clax directory"
 Write-Debug $outputPath
