@@ -3,6 +3,8 @@
 Clax is a portable HTTP(s) remote deployment agent that can run commands, exchange files and more. Clax can read
 requests from stdin and write responses to stdout, which makes it suitable for inetd integration.
 
+[![Build Status](https://travis-ci.org/clarive/clax.svg?branch=master)](https://travis-ci.org/clarive/clax)
+
 ## Tested Platforms
 
 - Debian GNU/Linux x86_64
