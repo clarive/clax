@@ -1,0 +1,5 @@
+language: c
+compiler:
+    - gcc
+install: make
+script: make check
