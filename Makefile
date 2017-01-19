@@ -19,6 +19,12 @@ ifeq ($(OS),Windows_NT)
 ifneq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
 	WINDOWS_CMD=1
 endif
+else
+	UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+	CFLAGS += -DHAVE_SNPRINTF
+endif
+
 endif
 
 ifeq ($(WINDOWS),1)
