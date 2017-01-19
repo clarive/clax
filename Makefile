@@ -56,10 +56,10 @@ clax_version.h:
 lib: clax_version.h mbedtls http-parser multipart-parser-c inih base64 slre snprintf $(OBJECTS)
 
 $(OBJECTS): $(SOURCES)
-	$(CC) -c $(CFLAGS) $^ $(LFLAGS) $(LIBS)
+	$(CC) -c $(CFLAGS) $^ $(LFLAGS)
 
 $(PROGRAM): $(OBJECTS)
-	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS)
+	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS) -o $(EXE)
 	$(CP) $(EXE) $(PROGRAM)
 
 ifneq ($(MVS),1)
