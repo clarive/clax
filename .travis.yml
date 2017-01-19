@@ -3,3 +3,6 @@ compiler:
     - gcc
 install: make
 script: make check-all
+os:
+    - linux
+    - osx
