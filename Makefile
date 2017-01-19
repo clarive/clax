@@ -5,7 +5,7 @@ COVERAGE_GRAPH=$(SOURCES:.c=.gcno)
 COVERAGE_DATA=$(SOURCES:.c=.gcda)
 CFLAGS += -Icontrib -Icontrib/mbedtls
 LFLAGS=
-LIBS=contrib/*/*.o
+LIBS=$(wildcard contrib/*/*.o)
 
 RM = rm
 RMF = rm -f
@@ -54,6 +54,9 @@ clax_version.h:
 	OS=$(OS) ARCH=$(ARCH) WINDOWS=$(WINDOWS) sh util/makeversion.sh
 
 lib: clax_version.h mbedtls http-parser multipart-parser-c inih base64 slre snprintf $(OBJECTS)
+
+$(OBJECTS): $(SOURCES)
+	$(CC) -c $(CFLAGS) $^ $(LFLAGS) $(LIBS)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS)
