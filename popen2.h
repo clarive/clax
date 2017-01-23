@@ -21,6 +21,7 @@
 #define POPEN2_H
 
 #include <stdlib.h>
+#include <sys/types.h>
 
 typedef struct {
     pid_t pid;
