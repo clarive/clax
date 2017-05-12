@@ -68,7 +68,8 @@ function generate_inetd {
     echo "clax stream tcp nowait $username $dir/clax clax -l $dir/clax.log" > $dir/inetd.clax
     echo "Generating xinetd.clax file"
     cat >$dir/xinetd.clax <<EOX
-service clax {
+service clax
+{
     disable = no
     id = clax
     type = UNLISTED
@@ -76,7 +77,7 @@ service clax {
     protocol = tcp
     port = $port
     wait = no
-    user = clax
+    user = $username
     server = $dir/clax
     server_args = -l $dir/clax.log
     instances = 5
@@ -91,6 +92,9 @@ function change_owner {
 
 function platform_config {
     cat >$dir/enable_clax_inetd_generic.sh <<GEN
+#!/bin/ksh
+dir=`dirname $0`
+
 cp /etc/services $dir/services.bak
 cp $dir/services.clax /etc/services
 cat $dir/inetd.clax >> /etc/inetd.conf
@@ -110,13 +114,16 @@ SOL
 chmod +x $dir/enable_clax_inetd_solaris.sh
 
     cat >$dir/enable_clax_xinetd_generic.sh <<'XIN'
+#!/bin/ksh
+dir=`dirname $0`
+
 cp /etc/services $dir/services.bak
 cp $dir/services.clax /etc/services
-cp $dir/xinetd.clax >> /etc/xinetd.d/clax
+cp $dir/xinetd.clax /etc/xinetd.d/clax
 
-pid=\`ps -ef | grep xinetd | grep -v grep | awk '{print $2}'\`
-echo Restarting pid \$pid
-kill -HUP \$pid
+pid=`ps -ef | grep xinetd | grep -v grep | awk '{print $2}'`
+echo Restarting pid $pid
+kill -HUP $pid
 XIN
 chmod +x $dir/enable_clax_xinetd_generic.sh
 
