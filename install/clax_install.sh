@@ -27,7 +27,7 @@ function create_dir {
 
 function copy_binary {
     echo "Copying clax binary to $dir"
-    cp $basedir/clax "$dir"
+    cp $basedir/../clax "$dir"
 }
 
 function create_ini {
