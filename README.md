@@ -14,6 +14,7 @@ requests from stdin and write responses to stdout, which makes it suitable for i
 - Windows 2003, 2008, 2012
 - Solaris 10 i86pc
 - z/OS 390
+- Raspbian ARMv7
 
 ## Compiling, testing and installing
 
