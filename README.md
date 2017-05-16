@@ -269,6 +269,12 @@ Optional
 
     curl -d 'command=echo foo' http://clax-server/command
 
+## Contributors
+
+In order of appearance:
+
+* [ktecho](https://github.com/ktecho)
+
 ## Copyright
 
 Clax is a portable HTTP(s) remote deployment agent
