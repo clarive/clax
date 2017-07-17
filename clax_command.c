@@ -357,6 +357,8 @@ int clax_command_read(command_ctx_t *ctx, clax_http_chunk_cb_t chunk_cb, va_list
         exit_code = 255;
     }
 
+    va_end(a_list);
+
     return exit_code;
 }
 

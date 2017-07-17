@@ -46,7 +46,7 @@ size_t slurp_file(char *fname, char *buf, size_t len)
     if (!fh)
         return -1;
 
-    size_t rlen = fread(buf, 1, len, fh);
+    ssize_t rlen = fread(buf, 1, len, fh);
     if (rlen < 0) {
         fclose(fh);
         return -1;
@@ -98,7 +98,7 @@ int rmrf(char *path)
         if (strcmp(d->d_name, "..") == 0)
             continue;
 
-        char *p =catfile(path, d->d_name);
+        char *p = catfile(path, d->d_name);
         rmrf(strdup(p));
         break;
     }
