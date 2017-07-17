@@ -320,15 +320,33 @@ char *clax_strjoin(char *sep, ...)
         if (!strlen(p))
             continue;
 
-        if (first) {
-            join = realloc(join, strlen(p) + 1);
-            strcat(join, p);
+        char *join_new;
 
-            first = 0;
+        if (first) {
+            join_new = realloc(join, strlen(p) + 1);
+
+            if (join) {
+                join = join_new;
+
+                strcat(join_new, p);
+
+                first = 0;
+            }
+            else {
+                free(p);
+            }
         } else {
-            join = realloc(join, strlen(join) + sep_len + strlen(p) + 1);
-            strcat(join, sep);
-            strcat(join, p);
+            join_new = realloc(join, strlen(join) + sep_len + strlen(p) + 1);
+
+            if (join_new) {
+                join = join_new;
+
+                strcat(join, sep);
+                strcat(join, p);
+            }
+            else {
+                free(join);
+            }
         }
     }
 
@@ -540,13 +558,20 @@ unsigned char *clax_slurp_alloc(char *filename, size_t *olen)
 
     size_t rcount = 0;
     while ((rcount = fread(buf, 1, sizeof(buf), fh)) > 0) {
-        slurp = realloc(slurp, *olen + rcount + 1);
+        char *slurp_new = realloc(slurp, *olen + rcount + 1);
 
-        memcpy(slurp + *olen, buf, rcount);
+        if (slurp_new) {
+            slurp = slurp_new;
 
-        *olen += rcount;
+            memcpy(slurp + *olen, buf, rcount);
 
-        slurp[*olen] = 0;
+            *olen += rcount;
+
+            slurp[*olen] = 0;
+        }
+        else {
+            free(slurp);
+        }
     }
 
     (*olen)++;

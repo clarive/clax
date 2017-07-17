@@ -166,7 +166,7 @@ void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax
                     clax_strcatfile(fullpath, fullpath_maxlen, path);
                     clax_strcatfile(fullpath, fullpath_maxlen, name);
 
-                    char *line;
+                    char *line = NULL;
                     char last_modified_buf[30];
                     clax_last_modified(fullpath, last_modified_buf, sizeof(last_modified_buf));
 
@@ -316,11 +316,11 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
             char *fpath;
 
             if (new_name && strlen(new_name)) {
-                fpath = clax_strjoin("/", subdir, new_name, NULL);
+                fpath = clax_strjoin("/", subdir, new_name, (char *)NULL);
             }
             else {
                 char *p = clax_strndup(filename, filename_len);
-                fpath = clax_strjoin("/", subdir, p, NULL);
+                fpath = clax_strjoin("/", subdir, p, (char *)NULL);
                 free(p);
             }
 
@@ -375,7 +375,7 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
         if (dirname && strlen(dirname)) {
             clax_san_path(dirname);
 
-            char *fullpath = clax_strjoin("/", subdir, dirname, NULL);
+            char *fullpath = clax_strjoin("/", subdir, dirname, (char *)NULL);
             if (clax_mkdir_p(fullpath) < 0) {
                 clax_dispatch_system_error(clax_ctx, req, res, "Can't create directory");
             }
@@ -394,10 +394,11 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
 void clax_dispatch_delete(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     char *path = req->path_info + strlen("/tree/");
-    char *error = NULL;
 
     int is_file = clax_is_path_f(path);
     if (is_file || clax_is_path_d(path)) {
+        char *error = NULL;
+
         if (is_file) {
             if (unlink(path) < 0) {
                 error = clax_sprintf_alloc("Can't delete file: %s", strerror(errno));

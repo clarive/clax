@@ -546,9 +546,13 @@ int clax_http_chunked(char *buf, size_t len, va_list a_list_)
         TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)"\r\n", 2) GOTO
     }
 
+    va_end(a_list);
+
     return 0;
 
 error:
+    va_end(a_list);
+
     return -1;
 }
 
