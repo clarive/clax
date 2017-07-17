@@ -62,7 +62,7 @@ check: $(PROGRAM)
 	./$(PROGRAM)
 
 check-valgrind: $(PROGRAM)
-	valgrind -v --leak-check=full --show-leak-kinds=all ./$(PROGRAM)
+	valgrind -v --track-origins=yes --leak-check=full --show-leak-kinds=all ./$(PROGRAM)
 
 check-coverage:
 	$(MAKE) clean
