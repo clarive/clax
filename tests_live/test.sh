@@ -22,7 +22,12 @@ function run {
     EXPECTED=$2
 
     echo -n "${CMD}... "
-    $CMD 2>&1 | tee -a test.log | grep "$EXPECTED" > /dev/null && ok || fail
+
+    if $CMD 2>&1 | tee -a test.log | grep "$EXPECTED" > /dev/null && ok; then
+        true
+    else
+        fail
+    fi
 }
 
 unlink test.log
