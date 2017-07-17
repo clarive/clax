@@ -675,7 +675,7 @@ int clax_rmpath_r(const char *path)
         if (strcmp(d->d_name, "..") == 0)
             continue;
 
-        char *p = clax_strjoin("/", path, d->d_name, NULL);
+        char *p = clax_strjoin("/", path, d->d_name, (char *)NULL);
         clax_rmpath_r(p);
         free(p);
 

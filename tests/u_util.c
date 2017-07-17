@@ -48,6 +48,7 @@ size_t slurp_file(char *fname, char *buf, size_t len)
 
     size_t rlen = fread(buf, 1, len, fh);
     if (rlen < 0) {
+        fclose(fh);
         return -1;
     }
 

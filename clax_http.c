@@ -601,7 +601,7 @@ int clax_http_write_response(void *ctx, send_cb_t send_cb, clax_http_response_t 
     const char *status_message = clax_http_status_message(response->status_code);
 
     TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)"HTTP/1.1 ", 9) GOTO
-    sprintf(buf, "%d ", response->status_code);
+    sprintf(buf, "%d ", (int)response->status_code);
     TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)buf, MIN(strlen(buf), sizeof(buf))) GOTO
     TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)status_message, strlen(status_message)) GOTO
     TRY send_cb_wrapper(send_cb, ctx, (const unsigned char *)"\r\n", 2) GOTO
@@ -970,7 +970,7 @@ int clax_http_proxy_write_request_body(clax_http_request_t *req, int sockfd)
     if (req->body && !req->continue_expected) {
         clax_log("Writing proxy body");
         size_t offset = 0;
-        size_t wcount = 0;
+        ssize_t wcount = 0;
 
         while ((wcount = send(sockfd, req->body + offset, req->body_len - offset, 0)) > 0) {
             offset += wcount;
