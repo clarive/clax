@@ -47,6 +47,7 @@ int clax_log_(const char *file, int line, const char *func, char *fmt, ...)
     }
 
     va_end(args);
+    free(p);
 
     return ret;
 }
