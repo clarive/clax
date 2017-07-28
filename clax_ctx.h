@@ -20,13 +20,39 @@
 #ifndef CLAX_CTX_H
 #define CLAX_CTX_H
 
+#include "contrib/mbedtls/mbedtls/ssl.h"
+
 #include "clax_options.h"
+#include "clax_http_parser.h"
 
-typedef struct {
+typedef struct clax_ctx_t clax_ctx_t;
+
+typedef int (*clax_ctx_send_cb_t)(clax_ctx_t *clax_ctx, const unsigned char *buf, size_t len);
+
+typedef struct clax_ctx_ssl_t clax_ctx_ssl_t;
+
+struct clax_ctx_ssl_t {
+    struct mbedtls_ssl_context ssl;
+    char *buf;
+    int len;
+};
+
+struct clax_ctx_t {
     opt* options;
-} clax_ctx_t;
+    http_parser parser;
+    clax_http_request_t request;
+    clax_http_response_t response;
 
-void clax_ctx_init(clax_ctx_t *ctx);
+    void *rh;
+    void *wh;
+    clax_ctx_send_cb_t send_cb;
+
+    clax_ctx_ssl_t ssl;
+    int ssl_handshake_done;
+};
+
+clax_ctx_t *clax_ctx_alloc();
+void clax_ctx_init(clax_ctx_t *ctx, opt *options);
 void clax_ctx_free(clax_ctx_t *ctx);
 
 #endif

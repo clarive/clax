@@ -25,6 +25,8 @@
 #include <time.h>
 #include <fcntl.h>
 
+#include "contrib/libuv/include/uv.h"
+
 #define sizeof_array(array) sizeof(array) / sizeof(array[0])
 #define sizeof_struct_member(type, member) sizeof(((type *)0)->member)
 
@@ -59,7 +61,7 @@ char *clax_buf2str(const char *buf, size_t len);
 void clax_str_append(char **dst, const char *src);
 char *clax_strapp_a(char **dst, const char *src);
 char *clax_strnapp_a(char **dst, const char *src, size_t src_len);
-void clax_buf_append(unsigned char **dst, size_t *dst_len, const char *src, size_t src_len);
+void clax_buf_append(unsigned char **dst, size_t *dst_len, const unsigned char *src, size_t src_len);
 void clax_hexdump(unsigned char *buf, size_t len);
 
 void clax_san_path(char *buf);
@@ -67,12 +69,12 @@ char *clax_strjoin(char *sep, ...);
 
 int clax_mkdir(char *dirname, int mode);
 char *clax_mktmpdir_alloc();
-char *clax_mktmpfile_alloc(const char *tmpdir, const char *template);
+char *clax_mktmpfile_alloc(const char *tmpdir, const char *tmpl);
 
 unsigned long int clax_htol(char *buf);
 
 char *clax_randstr_alloc(size_t len);
-char *clax_randstr_template_alloc(const char *template);
+char *clax_randstr_template_alloc(const char *tmpl);
 char *clax_strdup(const char *str);
 char *clax_strndup(const char *str, size_t max);
 
@@ -107,5 +109,7 @@ int clax_strcatdir(char *dst, size_t dst_max_len, const char *src);
 char *clax_sprintf_alloc(const char *fmt, ...);
 
 char *clax_str_alloc(size_t len);
+
+int clax_uv_mkdir_p(uv_loop_t *loop, uv_fs_t *req, const char *path, int mode, uv_fs_cb cb);
 
 #endif

@@ -29,39 +29,66 @@
 #include <windows.h>
 #endif
 
-#include "mbedtls/entropy.h"
-#include "mbedtls/ctr_drbg.h"
-#include "mbedtls/certs.h"
-#include "mbedtls/x509.h"
-#include "mbedtls/ssl.h"
-#include "mbedtls/net.h"
-#include "mbedtls/error.h"
-#include "mbedtls/debug.h"
-#include "mbedtls/ssl_cache.h"
+#include "contrib/mbedtls/mbedtls/entropy.h"
+#include "contrib/mbedtls/mbedtls/ctr_drbg.h"
+#include "contrib/mbedtls/mbedtls/certs.h"
+#include "contrib/mbedtls/mbedtls/x509.h"
+#include "contrib/mbedtls/mbedtls/ssl.h"
+#include "contrib/mbedtls/mbedtls/net.h"
+#include "contrib/mbedtls/mbedtls/error.h"
+#include "contrib/mbedtls/mbedtls/debug.h"
+#include "contrib/mbedtls/mbedtls/ssl_cache.h"
 
-#include "clax.h"
+#include "contrib/libuv/include/uv.h"
+
 #include "clax_ctx.h"
 #include "clax_errors.h"
 #include "clax_options.h"
 #include "clax_http.h"
+#include "clax_http_parser.h"
 #include "clax_log.h"
 #include "clax_util.h"
 #include "clax_platform.h"
+#include "clax.h"
 
 #define DEBUG_LEVEL 0
-
 #define DEV_RANDOM_THRESHOLD        32
 
 opt options;
 
+int clax_argc;
+char **clax_argv;
+
+mbedtls_entropy_context ssl_entropy;
+mbedtls_ctr_drbg_context ssl_ctr_drbg;
+mbedtls_ssl_config ssl_conf;
+mbedtls_x509_crt ssl_srvcert;
+mbedtls_pk_context ssl_pkey;
+mbedtls_ssl_cache_context ssl_cache;
+
+void clax_ssl_free();
+int clax_conn_write_cb(clax_ctx_t *clax_ctx, const unsigned char *buf, size_t size);
+
 void clax_exit(int code)
 {
+    if (options.ssl) {
+        clax_ssl_free();
+    }
+
     if (options._log_file) {
         clax_log("Closing log file '%s'", options.log_file);
         fclose(options._log_file);
 
         clax_log("Exit=%d", code);
     }
+
+    fflush(stdout);
+    fclose(stdout);
+
+    clax_options_free(&options);
+
+    uv_stop(uv_default_loop());
+    uv_loop_close(uv_default_loop());
 
     exit(code);
 }
@@ -76,41 +103,43 @@ void term(int dummy)
     clax_abort();
 }
 
-int clax_recv(void *ctx,  unsigned char *buf, size_t len)
+int clax_recv(void *ctx, unsigned char *buf, size_t len)
 {
-    int ret;
-    int fd = fileno(stdin);
+    clax_ctx_t *clax_ctx = ctx;
 
-    ret = (int)read(fd, buf, len);
+    int have = MIN(len, clax_ctx->ssl.len);
 
-#ifdef MVS
-    if (isatty(fd)) {
-        clax_etoa((char *)buf, len);
+    memcpy(buf, clax_ctx->ssl.buf, clax_ctx->ssl.len);
+    clax_ctx->ssl.buf += len;
+    clax_ctx->ssl.len -= len;
+
+    if (have == 0) {
+        return MBEDTLS_ERR_SSL_WANT_READ;
     }
 
-#endif
-
-    /*clax_log("recv (%d)=%d from %d", fd, ret, len);*/
-
-    return ret;
+    return have;
 }
 
 int clax_send(void *ctx, const unsigned char *buf, size_t len)
 {
-    int ret;
-    int fd = fileno(stdout);
+    clax_ctx_t *clax_ctx = ctx;
 
-    ret = (int)write(fd, buf, len);
+    int r = clax_conn_write_cb(clax_ctx, buf, len);
 
-    /*clax_log("send (%d)=%d from %d", fd, ret, len);*/
+    if (r < 0) {
+        clax_log("Error: send failed: %s", uv_strerror(r));
+        return -1;
+    }
 
-    return ret;
+    return len;
 }
 
 int clax_recv_ssl(void *ctx, unsigned char *buf, size_t len)
 {
     int ret;
-    mbedtls_ssl_context *ssl = ctx;
+
+    clax_ctx_t *clax_ctx = ctx;
+    mbedtls_ssl_context *ssl = (mbedtls_ssl_context *)&clax_ctx->ssl;
 
     ret = mbedtls_ssl_read(ssl, buf, len);
 
@@ -129,12 +158,13 @@ int clax_recv_ssl(void *ctx, unsigned char *buf, size_t len)
 int clax_send_ssl(void *ctx, const unsigned char *buf, size_t len)
 {
     int ret;
-    mbedtls_ssl_context *ssl = ctx;
+    clax_ctx_t *clax_ctx = ctx;
+    mbedtls_ssl_context *ssl = (mbedtls_ssl_context *)&clax_ctx->ssl;
 
     while ((ret = mbedtls_ssl_write(ssl, buf, len)) <= 0) {
         if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE) {
             clax_log("failed\n  ! mbedtls_ssl_write returned %d", ret);
-            return ret;
+            return -1;
         }
     }
 
@@ -182,7 +212,7 @@ int dev_random_entropy_poll(void *data, unsigned char *output,
     return 0;
 }
 
-void clax_loop_ssl(clax_ctx_t *clax_ctx)
+int clax_ssl_init()
 {
     int ret = 0;
     char pers[] = "clax_server";
@@ -191,21 +221,12 @@ void clax_loop_ssl(clax_ctx_t *clax_ctx)
     clax_etoa(pers, strlen(pers));
 #endif
 
-    mbedtls_entropy_context entropy;
-    mbedtls_ctr_drbg_context ctr_drbg;
-    mbedtls_ssl_context ssl;
-    mbedtls_ssl_config conf;
-    mbedtls_x509_crt srvcert;
-    mbedtls_pk_context pkey;
-    mbedtls_ssl_cache_context cache;
-
-    mbedtls_ssl_init(&ssl);
-    mbedtls_ssl_config_init(&conf);
-    mbedtls_ssl_cache_init(&cache);
-    mbedtls_x509_crt_init(&srvcert);
-    mbedtls_pk_init(&pkey);
-    mbedtls_entropy_init(&entropy);
-    mbedtls_ctr_drbg_init(&ctr_drbg);
+    mbedtls_ssl_config_init(&ssl_conf);
+    mbedtls_ssl_cache_init(&ssl_cache);
+    mbedtls_x509_crt_init(&ssl_srvcert);
+    mbedtls_pk_init(&ssl_pkey);
+    mbedtls_entropy_init(&ssl_entropy);
+    mbedtls_ctr_drbg_init(&ssl_ctr_drbg);
 
 #if defined(MBEDTLS_DEBUG_C)
     mbedtls_debug_set_threshold(DEBUG_LEVEL);
@@ -229,7 +250,7 @@ void clax_loop_ssl(clax_ctx_t *clax_ctx)
 #endif
 
     clax_log("Parsing '%s'...", options.cert_file);
-    ret = mbedtls_x509_crt_parse(&srvcert, (const unsigned char *)file, file_len);
+    ret = mbedtls_x509_crt_parse(&ssl_srvcert, (const unsigned char *)file, file_len);
     free(file);
 
     if (ret != 0) {
@@ -249,7 +270,7 @@ void clax_loop_ssl(clax_ctx_t *clax_ctx)
 #endif
 
     clax_log("Parsing '%s'...", options.key_file);
-    ret = mbedtls_pk_parse_key(&pkey, (const unsigned char *)file, file_len, NULL, 0);
+    ret = mbedtls_pk_parse_key(&ssl_pkey, (const unsigned char *)file, file_len, NULL, 0);
     free(file);
 
     if (ret != 0) {
@@ -257,35 +278,29 @@ void clax_loop_ssl(clax_ctx_t *clax_ctx)
         goto exit;
     }
 
-    clax_log("ok");
-
     if (options.entropy_file[0]) {
         clax_log("Using '%s' as entropy file...", options.entropy_file);
 
-        if ((ret = mbedtls_entropy_add_source(&entropy, dev_random_entropy_poll,
+        if ((ret = mbedtls_entropy_add_source(&ssl_entropy, dev_random_entropy_poll,
                                                 NULL, DEV_RANDOM_THRESHOLD,
                                                 MBEDTLS_ENTROPY_SOURCE_STRONG)) != 0) {
             clax_log("failed\n  ! mbedtls_entropy_add_source returned -0x%04x", -ret);
             goto exit;
         }
-
-        clax_log("ok");
     }
 
     clax_log("Seeding the random number generator...");
 
-    if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
+    if ((ret = mbedtls_ctr_drbg_seed(&ssl_ctr_drbg, mbedtls_entropy_func, &ssl_entropy,
                                        (const unsigned char *)pers,
                                        strlen(pers))) != 0) {
         clax_log("failed\n  ! mbedtls_ctr_drbg_seed returned %d", ret);
         goto exit;
     }
 
-    clax_log("ok");
-
     clax_log("Setting up the SSL data....");
 
-    if ((ret = mbedtls_ssl_config_defaults(&conf,
+    if ((ret = mbedtls_ssl_config_defaults(&ssl_conf,
                 MBEDTLS_SSL_IS_SERVER,
                 MBEDTLS_SSL_TRANSPORT_STREAM,
                 MBEDTLS_SSL_PRESET_DEFAULT)) != 0) {
@@ -294,89 +309,412 @@ void clax_loop_ssl(clax_ctx_t *clax_ctx)
     }
 
     if (!options.no_ssl_verify) {
-        mbedtls_ssl_conf_authmode(&conf, MBEDTLS_SSL_VERIFY_REQUIRED);
+        mbedtls_ssl_conf_authmode(&ssl_conf, MBEDTLS_SSL_VERIFY_REQUIRED);
     }
 
-    mbedtls_ssl_conf_rng(&conf, mbedtls_ctr_drbg_random, &ctr_drbg);
+    mbedtls_ssl_conf_rng(&ssl_conf, mbedtls_ctr_drbg_random, &ssl_ctr_drbg);
 
-    mbedtls_ssl_conf_session_cache(&conf, &cache,
+    mbedtls_ssl_conf_session_cache(&ssl_conf, &ssl_cache,
                                     mbedtls_ssl_cache_get,
                                     mbedtls_ssl_cache_set);
 
-    mbedtls_ssl_conf_ca_chain(&conf, srvcert.next, NULL);
-    if ((ret = mbedtls_ssl_conf_own_cert(&conf, &srvcert, &pkey)) != 0) {
+    mbedtls_ssl_conf_ca_chain(&ssl_conf, ssl_srvcert.next, NULL);
+    if ((ret = mbedtls_ssl_conf_own_cert(&ssl_conf, &ssl_srvcert, &ssl_pkey)) != 0) {
         clax_log(" failed\n  ! mbedtls_ssl_conf_own_cert returned %d", ret);
         goto exit;
     }
 
-    if ((ret = mbedtls_ssl_setup(&ssl, &conf)) != 0) {
-        clax_log(" failed\n  ! mbedtls_ssl_setup returned %d", ret);
-        goto exit;
-    }
-
-    clax_log("ok");
-
-    mbedtls_ssl_session_reset(&ssl);
-
-    mbedtls_ssl_set_bio(&ssl, NULL, clax_send, clax_recv, NULL);
-
-    clax_log("ok");
-
-    clax_log("Performing the SSL/TLS handshake...");
-
-    while ((ret = mbedtls_ssl_handshake(&ssl)) != 0) {
-        if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE) {
-            clax_log("failed\n  ! mbedtls_ssl_handshake returned %d", ret);
-            goto exit;
-        }
-    }
-
-    clax_log("ok");
-
-    clax_http_dispatch(clax_ctx, clax_send_ssl, clax_recv_ssl, &ssl);
-
-    clax_log("Closing the connection...");
-
-    while ((ret = mbedtls_ssl_close_notify(&ssl)) < 0) {
-        if (ret != MBEDTLS_ERR_SSL_WANT_READ &&
-                ret != MBEDTLS_ERR_SSL_WANT_WRITE) {
-            clax_log("failed\n  ! mbedtls_ssl_close_notify returned %d", ret);
-            goto exit;
-        }
-    }
-
-    clax_log("ok");
-
-    ret = 0;
-    goto exit;
+    return 0;
 
 exit:
-    fflush(stdout);
-
-#ifdef MBEDTLS_ERROR_C
-    if (ret != 0) {
-        char error_buf[100];
-        mbedtls_strerror(ret, error_buf, 100);
-#ifdef MVS
-        clax_atoe(error_buf, strlen(error_buf));
-#endif
-        clax_log("Last error was: %d - %s", ret, error_buf);
-    }
-#endif
-
-    mbedtls_x509_crt_free(&srvcert);
-    mbedtls_pk_free(&pkey);
-    mbedtls_ssl_free(&ssl);
-    mbedtls_ssl_config_free(&conf);
-    mbedtls_ssl_cache_free(&cache);
-    mbedtls_ctr_drbg_free(&ctr_drbg);
-    mbedtls_entropy_free(&entropy);
+    return -1;
 }
 
-int main(int argc, char **argv)
+void clax_ssl_free()
 {
-    clax_ctx_t clax_ctx;
+    clax_log("Freeing ssl");
 
+    mbedtls_x509_crt_free(&ssl_srvcert);
+    mbedtls_pk_free(&ssl_pkey);
+    mbedtls_ssl_config_free(&ssl_conf);
+    mbedtls_ssl_cache_free(&ssl_cache);
+    mbedtls_ctr_drbg_free(&ssl_ctr_drbg);
+    mbedtls_entropy_free(&ssl_entropy);
+}
+
+int clax_ssl_init_ctx(clax_ctx_t *clax_ctx)
+{
+    clax_log("Initializing ssl ctx");
+
+    mbedtls_ssl_context *ssl = (mbedtls_ssl_context *)&clax_ctx->ssl;
+
+    if (mbedtls_ssl_setup(ssl, &ssl_conf) != 0) {
+        clax_log("Error: ssl ctx setup failed");
+        return -1;
+    }
+
+    mbedtls_ssl_session_reset(ssl);
+
+    mbedtls_ssl_set_bio(ssl, clax_ctx, clax_send, clax_recv, NULL);
+
+    return 0;
+}
+
+void clax_ssl_free_ctx(clax_ctx_t *clax_ctx)
+{
+    clax_log("Freeing ssl ctx");
+
+    mbedtls_ssl_context *ssl = (mbedtls_ssl_context *)&clax_ctx->ssl;
+
+    mbedtls_ssl_free(ssl);
+}
+
+typedef struct {
+    uv_write_t req;
+    uv_buf_t buf;
+    clax_ctx_t *clax_ctx;
+} write_req_t;
+
+void free_write_req(uv_write_t *req)
+{
+    write_req_t *wr = (write_req_t *)req;
+    free(wr->buf.base);
+    free(wr);
+}
+
+void alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf)
+{
+    buf->base = (char *)malloc(suggested_size);
+    buf->len = suggested_size;
+}
+
+void clax_conn_close_cb(uv_handle_t *handle)
+{
+    clax_log("Freeing connection handle");
+
+    if (handle)
+        free(handle);
+}
+
+static void clax_conn_shutdown_cb(uv_shutdown_t* req, int status)
+{
+    clax_log("Closing handle");
+
+    uv_close((uv_handle_t *)req->handle, clax_conn_close_cb);
+    free(req);
+}
+
+int clax_conn_done_cb(clax_ctx_t *clax_ctx)
+{
+    clax_log("Closing connection");
+
+    uv_handle_t *rh = clax_ctx->rh;
+    uv_handle_t *wh = clax_ctx->wh;
+
+    if (options.ssl) {
+        /*mbedtls_ssl_context *ssl = (mbedtls_ssl_context *)&clax_ctx->ssl;*/
+        /*int ret;*/
+        /*while ((ret = mbedtls_ssl_close_notify(ssl)) < 0) {*/
+            /*if (ret != MBEDTLS_ERR_SSL_WANT_READ &&*/
+                    /*ret != MBEDTLS_ERR_SSL_WANT_WRITE) {*/
+                /*clax_log("failed\n  ! mbedtls_ssl_close_notify returned %d", ret);*/
+            /*}*/
+        /*}*/
+    }
+
+    if (wh && rh != wh) {
+        uv_read_stop((uv_stream_t *)wh);
+
+        clax_log("Closing write handle");
+
+        uv_close(wh, clax_conn_close_cb);
+    }
+
+    if (rh) {
+        uv_read_stop((uv_stream_t *)rh);
+
+        clax_log("Shutting down io handle");
+
+        /*uv_shutdown_t *sreq = malloc(sizeof *sreq);*/
+        /*uv_shutdown(sreq, (uv_stream_t *)rh, clax_conn_shutdown_cb);*/
+        uv_close((uv_handle_t *)rh, clax_conn_close_cb);
+    }
+
+    clax_ctx->rh = NULL;
+    clax_ctx->wh = NULL;
+
+    if (options.ssl)
+        clax_ssl_free_ctx(clax_ctx);
+
+    clax_ctx_free(clax_ctx);
+
+    return 0;
+}
+
+void clax_conn_write_finished_cb(uv_write_t *req, int status)
+{
+    write_req_t *write_req = (write_req_t *)req;
+    clax_ctx_t *clax_ctx = write_req->clax_ctx;
+
+    if (write_req->buf.base) {
+        clax_ctx->response.to_write -= write_req->buf.len;
+    }
+
+    if (status) {
+        clax_log("Error: write error: %s %s", uv_err_name(status), uv_strerror(status));
+    }
+
+    if (clax_ctx->response.finalized) {
+        if (clax_ctx->response.to_write <= 0) {
+            clax_conn_done_cb(clax_ctx);
+        }
+    }
+
+    free_write_req(req);
+}
+
+int clax_conn_write_cb(clax_ctx_t *clax_ctx, const unsigned char *buf, size_t size) {
+    write_req_t *req = (write_req_t *)malloc(sizeof(write_req_t));
+
+    if (req) {
+        if (buf && size) {
+            req->clax_ctx = clax_ctx;
+
+            req->buf.base = malloc(size);
+            req->buf.len = size;
+            memcpy(req->buf.base, buf, size);
+
+            clax_ctx->response.to_write += size;
+
+            int r = uv_write((uv_write_t *)req, (uv_stream_t *)clax_ctx->wh, &req->buf, 1, clax_conn_write_finished_cb);
+
+            if (r) {
+                free(req->buf.base);
+                free(req);
+
+                clax_log("Error: write error");
+                clax_conn_done_cb(clax_ctx);
+            }
+        }
+        else {
+            free(req);
+        }
+    }
+
+    if (clax_ctx->response.finalized && clax_ctx->response.to_write == 0) {
+        clax_conn_done_cb(clax_ctx);
+    }
+
+    return 0;
+}
+
+void clax_conn_uv_read_cb(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
+    clax_ctx_t *clax_ctx = (clax_ctx_t *)client->data;
+
+    char *base = buf->base;
+
+    if (nread > 0) {
+        if (options.ssl) {
+            mbedtls_ssl_context *ssl = (mbedtls_ssl_context *)&clax_ctx->ssl;
+
+            clax_ctx->ssl.buf = buf->base;
+            clax_ctx->ssl.len = nread;
+
+            if (!clax_ctx->ssl_handshake_done) {
+                clax_log("Performing the SSL/TLS handshake...");
+
+                int r = mbedtls_ssl_handshake(ssl);
+
+                if (r == 0) {
+                    clax_log("SSL/TLS handshake done");
+
+                    clax_ctx->ssl_handshake_done++;
+                }
+                else if (r == MBEDTLS_ERR_SSL_WANT_READ || r == MBEDTLS_ERR_SSL_WANT_WRITE) {
+                    return;
+                }
+                else {
+                    clax_log("SSL/TLS handshake failed");
+
+                    clax_conn_done_cb(clax_ctx);
+
+                    return;
+                }
+            }
+
+            if (!clax_ctx->ssl_handshake_done) {
+                return;
+            }
+
+            uv_buf_t decoded_buf;
+            decoded_buf.base = (char *)malloc(1024);
+            decoded_buf.len = 1024;
+
+            int ret = mbedtls_ssl_read(ssl, (unsigned char *)decoded_buf.base, decoded_buf.len);
+
+            if (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE)
+                return;
+
+            if (ret == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY || ret == MBEDTLS_ERR_NET_CONN_RESET) {
+                clax_conn_done_cb(clax_ctx);
+                return;
+            }
+
+            nread = ret;
+            base = decoded_buf.base;
+        }
+
+        int ok = clax_http_dispatch(clax_ctx, base, nread);
+
+        if (ok < 0) {
+            clax_conn_done_cb(clax_ctx);
+        }
+    }
+    else if (nread < 0) {
+        if (nread != UV_EOF)
+            clax_log("Read error %s\n", uv_err_name(nread));
+
+        clax_conn_done_cb(clax_ctx);
+    }
+
+    if (buf && buf->base)
+        free(buf->base);
+}
+
+void clax_conn_uv_new_cb(uv_stream_t *server, int status) {
+    if (status < 0) {
+        clax_log("New connection error %s\n", uv_strerror(status));
+        return;
+    }
+
+    uv_tcp_t *client = (uv_tcp_t *)malloc(sizeof(uv_tcp_t));
+    uv_tcp_init(uv_default_loop(), client);
+
+    clax_ctx_t *clax_ctx = clax_ctx_alloc();
+    clax_ctx_init(clax_ctx, &options);
+
+    if (options.ssl)
+        clax_ssl_init_ctx(clax_ctx);
+
+    clax_ctx->rh = client;
+    clax_ctx->wh = client;
+    if (options.ssl) {
+        clax_ctx->send_cb = clax_send_ssl;
+    }
+    else {
+        clax_ctx->send_cb = clax_conn_write_cb;
+    }
+
+    client->data = clax_ctx;
+
+    int r = uv_accept(server, (uv_stream_t *)client);
+    if (r == 0) {
+        clax_log("New tcp connection");
+
+        uv_read_start((uv_stream_t *)client, alloc_buffer, clax_conn_uv_read_cb);
+    }
+    else {
+        clax_log("Error: accept failed: %s", uv_strerror(r));
+
+        if (options.ssl)
+            clax_ssl_free_ctx(clax_ctx);
+
+        clax_ctx_free(clax_ctx);
+
+        uv_close((uv_handle_t *)client, clax_conn_close_cb);
+    }
+}
+
+int clax_service_mode()
+{
+#ifdef _WIN32
+
+    HANDLE hProcessToken = NULL;
+    DWORD groupLength = 50;
+
+    PTOKEN_GROUPS groupInfo = (PTOKEN_GROUPS)LocalAlloc(0, groupLength);
+
+    SID_IDENTIFIER_AUTHORITY siaNt = SECURITY_NT_AUTHORITY;
+    PSID InteractiveSid = NULL;
+    PSID ServiceSid = NULL;
+    DWORD i;
+
+    BOOL exe = TRUE;
+
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hProcessToken))
+        goto ret;
+
+    if (groupInfo == NULL)
+        goto ret;
+
+    if (!GetTokenInformation(hProcessToken, TokenGroups, groupInfo,
+                groupLength, &groupLength))
+    {
+        if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+            goto ret;
+
+        LocalFree(groupInfo);
+
+        groupInfo = (PTOKEN_GROUPS)LocalAlloc(0, groupLength);
+
+        if (groupInfo == NULL)
+            goto ret;
+
+        if (!GetTokenInformation(hProcessToken, TokenGroups, groupInfo,
+                    groupLength, &groupLength))
+        {
+            goto ret;
+        }
+    }
+
+    if (!AllocateAndInitializeSid(&siaNt, 1, SECURITY_INTERACTIVE_RID, 0, 0, 0, 0, 0, 0, 0, &InteractiveSid)) {
+        goto ret;
+    }
+
+    if (!AllocateAndInitializeSid(&siaNt, 1, SECURITY_SERVICE_RID, 0, 0, 0, 0, 0, 0, 0, &ServiceSid)) {
+        goto ret;
+    }
+
+    for (i = 0; i < groupInfo->GroupCount; i++) {
+        SID_AND_ATTRIBUTES sanda = groupInfo->Groups[i];
+        PSID Sid = sanda.Sid;
+
+        if (EqualSid(Sid, InteractiveSid)) {
+            goto ret;
+        }
+        else if (EqualSid(Sid, ServiceSid)) {
+            exe = FALSE;
+            goto ret;
+        }
+    }
+
+    exe = FALSE;
+
+ret:
+
+    if (InteractiveSid)
+        FreeSid(InteractiveSid);
+
+    if (ServiceSid)
+        FreeSid(ServiceSid);
+
+    if (groupInfo)
+        LocalFree(groupInfo);
+
+    if (hProcessToken)
+        CloseHandle(hProcessToken);
+
+    return !exe;
+
+#else
+
+    return 0;
+
+#endif
+}
+
+int clax_main(int argc, char **argv)
+{
 #ifdef _WIN32
     _setmode(_fileno(stdin), _O_BINARY);
     _setmode(_fileno(stdout), _O_BINARY);
@@ -386,16 +724,17 @@ int main(int argc, char **argv)
     int is_interactive = isatty(fileno(stdin));
 
     signal(SIGINT, term);
+    setbuf(stderr, NULL);
     setbuf(stdout, NULL);
 
     clax_options_init(&options);
-    clax_ctx_init(&clax_ctx);
-    clax_ctx.options = &options;
 
     int ok = clax_parse_options(&options, argc, argv);
     if (ok < 0) {
         const char *error = clax_strerror(ok);
         size_t len = strlen(error);
+
+        clax_log("Options parsing error: %s", error);
 
         if (is_interactive) {
             fprintf(stdout, "Error: %s\n", error);
@@ -405,7 +744,7 @@ int main(int argc, char **argv)
                 clax_usage();
             }
 
-            clax_exit(255);
+            clax_abort();
         }
         else {
             char buf[1024];
@@ -430,7 +769,7 @@ int main(int argc, char **argv)
 #ifdef MVS
             free(b);
 #endif
-            goto cleanup;
+            clax_abort();
         }
     }
 
@@ -439,18 +778,216 @@ int main(int argc, char **argv)
     clax_log("Option: log_file=%s", options.log_file);
     clax_log("Option: ssl=%d", options.ssl);
 
-    if (!options.ssl) {
-        clax_http_dispatch(&clax_ctx, clax_send, clax_recv, NULL);
-    } else {
-        clax_loop_ssl(&clax_ctx);
+    if (options.ssl) {
+        clax_ssl_init();
     }
 
-cleanup:
-    fflush(stdout);
-    fclose(stdout);
+    if (options.standalone || clax_service_mode()) {
+        if (!options.bind_host) {
+            options.bind_host = DEFAULT_BIND;
+            options.bind_port = DEFAULT_PORT;
+        }
 
-    clax_ctx_free(&clax_ctx);
-    clax_options_free(&options);
+        clax_log("Option: listen=%s:%d", options.bind_host, options.bind_port);
 
-    clax_exit(0);
+        uv_tcp_t server;
+
+        uv_tcp_init(uv_default_loop(), &server);
+
+        struct sockaddr_in bind_addr;
+        uv_ip4_addr(options.bind_host, options.bind_port, &bind_addr);
+
+        int r = uv_tcp_bind(&server, (const struct sockaddr *)&bind_addr, 0);
+        if (r) {
+            clax_log("Error: bind failed: %s", uv_strerror(r));
+            clax_abort();
+            return 1;
+        }
+
+        r = uv_listen((uv_stream_t *)&server, 128, clax_conn_uv_new_cb);
+        if (r) {
+            clax_log("Error: listen failed: %s", uv_strerror(r));
+            clax_abort();
+            return 1;
+        }
+
+        clax_log("Listening on %s:%d\n", options.bind_host, options.bind_port);
+        fprintf(stdout, "Listening on %s:%d\n", options.bind_host, options.bind_port);
+    }
+    else {
+        clax_log("New stdin connection");
+
+        uv_pipe_t *stdin_pipe = (uv_pipe_t *)malloc(sizeof(uv_pipe_t));
+        uv_pipe_t *stdout_pipe = (uv_pipe_t *)malloc(sizeof(uv_pipe_t));
+
+        uv_pipe_init(uv_default_loop(), stdin_pipe, 0);
+        uv_pipe_open(stdin_pipe, fileno(stdin));
+
+        uv_pipe_init(uv_default_loop(), stdout_pipe, 0);
+        uv_pipe_open(stdout_pipe, fileno(stdout));
+
+        clax_ctx_t *clax_ctx = clax_ctx_alloc();
+        clax_ctx_init(clax_ctx, &options);
+
+        clax_ctx->rh = stdin_pipe;
+        clax_ctx->wh = stdout_pipe;
+        clax_ctx->send_cb = clax_conn_write_cb;
+
+        stdin_pipe->data = clax_ctx;
+        stdout_pipe->data = clax_ctx;
+
+        int r = uv_read_start((uv_stream_t*)stdin_pipe, alloc_buffer, clax_conn_uv_read_cb);
+
+        if (r < 0) {
+            clax_log("Error: read start failed: %s", uv_strerror(r));
+            clax_abort();
+        }
+    }
+
+    int r = uv_run(uv_default_loop(), UV_RUN_DEFAULT);
+
+    if (r < 0) {
+        clax_log("Error: event loop failed: %s", uv_strerror(r));
+        clax_abort();
+    }
+
+    /*if (!options.ssl) {*/
+        /*clax_http_dispatch(&clax_ctx, clax_send, clax_recv, NULL);*/
+    /*} else {*/
+        /*clax_loop_ssl(&clax_ctx);*/
+    /*}*/
+
+    return 0;
+}
+
+#ifdef _WIN32
+SERVICE_STATUS ServiceStatus;
+SERVICE_STATUS_HANDLE ServiceStatusHandle;
+
+DWORD service_init(DWORD argc, LPTSTR *argv, DWORD *specificError);
+
+void WINAPI service_main(DWORD argc, LPTSTR *argv);
+void WINAPI service_ctrl_handler(DWORD opcode);
+
+DWORD service_init(DWORD argc, LPTSTR *argv, DWORD *specificError){
+    *argv;
+    argc;
+    specificError;
+
+    return 0;
+}
+
+void WINAPI service_main(DWORD argc, LPTSTR *argv){
+
+    DWORD status;
+
+    ServiceStatus.dwServiceType = SERVICE_WIN32;
+    ServiceStatus.dwCurrentState = SERVICE_START_PENDING;
+    ServiceStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
+    ServiceStatus.dwWin32ExitCode = 0;
+    ServiceStatus.dwServiceSpecificExitCode = 0;
+    ServiceStatus.dwCheckPoint = 0;
+    ServiceStatus.dwWaitHint = 0;
+
+    ServiceStatusHandle = RegisterServiceCtrlHandler(SERVICE_NAME, service_ctrl_handler);
+
+    if (ServiceStatusHandle == (SERVICE_STATUS_HANDLE)0) {
+        clax_log("Service register error: %ld.\n", GetLastError());
+
+        return;
+    } else {
+        clax_log("Service registered");
+    }
+
+    ServiceStatus.dwCurrentState = SERVICE_RUNNING;
+    ServiceStatus.dwCheckPoint = 0;
+    ServiceStatus.dwWaitHint = 0;
+
+    if (!SetServiceStatus(ServiceStatusHandle, &ServiceStatus)) {
+        status = GetLastError();
+
+        clax_log("Service status error: %ld", status);
+
+        return;
+    }
+    else {
+        clax_log("Service running");
+    }
+
+    clax_main(clax_argc, clax_argv);
+
+    return;
+}
+
+void WINAPI service_ctrl_handler(DWORD Opcode) {
+    DWORD status;
+
+    switch (Opcode) {
+        case SERVICE_CONTROL_STOP:
+
+            // Do whatever it takes to stop here...
+            ServiceStatus.dwWin32ExitCode = 0;
+            ServiceStatus.dwCurrentState = SERVICE_STOPPED;
+            ServiceStatus.dwCheckPoint = 0;
+            ServiceStatus.dwWaitHint = 0;
+
+            if (!SetServiceStatus(ServiceStatusHandle, &ServiceStatus)){
+                status = GetLastError();
+                clax_log("[MY_SERVICE] SetServiceStatus() error: %ld", status);
+            }
+
+            clax_log("Leaving");
+
+            clax_exit(0);
+
+            return;
+        case SERVICE_CONTROL_INTERROGATE:
+
+            // Fall through to send current status.
+            break;
+        default:
+            clax_log("Unrecognized opcode %ld", Opcode);
+    }
+
+    if (!SetServiceStatus(ServiceStatusHandle, &ServiceStatus)){
+        status = GetLastError();
+        clax_log("SetServiceStatus error %ld", status);
+
+        return;
+    }
+    else {
+        printf("SetServiceStatus() is OK.\n");
+    }
+
+    return;
+}
+
+#endif
+
+int main(int argc, char **argv)
+{
+    if (clax_service_mode()) {
+#ifdef _WIN32
+        FILE *stderr_redirect = freopen("C:/clax.log", "w", stderr);
+
+        clax_argc = argc;
+        clax_argv = argv;
+
+        SERVICE_TABLE_ENTRY service_dispatch_table[] = {
+            {SERVICE_NAME, service_main}, {NULL, NULL}
+        };
+
+        if (!StartServiceCtrlDispatcher(service_dispatch_table)) {
+            clax_log("Registering dispatch table failed: %ld", GetLastError());
+        }
+        else {
+            clax_log("Registering dispatch table ok");
+        }
+#endif
+    }
+    else {
+        clax_main(argc, argv);
+    }
+
+    return 0;
 }

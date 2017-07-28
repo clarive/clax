@@ -17,6 +17,7 @@
  *  along with Clax.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <time.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -26,44 +27,34 @@
 #include <sys/types.h>
 #include <sys/stat.h> /* stat */
 #include <unistd.h>
-#include <time.h>
-#include <utime.h>
 #include <errno.h>
 #include <dirent.h> /* DIR */
 
-#ifdef MVS
-#include "scandir.h"
-#endif
-
 #ifdef _WIN32
-# include "scandir.h"
 # include <windows.h>
 #endif
 
-#include "clax.h"
 #include "clax_http.h"
 #include "clax_log.h"
-#include "clax_big_buf.h"
 #include "clax_crc32.h"
 #include "clax_dispatcher.h"
 #include "clax_dispatcher_tree.h"
 #include "clax_util.h"
 
-char *clax_last_modified(const char *path, char *buf, size_t max_len)
+typedef struct {
+    uv_fs_t req;
+    void *data;
+} delete_req_t;
+
+char *clax_last_modified(uv_stat_t *stat, char *buf, size_t max_len)
 {
-    struct stat st;
     struct tm last_modified_time;
     struct tm *last_modified_time_p;
 
-    if (stat(path, &st) != 0) {
-        return NULL;
-    }
+    long epoch = stat->st_mtim.tv_sec;
+    time_t time = epoch;
 
-    if (!clax_is_path_d(path) && !clax_is_path_f(path)) {
-        return NULL;
-    }
-
-    last_modified_time_p = gmtime_r(&st.st_mtime, &last_modified_time);
+    last_modified_time_p = gmtime_r(&time, &last_modified_time);
 
     strftime(buf, max_len, "%a, %d %b %Y %H:%M:%S GMT", last_modified_time_p);
 
@@ -103,331 +94,467 @@ void clax_dispatch_tree(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_htt
     }
 }
 
+typedef struct {
+    uv_fs_t req;
+    uv_buf_t buf;
+    void *data;
+    char last_modified[30];
+    uv_file handle;
+    char *path;
+    unsigned long crc32;
+    uv_fs_cb cb;
+} file_req_t;
+
+void clax_uv_crc32_(uv_fs_t *req)
+{
+    file_req_t *file_req = (file_req_t *)req;
+
+    if (req->fs_type == UV_FS_OPEN) {
+        if (req->result > 0) {
+            clax_log("File opened successfully");
+
+            file_req->handle = req->result;
+
+            int r = uv_fs_read(uv_default_loop(), (uv_fs_t *)file_req,
+                    file_req->handle, &file_req->buf, 1, -1, clax_uv_crc32_);
+
+            if (r < 0) {
+                clax_log("File read error: %s", uv_strerror(r));
+
+                req->result = -1;
+                file_req->cb(req);
+
+                return;
+            }
+        }
+        else {
+            clax_log("Cannot open file");
+
+            req->result = -1;
+            file_req->cb(req);
+        }
+    }
+    else if (req->fs_type == UV_FS_READ) {
+        if (req->result == 0) {
+            clax_log("Finished reading file");
+
+            file_req->crc32 = clax_crc32_finalize(file_req->crc32);
+
+            req->result = 0;
+            file_req->cb(req);
+        }
+        else if (req->result > 0) {
+            file_req->crc32 = clax_crc32_calc(file_req->crc32,
+                    (unsigned char *)file_req->buf.base, req->result);
+
+            int r = uv_fs_read(uv_default_loop(), (uv_fs_t *)file_req,
+                    file_req->handle, &file_req->buf, 1, -1, clax_uv_crc32_);
+
+            if (r < 0) {
+                clax_log("File read error: %s", uv_strerror(r));
+
+                req->result = -1;
+                file_req->cb(req);
+
+                return;
+            }
+        }
+        else {
+            clax_log("File read error: %s", uv_strerror(req->result));
+
+            req->result = -1;
+            file_req->cb(req);
+        }
+    }
+}
+
+int clax_uv_crc32(file_req_t *file_req, const char *path, uv_fs_cb cb)
+{
+    uv_fs_t *req = (uv_fs_t *)file_req;
+    file_req->cb = cb;
+
+    file_req->buf.base = malloc(1024);
+    file_req->buf.len = 1024;
+
+    file_req->path = (char *)path;
+    file_req->crc32 = clax_crc32_init();
+
+    int r = uv_fs_open(uv_default_loop(), (uv_fs_t *)file_req, path, O_RDONLY, 0, clax_uv_crc32_);
+
+    if (r < 0) {
+        clax_log("File read error: %s", uv_strerror(r));
+
+        req->result = -1;
+        cb(req);
+
+        return - 1;
+    }
+
+    return 0;
+}
+
+void clax_dispatch_download_crc32_(uv_fs_t *req)
+{
+    file_req_t *file_req = (file_req_t *)req;
+    clax_ctx_t *clax_ctx = file_req->data;
+
+    if (req->result >= 0) {
+        char crc32_hex[9] = {0};
+        snprintf(crc32_hex, sizeof(crc32_hex), "%08lx", file_req->crc32);
+
+        clax_http_response_status(clax_ctx, &clax_ctx->response, 200);
+        clax_http_response_header(clax_ctx, &clax_ctx->response, "Last-Modified", file_req->last_modified);
+        clax_http_response_header(clax_ctx, &clax_ctx->response, "Content-Type", "application/octet-stream");
+        clax_http_response_header(clax_ctx, &clax_ctx->response, "Pragma", "no-cache");
+        clax_http_response_header(clax_ctx, &clax_ctx->response, "X-Clax-CRC32", crc32_hex);
+
+        uv_fs_req_cleanup(req);
+        free(file_req->buf.base);
+        free(file_req);
+
+        clax_http_dispatch_done_cb(clax_ctx, &clax_ctx->request, &clax_ctx->response);
+    }
+    else {
+        clax_log("Error: crc32 failed");
+
+        uv_fs_req_cleanup(req);
+        free(file_req->buf.base);
+        free(file_req);
+
+        clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+    }
+}
+
+void clax_dispatch_download_(uv_fs_t *req)
+{
+    file_req_t *file_req = (file_req_t *)req;
+    clax_ctx_t *clax_ctx = file_req->data;
+
+    if (req->fs_type == UV_FS_STAT) {
+        if (req->result == 0) {
+            if (S_ISREG(req->statbuf.st_mode)) {
+                clax_last_modified(&req->statbuf, file_req->last_modified, 30);
+                clax_ctx->response.body_len = req->statbuf.st_size;
+
+                int r = uv_fs_open(uv_default_loop(), (uv_fs_t *)file_req, req->path, O_RDONLY, 0, clax_dispatch_download_);
+
+                if (r < 0) {
+                    clax_log("Error: file open failed: %s", uv_strerror(r));
+
+                    uv_fs_req_cleanup(req);
+                    free(file_req);
+
+                    clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+                }
+            }
+            else {
+                clax_log("File '%s' is not a regular file", req->path);
+
+                uv_fs_req_cleanup(req);
+                free(file_req);
+
+                clax_dispatch_bad_request(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+            }
+        }
+        else {
+            clax_log("File '%s' not found", req->path);
+
+            uv_fs_req_cleanup(req);
+            free(file_req);
+
+            clax_dispatch_not_found(clax_ctx, &clax_ctx->request, &clax_ctx->response);
+        }
+    }
+    else if (req->fs_type == UV_FS_OPEN) {
+        if (req->result > 0) {
+            clax_log("File opened successfully");
+
+            clax_ctx->response.body_handle = req->result;
+
+            int r = clax_uv_crc32(file_req, req->path, clax_dispatch_download_crc32_);
+
+            if (r < 0) {
+                clax_log("Error: crc32 failed");
+
+                uv_fs_req_cleanup(req);
+                free(file_req->buf.base);
+                free(file_req);
+
+                clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+
+                return;
+            }
+        }
+        else {
+            clax_log("Cannot open file");
+
+            clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+
+            uv_fs_req_cleanup(req);
+            free(file_req);
+        }
+    }
+    else {
+        uv_fs_req_cleanup(req);
+        free(file_req);
+
+        clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+    }
+}
+
 void clax_dispatch_download(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     char *path = req->path_info + strlen("/tree/");
 
-    char size_buf[255];
-    char base_buf[255];
-    char last_modified_buf[30];
+    clax_log("Serving file '%s'", path);
 
-    if (!clax_is_path_d(path) && !clax_is_path_f(path)) {
-        clax_dispatch_not_found(clax_ctx, req, res);
+    file_req_t *file_req = malloc(sizeof(file_req_t));
+
+    if (file_req == NULL) {
+        clax_dispatch_system_error(clax_ctx, req, res, NULL);
         return;
     }
 
-    clax_last_modified((const char *)path, last_modified_buf, sizeof(last_modified_buf));
-    clax_kv_list_push(&res->headers, "Last-Modified", last_modified_buf);
+    file_req->data = clax_ctx;
 
-    if (clax_is_path_d(path)) {
-        res->status_code = 200;
+    int r = uv_fs_stat(uv_default_loop(), (uv_fs_t *)file_req, path, clax_dispatch_download_);
 
-        char *content_type = "application/vnd.clarive-clax.folder";
-        const char *accept = clax_kv_list_find(&req->headers, "Accept");
-        int is_html = 0;
+    if (r < 0) {
+        clax_log("Error: stat failed: %s", uv_strerror(r));
 
-        if (accept && strstr(accept, "text/html")) {
-            is_html = 1;
-            content_type = "text/html; charset=utf-8";
+        free(file_req);
+    }
+}
+
+typedef struct {
+    uv_fs_t req;
+    void *data;
+    char *path;
+} mkdir_req_t;
+
+typedef struct {
+    uv_fs_t req;
+    char *path;
+    void *data;
+} copy_req_t;
+
+void clax_dispatch_upload_crc32_invalid_(uv_fs_t *req)
+{
+    delete_req_t *delete_req = (delete_req_t*)req;
+    clax_ctx_t *clax_ctx = delete_req->data;
+
+    if (req->result == 0 || req->result == UV_ENOENT) {
+        clax_log("File deleted");
+
+        clax_http_response_status(clax_ctx, &clax_ctx->response, 400);
+
+        clax_http_dispatch_done_cb(clax_ctx, &clax_ctx->request, &clax_ctx->response);
+    }
+    else {
+        clax_log("Error: file delete failed: %s", uv_strerror(req->result));
+
+        clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+    }
+
+    uv_fs_req_cleanup(req);
+    free(delete_req);
+}
+
+void clax_dispatch_upload_crc32_(uv_fs_t *req)
+{
+    file_req_t *file_req = (file_req_t*)req;
+    clax_ctx_t *clax_ctx = file_req->data;
+
+    if (req->result >= 0) {
+        char *exp = clax_kv_list_find(&clax_ctx->request.query_params, "crc");
+        clax_log("Checking crc32 of '%s': got=%08lx exp=%s", file_req->path, file_req->crc32, exp);
+
+        if (strtol(exp, NULL, 16) != file_req->crc32) {
+            clax_log("Error: crc32 is invalid, removing file");
+
+            delete_req_t *delete_req = malloc(sizeof(delete_req_t));
+            delete_req->data = clax_ctx;
+
+            int r = uv_fs_unlink(uv_default_loop(), (uv_fs_t *)delete_req, file_req->path, clax_dispatch_upload_crc32_invalid_);
+
+            if (r < 0) {
+                free(delete_req);
+
+                clax_log("Error: removing file failed: %s", uv_strerror(r));
+
+                clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+            }
         }
+        else {
+            clax_log("CRC32 check successful");
 
-        clax_kv_list_push(&res->headers, "Content-Type", content_type);
+            clax_http_response_status(clax_ctx, &clax_ctx->response, 204);
 
-        if (req->method == HTTP_GET) {
-            if (is_html) {
-                clax_big_buf_append_str(&res->body, "<html>\n");
-                clax_big_buf_append_str(&res->body, "<head><title>Index of /</title></head>\n");
-                clax_big_buf_append_str(&res->body, "<body bgcolor=\"white\">\n");
-                clax_big_buf_append_str(&res->body, "<h1>Index of /</h1><hr>");
-                clax_big_buf_append_str(&res->body, "<table>\n");
-                clax_big_buf_append_str(&res->body, "<tr><td><a href=\"../\">../</a></td><td>Last Modified</td><td>Size</td></tr>\n");
-            }
-            else {
-                clax_big_buf_append_str(&res->body, "[");
-            }
+            clax_http_dispatch_done_cb(clax_ctx, &clax_ctx->request, &clax_ctx->response);
+        }
+    }
+    else {
+        clax_log("Error: crc32 failed");
 
-            struct dirent **namelist;
-            int n;
+        clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+    }
+}
 
-            n = scandir(path, &namelist, 0, alphasort);
+void clax_dispatch_upload_(uv_fs_t *req)
+{
+    copy_req_t *copy_req = (copy_req_t*)req;
+    clax_ctx_t *clax_ctx = copy_req->data;
 
-            if (n >= 0) {
-                for (int i = 0; i < n; i++) {
-                    char *name = namelist[i]->d_name;
+    if (req->result == 0) {
+        clax_log("File copy succeeded");
 
-                    if (strcmp(name, ".") == 0)
-                        continue;
-                    if (strcmp(name, "..") == 0)
-                        continue;
+        char *time = clax_kv_list_find(&clax_ctx->request.query_params, "time");
+        if (time) {
+            uv_fs_t utime_req;
+            double time_d = (double)atoi(time);
+            int r = uv_fs_utime(uv_default_loop(), &utime_req, copy_req->path, time_d, time_d, NULL);
 
-                    size_t fullpath_maxlen = strlen(path) + strlen(name) + 2;
-                    char *fullpath = clax_str_alloc(fullpath_maxlen);
-
-                    clax_strcatfile(fullpath, fullpath_maxlen, path);
-                    clax_strcatfile(fullpath, fullpath_maxlen, name);
-
-                    char *line = NULL;
-                    char last_modified_buf[30];
-                    clax_last_modified(fullpath, last_modified_buf, sizeof(last_modified_buf));
-
-                    if (clax_is_path_d(fullpath)) {
-                        clax_strcatdir(fullpath, fullpath_maxlen, "/");
-
-                        if (is_html) {
-                            line = clax_sprintf_alloc("<tr><td><a href=\"%s/\">%s/</a></td><td><pre>%s</pre></td><td><pre>-</pre></td></tr>\n",
-                                    name, name, last_modified_buf);
-                        }
-                        else {
-                            line = clax_sprintf_alloc(
-                                    "{"
-                                        "\"name\":\"%s\","
-                                        "\"path\":\"%s\","
-                                        "\"dir\":true,"
-                                        "\"last_modified\":\"%s\""
-                                    "}", name, fullpath, last_modified_buf);
-                        }
-                    }
-                    else if (clax_is_path_f(fullpath)) {
-                        char size_buf[30];
-                        clax_file_size(fullpath, size_buf, sizeof(size_buf));
-
-                        if (is_html) {
-                            line = clax_sprintf_alloc("<tr><td><a href=\"%s\">%s</a></td><td><pre>%s</pre></td><td><pre>%s</pre></td></tr>\n",
-                                    name, name, last_modified_buf, size_buf);
-                        }
-                        else {
-                            line = clax_sprintf_alloc(
-                                    "{"
-                                        "\"name\":\"%s\","
-                                        "\"path\":\"%s\","
-                                        "\"dir\":false,"
-                                        "\"last_modified\":\"%s\","
-                                        "\"size\":%s"
-                                    "}", name, fullpath, last_modified_buf, size_buf);
-                        }
-                    }
-
-                    clax_big_buf_append_str(&res->body, line);
-                    free(line);
-
-                    free(fullpath);
-
-                    free(namelist[n]);
-                }
-
-                free(namelist);
-            }
-
-            if (is_html) {
-                clax_big_buf_append_str(&res->body, "</table>\n");
-                clax_big_buf_append_str(&res->body, "<hr></body>\n");
-                clax_big_buf_append_str(&res->body, "</html>\n");
-            }
-            else {
-                clax_big_buf_append_str(&res->body, "]");
+            if (r < 0) {
+                clax_log("Error (ignored): setting atime/utime failed: %s", uv_strerror(r));
             }
         }
 
+        char *crc32 = clax_kv_list_find(&clax_ctx->request.query_params, "crc");
+
+        if (crc32) {
+            clax_log("Checking crc32");
+
+            file_req_t *file_req = malloc(sizeof(file_req_t));
+            file_req->data = clax_ctx;
+
+            int r = clax_uv_crc32(file_req, copy_req->path, clax_dispatch_upload_crc32_);
+
+            if (r < 0) {
+                clax_log("Error: crc32 failed");
+            }
+        }
+        else {
+            clax_http_response_status(clax_ctx, &clax_ctx->response, 204);
+
+            clax_http_dispatch_done_cb(clax_ctx, &clax_ctx->request, &clax_ctx->response);
+        }
+    }
+    else {
+        clax_log("Error: file copy failed: %s", uv_strerror(req->result));
+
+        clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+    }
+
+    uv_fs_req_cleanup(req);
+    free(copy_req);
+}
+
+void clax_dispatch_upload_mkdir(uv_fs_t *req)
+{
+    mkdir_req_t *mkdir_req = (mkdir_req_t *)req;
+    clax_ctx_t *clax_ctx = mkdir_req->data;
+    char *tmpfile = clax_ctx->request.body_tmpfile;
+
+    if (!tmpfile || !strlen(tmpfile)) {
+        uv_fs_req_cleanup(req);
+        free(mkdir_req);
+
+        clax_dispatch_bad_request(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+
         return;
     }
 
-    FILE *fh = fopen(path, "rb");
+    clax_log("Saving upload '%s' to file '%s'", tmpfile, mkdir_req->path);
 
-    if (fh == NULL) {
-        clax_dispatch_not_found(clax_ctx, req, res);
+    copy_req_t *copy_req = malloc(sizeof(copy_req_t));
+    copy_req->path = mkdir_req->path;
+    copy_req->data = clax_ctx;
+
+    int r = uv_fs_copyfile(uv_default_loop(), (uv_fs_t *)copy_req,
+            (char *)tmpfile, mkdir_req->path, 0, clax_dispatch_upload_);
+
+    if (r < 0) {
+        clax_log("Error: copy failed: %s", uv_strerror(r));
+
+        clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
         return;
     }
 
-    unsigned long crc32 = clax_crc32_calc_file(path);
-    char crc32_hex[9] = {0};
-    snprintf(crc32_hex, sizeof(crc32_hex), "%08lx", crc32);
-
-    clax_file_size(path, size_buf, sizeof(size_buf));
-
-    char *base = basename(path);
-    strcpy(base_buf, "attachment; filename=\"");
-    strcat(base_buf, base);
-    strcat(base_buf, "\"");
-
-    res->status_code = 200;
-    clax_kv_list_push(&res->headers, "Content-Type", "application/octet-stream");
-    clax_kv_list_push(&res->headers, "Content-Disposition", base_buf);
-    clax_kv_list_push(&res->headers, "Pragma", "no-cache");
-    clax_kv_list_push(&res->headers, "Content-Length", size_buf);
-
-    clax_kv_list_push(&res->headers, "X-Clax-CRC32", crc32_hex);
-
-    if (req->method == HTTP_GET)
-        res->body_fh = fh;
-    else
-        fclose(fh);
+    uv_fs_req_cleanup(req);
+    free(mkdir_req);
 }
 
 void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
-    char *subdir = req->path_info + strlen("/tree/");
-
-    if (strlen(subdir)) {
-        clax_mkdir_p(subdir);
-
-        if (!clax_is_path_d(subdir)) {
-            clax_log("Output directory '%s' does not exist", subdir);
-
-            clax_dispatch_bad_request(clax_ctx, req, res, "Output directory does not exist");
-            return;
-        }
-    }
+    char *path = req->path_info + strlen("/tree/");
 
     if (req->continue_expected) {
+        clax_dispatch_continue(clax_ctx, req, res);
         return;
     }
 
-    if (strlen(req->multipart_boundary)) {
-        int i;
-        for (i = 0; i < req->multiparts.size; i++) {
-            clax_http_multipart_t *multipart = clax_http_multipart_list_at(&req->multiparts, i);
+    char *pathdup = clax_strdup((const char *)path);
+    char *dir = dirname(pathdup);
 
-            const char *content_disposition = clax_kv_list_find(&multipart->headers, "Content-Disposition");
-            if (!content_disposition)
-                continue;
+    clax_log("Creating intermediate path '%s'", dir);
 
-            char prefix[] = "form-data; ";
-            if (strncmp(content_disposition, prefix, strlen(prefix)) != 0)
-                continue;
+    mkdir_req_t *mkdir_req = malloc(sizeof(mkdir_req_t));
+    mkdir_req->data = clax_ctx;
+    mkdir_req->path = path;
 
-            const char *kv = content_disposition + strlen(prefix);
-            size_t name_len;
-            size_t filename_len;
-            const char *name = clax_http_extract_kv(kv, "name", &name_len);
-            const char *filename = clax_http_extract_kv(kv, "filename", &filename_len);
+    int r = clax_uv_mkdir_p(uv_default_loop(), (uv_fs_t *)mkdir_req, dir, 0755, clax_dispatch_upload_mkdir);
 
-            if (!name || !filename || (strncmp(name, "file", name_len) != 0))
-                continue;
+    if (r < 0) {
+        clax_log("Error: mkdirp failed");
 
-            char *new_name = clax_kv_list_find(&req->query_params, "name");
-            char *crc32 = clax_kv_list_find(&req->query_params, "crc");
-            char *time = clax_kv_list_find(&req->query_params, "time");
+        uv_fs_req_cleanup((uv_fs_t *)mkdir_req);
+        free(mkdir_req);
 
-            if (crc32 && strlen(crc32) != 8) {
-                clax_dispatch_bad_request(clax_ctx, req, res, "Invalid CRC32");
-                return;
-            }
+        clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+    }
 
-            char *fpath;
+    free(pathdup);
+}
 
-            if (new_name && strlen(new_name)) {
-                fpath = clax_strjoin("/", subdir, new_name, (char *)NULL);
-            }
-            else {
-                char *p = clax_strndup(filename, filename_len);
-                fpath = clax_strjoin("/", subdir, p, (char *)NULL);
-                free(p);
-            }
+void clax_dispatch_delete_(uv_fs_t *req)
+{
+    delete_req_t *delete_req = (delete_req_t*)req;
+    clax_ctx_t *clax_ctx = delete_req->data;
 
-            clax_san_path(fpath);
+    if (req->result == 0) {
+        clax_log("File deleted succeeded");
 
-            int ret = clax_big_buf_write_file(&multipart->bbuf, fpath);
+        clax_http_response_status(clax_ctx, &clax_ctx->response, 204);
 
-            if (ret < 0) {
-                clax_log("Saving file failed: %s\n", fpath);
-                clax_dispatch_system_error(clax_ctx, req, res, "Saving file failed");
-            }
-            else {
-                if (crc32 && strlen(crc32)) {
-                    unsigned long got_crc32 = clax_htol(crc32);
-                    unsigned long exp_crc32 = clax_crc32_calc_file(fpath);
-
-                    if (got_crc32 != exp_crc32) {
-                        clax_log("CRC mismatch %u != %u (%s)", exp_crc32, got_crc32, crc32);
-                        clax_dispatch_bad_request(clax_ctx, req, res, "CRC32 mismatch");
-
-                        remove(fpath);
-                        free(fpath);
-
-                        return;
-                    } else {
-                        clax_log("CRC ok %u != %u (%s)", exp_crc32, got_crc32, crc32);
-                    }
-                }
-
-                if (time && strlen(time)) {
-                    int mtime = atol(time);
-
-                    struct utimbuf t;
-                    t.actime = mtime;
-                    t.modtime = mtime;
-                    int ok = utime(fpath, &t);
-
-                    if (ok < 0)
-                        clax_log("utime on file '%s' failed: %s", fpath, strerror(errno));
-                }
-
-                clax_dispatch_success(clax_ctx, req, res);
-            }
-
-            free(fpath);
-
-            break;
-        }
+        clax_http_dispatch_done_cb(clax_ctx, &clax_ctx->request, &clax_ctx->response);
     }
     else {
-        char *dirname = clax_kv_list_find(&req->body_params, "dirname");
-        if (dirname && strlen(dirname)) {
-            clax_san_path(dirname);
+        clax_log("Error: file delete failed: %s", uv_strerror(req->result));
 
-            char *fullpath = clax_strjoin("/", subdir, dirname, (char *)NULL);
-            if (clax_mkdir_p(fullpath) < 0) {
-                clax_dispatch_system_error(clax_ctx, req, res, "Can't create directory");
-            }
-            else {
-                clax_dispatch_success(clax_ctx, req, res);
-            }
-            free(fullpath);
+        if (req->result == UV_ENOENT) {
+            clax_dispatch_not_found(clax_ctx, &clax_ctx->request, &clax_ctx->response);
+        }
+        else {
+            clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
         }
     }
 
-    if (!res->status_code) {
-        clax_dispatch_bad_request(clax_ctx, req, res, NULL);
-    }
+    uv_fs_req_cleanup(req);
+    free(delete_req);
 }
 
 void clax_dispatch_delete(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     char *path = req->path_info + strlen("/tree/");
 
-    int is_file = clax_is_path_f(path);
-    if (is_file || clax_is_path_d(path)) {
-        char *error = NULL;
+    delete_req_t *delete_req = malloc(sizeof(delete_req_t));
+    delete_req->data = clax_ctx;
 
-        if (is_file) {
-            if (unlink(path) < 0) {
-                error = clax_sprintf_alloc("Can't delete file: %s", strerror(errno));
-            }
-        }
-        else {
-            char *recursive = clax_kv_list_find(&req->query_params, "recursive");
+    int r = uv_fs_unlink(uv_default_loop(), (uv_fs_t *)delete_req, path, clax_dispatch_delete_);
 
-            if (recursive && strlen(recursive) && strcmp(recursive, "1") == 0) {
-                if (clax_rmpath_r(path) < 0) {
-                    error = clax_sprintf_alloc("Can't remove directory recursively: %s", strerror(errno));
-                }
-            }
-            else if (rmdir(path) < 0) {
-                error = clax_sprintf_alloc("Can't remove directory: %s", strerror(errno));
-            }
-        }
+    if (r < 0) {
+        free(delete_req);
 
-        if (error) {
-            clax_dispatch_system_error(clax_ctx, req, res, error);
-
-            free(error);
-        }
-        else {
-            clax_dispatch_success(clax_ctx, req, res);
-        }
-    }
-    else {
-        clax_dispatch_not_found(clax_ctx, req, res);
+        clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
     }
 }
-

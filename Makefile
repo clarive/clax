@@ -3,9 +3,9 @@ SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
 COVERAGE_GRAPH=$(SOURCES:.c=.gcno)
 COVERAGE_DATA=$(SOURCES:.c=.gcda)
-CFLAGS += -Icontrib -Icontrib/mbedtls
-LFLAGS=
-LIBS=$(wildcard contrib/*/*.o)
+CFLAGS += -Icontrib -Icontrib/mbedtls -Iinclude -Isrc
+LFLAGS += -pthread
+LIBS   += $(wildcard contrib/*/*.o) $(wildcard contrib/*/*.a) $(wildcard contrib/*/.libs/*.a)
 
 RM = rm
 RMF = rm -f
@@ -30,7 +30,7 @@ endif
 ifeq ($(WINDOWS),1)
 	EXE     = a.exe
 	PROGRAM =  clax.exe
-	LIBS    += -lws2_32
+	LIBS    += -liphlpapi -lpsapi -lws2_32 -luserenv
 	CFLAGS  += -std=gnu99 -pedantic -Wall
 ifeq ($(WINDOWS_CMD),1)
 	RM      = del
@@ -53,7 +53,7 @@ all: lib $(PROGRAM)
 clax_version.h:
 	OS=$(OS) ARCH=$(ARCH) WINDOWS=$(WINDOWS) sh util/makeversion.sh
 
-lib: clax_version.h mbedtls http-parser multipart-parser-c inih base64 slre snprintf $(OBJECTS)
+lib: clax_version.h mbedtls http-parser multipart-parser-c inih base64 slre snprintf libuv $(OBJECTS)
 
 $(OBJECTS): $(SOURCES)
 	$(CC) -c $(CFLAGS) $^ $(LFLAGS)
@@ -91,6 +91,9 @@ slre:
 
 snprintf:
 	$(MAKE) -C contrib/snprintf CC="$(CC)" CFLAGS="$(CFLAGS)"
+
+libuv:
+	$(MAKE) -C contrib/libuv -f Makefile.clax CC="$(CC)" CFLAGS="$(CFLAGS)" WINDOWS="$(WINDOWS)"
 
 tests: lib
 	$(MAKE) -C tests CC="$(CC)" CFLAGS="$(CFLAGS)"
@@ -139,6 +142,7 @@ dist: all
 
 clean:
 	$(RMF)  $(PROGRAM) $(OBJECTS)
+	$(RMF)  *.gch
 	$(RMF)  a.out *.exe
 	$(RMF)  clax_version.h OS ARCH
 	$(RMF)  .depend
@@ -157,3 +161,4 @@ distclean:
 	$(MAKE) -C contrib/base64 clean
 	$(MAKE) -C contrib/slre clean
 	$(MAKE) -C contrib/snprintf clean
+	$(MAKE) -C contrib/libuv clean

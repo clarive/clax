@@ -8,7 +8,6 @@
 #include <errno.h>
 
 #include "http-parser/http_parser.h"
-#include "popen2.h"
 #include "clax_util.h"
 #include "util.h"
 
@@ -48,72 +47,6 @@ int util_parse_http_response(char *buf, size_t len)
 #endif
 
     return ret == len && http_message_done;
-}
-
-int execute(char *command, char *request, char *obuf, size_t olen)
-{
-    int ret;
-    popen2_t ctx;
-    char *r = request;
-
-    ret = popen2(command, environ, &ctx);
-    if (ret < 0) {
-        fprintf(stderr, "Command '%s' failed=%d", command, ret);
-        return -1;
-    }
-
-    int offset = 0;
-    size_t request_len = strlen(request);
-    int wcount = 0;
-
-#ifdef MVS
-    r = clax_etoa_alloc(request, request_len);
-#endif
-
-    while (1) {
-        ret = write(ctx.in, r + offset, request_len - offset);
-        wcount += ret;
-
-        if (wcount == request_len)
-            break;
-
-        if (ret < 0 && errno == EAGAIN) {
-            continue;
-        }
-
-        offset += ret;
-    }
-
-#ifdef MVS
-    free(r);
-#endif
-
-    offset = 0;
-    while (1) {
-        ret = read(ctx.out, obuf + offset, olen - offset);
-
-        if (ret == 0)
-            break;
-
-        if (ret < 0 && errno == EAGAIN) {
-            continue;
-        }
-
-        offset += ret;
-    }
-    obuf[offset] = 0;
-
-#ifdef MVS
-    clax_atoe(obuf, offset);
-#endif
-
-    int exit_code = pclose2(&ctx);
-    if (exit_code != 0) {
-        fprintf(stderr, "Exit code=%d\n", exit_code);
-        return -1;
-    }
-
-    return offset;
 }
 
 char *write_tmp_file_a(char *content)

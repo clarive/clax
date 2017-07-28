@@ -27,16 +27,16 @@
 #include "clax_crc32.h"
 #include "clax_platform.h"
 
-unsigned long clax_crc32_table[256];
+static unsigned long clax_crc32_table[256];
 
-void clax_crc32_gen(void)
+static void clax_crc32_gen(void)
 {
-    unsigned long crc, poly;
+    unsigned long poly;
     int i, j;
 
     poly = 0xEDB88320L;
     for (i = 0; i < 256; i++) {
-        crc = i;
+        unsigned long crc = i;
         for (j = 8; j > 0; j--) {
             if (crc & 1) {
                 crc = (crc >> 1) ^ poly;
@@ -49,38 +49,25 @@ void clax_crc32_gen(void)
     }
 }
 
-unsigned long clax_crc32_calc_fd(int fd)
+unsigned long clax_crc32_init()
 {
-    unsigned long crc;
-    unsigned int len;
-    unsigned char buf[CRC32_BUFSIZE];
-    unsigned char *p;
-
-    crc = 0xFFFFFFFF;
     clax_crc32_gen();
 
-    while ((len = read(fd, buf, CRC32_BUFSIZE)) > 0 ) {
-        p = buf;
-        do {
-            crc = ((crc >> 8) & 0x00FFFFFF) ^ clax_crc32_table[(unsigned char)((crc & 0xff) ^ *(p++))];
-        } while (--len);
-    }
+    return 0xFFFFFFFF;
+}
 
+unsigned long clax_crc32_finalize(unsigned long crc)
+{
     return crc ^ 0xFFFFFFFF;
 }
 
-unsigned long clax_crc32_calc_file(char *filename)
+unsigned long clax_crc32_calc(unsigned long crc, unsigned char *buf, size_t len)
 {
-    FILE *fh;
+    unsigned char *p = buf;
 
-    fh = fopen(filename, "rb");
-    if (fh == NULL)
-        return -1;
-
-    unsigned long crc = clax_crc32_calc_fd(fileno(fh));
-
-    fclose(fh);
+    do {
+        crc = ((crc >> 8) & 0x00FFFFFF) ^ clax_crc32_table[(unsigned char)((crc & 0xff) ^ *(p++))];
+    } while (--len);
 
     return crc;
 }
-

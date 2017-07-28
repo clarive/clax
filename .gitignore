@@ -1,6 +1,7 @@
 clax
 clax_version.h
 *.exe
+a.out
 *.o
 *.a
 .depend
@@ -9,6 +10,7 @@ tests/test
 tests_func/.depend
 tests_func/test
 *.swp
+*.gch
 
 # Coverage
 *.gcda

@@ -20,4 +20,8 @@
 #ifndef CLAX_H
 #define CLAX_H
 
+#define DEFAULT_BIND "0.0.0.0"
+#define DEFAULT_PORT 11801
+#define SERVICE_NAME "clax"
+
 #endif

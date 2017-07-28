@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "slre/slre.h"
+#include "contrib/slre/slre.h"
 
 int u_tests;
 int u_tests_failed;

@@ -38,6 +38,10 @@ typedef struct {
     char key_file[255];
     char entropy_file[255];
 
+    char standalone;
+    char *bind_host;
+    int bind_port;
+
     /* Private */
     FILE *_log_file;
 } opt;

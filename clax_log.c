@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdarg.h>
 #include <unistd.h>

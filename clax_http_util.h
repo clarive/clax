@@ -17,36 +17,15 @@
  *  along with Clax.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
+#ifndef CLAX_HTTP_UTIL_H
+#define CLAX_HTTP_UTIL_H
 
-#include "u/u.h"
+#include "clax_util.h"
 
-#include "clax_dispatcher_ping.h"
-#include "u_util.h"
+const char *clax_http_extract_kv(const char *str, const char *key, size_t *len);
+void clax_http_parse_urlencoded(clax_kv_list_t *params, const char *buf, size_t len);
+const char *clax_http_status_message(int code);
+size_t clax_http_url_decode(char *str);
+int clax_http_check_basic_auth(char *header, char *username, char *password);
 
-SUITE_START(clax_dispatcher_ping)
-
-TEST_START(returns pong)
-{
-    clax_ctx_t clax_ctx;
-    clax_http_request_t request;
-    clax_http_response_t response;
-
-    clax_ctx_init(&clax_ctx);
-    clax_http_request_init(&request, NULL);
-    clax_http_response_init(&response, NULL, 0);
-
-    request.method = HTTP_GET;
-    strcpy(request.path_info, "/");
-
-    clax_dispatch_ping(&clax_ctx, &request, &response);
-
-    ASSERT_EQ(response.status_code, 200)
-
-    clax_http_request_free(&request);
-    clax_http_response_free(&response);
-    clax_ctx_free(&clax_ctx);
-}
-TEST_END
-
-SUITE_END
+#endif

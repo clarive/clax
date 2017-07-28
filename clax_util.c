@@ -35,7 +35,8 @@
 # include <sys/types.h>
 #endif
 
-#include "clax.h"
+#include "contrib/libuv/include/uv.h"
+
 #include "clax_log.h"
 #include "clax_util.h"
 #include "clax_platform.h"
@@ -170,7 +171,7 @@ char *clax_buf2str(const char *buf, size_t len)
     return str;
 }
 
-void clax_buf_append(unsigned char **dst, size_t *dst_len, const char *src, size_t src_len)
+void clax_buf_append(unsigned char **dst, size_t *dst_len, const unsigned char *src, size_t src_len)
 {
     if (!*dst) {
         *dst = malloc(src_len);
@@ -581,6 +582,91 @@ unsigned char *clax_slurp_alloc(char *filename, size_t *olen)
     return slurp;
 }
 
+typedef struct {
+    uv_fs_t req;
+    uv_fs_t *orig_req;
+    uv_fs_cb orig_cb;
+    const char *orig_path;
+    int orig_mode;
+    char *prefix;
+} clax_uv_mkdir_p_req_t;
+
+int clax_uv_mkdir_p_(uv_loop_t *loop, clax_uv_mkdir_p_req_t *req, const char *root, const char *path, int mode, uv_fs_cb cb);
+
+void clax_uv_mkdir_p_cb(uv_fs_t *req)
+{
+    clax_uv_mkdir_p_req_t *clax_req = (clax_uv_mkdir_p_req_t *)req;
+
+    if (req->result == 0 || req->result == UV_EEXIST) {
+        if (clax_req->prefix) {
+            clax_uv_mkdir_p_(req->loop, clax_req, clax_req->orig_path, req->path, clax_req->orig_mode, clax_uv_mkdir_p_cb);
+        }
+        else {
+            if (clax_req->prefix) {
+                free(clax_req->prefix);
+            }
+
+            uv_fs_req_cleanup(req);
+        }
+    }
+    else {
+        if (clax_req->prefix) {
+            free(clax_req->prefix);
+        }
+
+        uv_fs_req_cleanup(req);
+    }
+}
+
+int clax_uv_mkdir_p_(uv_loop_t *loop, clax_uv_mkdir_p_req_t *mkdir_req, const char *root, const char *path, int mode, uv_fs_cb cb) {
+    char *p = (char *)root;
+
+    if (path) {
+        p += strlen(path);
+    }
+
+    while (*p == '/')
+        p++;
+    p = strchr(p, '/');
+
+    if (mkdir_req->prefix) {
+        free(mkdir_req->prefix);
+        mkdir_req->prefix = NULL;
+    }
+
+    if (p) {
+        mkdir_req->prefix = malloc(sizeof(char) * (p - root) + 1);
+        strncpy(mkdir_req->prefix, root, p - root);
+        mkdir_req->prefix[p - root] = 0;
+
+        uv_fs_mkdir(loop, (uv_fs_t *)mkdir_req, mkdir_req->prefix, mode, cb);
+    }
+    else if (path) {
+        uv_fs_mkdir(loop, (uv_fs_t *)mkdir_req, path, mode, mkdir_req->orig_cb);
+    }
+    else {
+        uv_fs_mkdir(loop, mkdir_req->orig_req, root, mode, mkdir_req->orig_cb);
+    }
+
+    return 0;
+}
+
+int clax_uv_mkdir_p(uv_loop_t *loop, uv_fs_t *req, const char *path, int mode, uv_fs_cb cb)
+{
+    clax_uv_mkdir_p_req_t *mkdir_req = malloc(sizeof(clax_uv_mkdir_p_req_t));
+    if (mkdir_req == NULL) {
+        return -1;
+    }
+
+    mkdir_req->orig_req = req;
+    mkdir_req->orig_path = path;
+    mkdir_req->orig_mode = mode;
+    mkdir_req->orig_cb = cb;
+    mkdir_req->prefix = NULL;
+
+    return clax_uv_mkdir_p_(loop, mkdir_req, path, NULL, mode, clax_uv_mkdir_p_cb);
+}
+
 /* Based on https://gist.github.com/JonathonReinhart/8c0d90191c38af2dcadb102c4e202950 */
 int clax_mkdir_p(const char *path)
 {
@@ -718,7 +804,8 @@ char *clax_detect_root(char *root, size_t root_size, char **argv)
     clax_san_path(root);
 
     char *dir = dirname(root);
-    strcpy(root, dir);
+    /*strcpy(root, dir);*/
+    memmove(root, dir, strlen(dir));
 
     if (clax_strcatdir(root, root_size, "/") < 0) {
         return NULL;

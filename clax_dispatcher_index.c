@@ -17,33 +17,15 @@
  *  along with Clax.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <libgen.h> /* basename */
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h> /* stat */
-#include <unistd.h>
-#include <time.h>
-#include <utime.h>
-#include <errno.h>
-
 #include "clax_version.h"
 #include "clax_http.h"
-#include "clax_log.h"
-#include "clax_command.h"
-#include "clax_big_buf.h"
-#include "clax_crc32.h"
-#include "clax_dispatcher.h"
-#include "clax_util.h"
-#include "clax_platform.h"
 
-void clax_dispatch_index(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
+void clax_dispatch_index(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *response)
 {
-    res->status_code = 200;
-    clax_kv_list_push(&res->headers, "Content-Type", "application/json");
-    clax_kv_list_push(&res->headers, "X-Clax-Root", clax_ctx->options->root);
-    clax_big_buf_append_str(&res->body, "{\"message\":\"Hello, world!\",\"version\":\"" CLAX_VERSION "\",\"os\":\"" CLAX_OS "\",\"arch\":\"" CLAX_ARCH "\"}");
+    const char *body = "{\"message\":\"Hello, world!\",\"version\":\"" CLAX_VERSION "\",\"os\":\"" CLAX_OS "\",\"arch\":\"" CLAX_ARCH "\"}";
+
+    clax_http_response_status(clax_ctx, response, 200);
+    clax_http_response_header(clax_ctx, response, "Content-Type", "application/json");
+    clax_http_response_header(clax_ctx, response, "X-Clax-Root", clax_ctx->options->root);
+    clax_http_response_body(clax_ctx, response, (const unsigned char *)body, strlen(body));
 }

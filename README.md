@@ -34,7 +34,43 @@ Clax has a rich unit and functional test suites.
        -c <config_file>  path to configuration file (defaults to clax.ini
                              in binary location directory)
 
-# API Documentation
+# Configuration
+
+Configuration file is an `INI` file with the following content:
+
+```
+[bind]
+host = 0.0.0.0
+port = 11801
+
+[http_basic_auth]
+username = username
+password = password
+
+[ssl]
+enabled = yes
+verify = yes
+cert_file = ssl/server.pem
+key_file = ssl/server.key
+```
+
+## Windows Service
+
+Clax can be run as a windows service. Installation and control can be done via `sc` command:
+
+    # Install Clax service (make sure there a <space> after `=`)
+    sc create clax binPath= "C:\clax.exe -l C:\clax.log -c C:\clax.ini" start= auto
+
+    # Start the service
+    sc start clax
+
+    # Query the service status
+    sc query clax
+
+    # Stop the service
+    sc stop clax
+
+# REST API Documentation
 
 ## Overview
 
@@ -48,7 +84,7 @@ Standard basic authorization described in [rfc2617](http://tools.ietf.org/html/r
 
 #### Example
 
-    curl http://clax.local/ -u 'clax:password'
+    curl http://username:password@clax.local:11801
 
 ### Generating SSL certificates
 
@@ -131,30 +167,29 @@ Same as downloading a file without actually receiving the body.
 
     HTTP/1.1 200 OK
     Content-Type: application/octet-stream
-    Content-Disposition: attachment; filename="filename"
     Pragma: no-cache
     Content-Length: 13915
     Last-Modified: Thu, 10 Sep 2015 14:32:19 GMT
+    Content-Length: 123456
 
 #### Example
 
-    curl -X HEAD http://clax-server/tree/my-file
+    curl -I http://clax-server/tree/my-file
 
 ### Download file
 
     GET /tree/filename
     GET /tree/some/sub/directory/filename
 
-Download a file as attachment.
+Download a file.
 
 #### Response
 
     HTTP/1.1 200 OK
     Content-Type: application/octet-stream
-    Content-Disposition: attachment; filename="filename"
     Pragma: no-cache
-    Content-Length: 13915
     Last-Modified: Thu, 10 Sep 2015 14:32:19 GMT
+    Transfer-Encoding: chunked
 
     ...<file content>...
 
@@ -167,7 +202,7 @@ Download a file as attachment.
     POST /tree/
     POST /tree/some/sub/directory
 
-Upload file to the server via multipart form.
+Upload file to the server.
 
 #### URL Params
 
@@ -189,27 +224,23 @@ Optional
 
     Set atime/mtime to the provided value
 
-#### Data Params
+#### Data
 
-Required
-
-* `file=[bytes]`
+File data in bytes.
 
 #### Response
 
-    200 OK
-
-    {"status":"ok"}
+    204 OK
 
 #### Example
 
-    curl -F 'file=@path_to_file' http://clax-server/tree/
+    curl --data-binary @path_to_file http://clax.local:11801/tree/
 
 ### Delete path
 
-    DELETE /tree/path/to/file_or_dir
+    DELETE /tree/path/to/file
 
-Delete file or directory.
+Delete a file.
 
 #### URL Params
 
@@ -217,17 +248,9 @@ Required
 
 None
 
-Optional
-
-* `recursive=1`
-
-    Remove directory recursively
-
 #### Response
 
-    200 OK
-
-    {"status":"ok"}
+    204 OK
 
 #### Example
 

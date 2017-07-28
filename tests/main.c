@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "u/u.h"
+#include "contrib/u/u.h"
 
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 
@@ -28,16 +28,13 @@ int main(int argc, char *argv[])
 {
     START_TESTING
 
-    RUN_SUITE(clax_big_buf)
     RUN_SUITE(clax_crc32)
-    RUN_SUITE(clax_command)
-    RUN_SUITE(clax_dispatch)
-    RUN_SUITE(clax_dispatcher_index)
-    RUN_SUITE(clax_dispatcher_ping)
-    RUN_SUITE(clax_dispatcher_tree)
-    RUN_SUITE(clax_dispatcher_command)
-    RUN_SUITE(clax_http)
-    RUN_SUITE(clax_http_multipart_list)
+    /*RUN_SUITE(clax_dispatch)*/
+    /*RUN_SUITE(clax_dispatcher_index)*/
+    /*RUN_SUITE(clax_dispatcher_ping)*/
+    /*RUN_SUITE(clax_dispatcher_tree)*/
+    /*RUN_SUITE(clax_dispatcher_command)*/
+    /*RUN_SUITE(clax_http)*/
     RUN_SUITE(clax_options)
     RUN_SUITE(clax_util)
 

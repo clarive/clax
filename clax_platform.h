@@ -50,7 +50,7 @@ unsigned int sleep(unsigned int seconds);
 
 #if !defined(__CYGWIN__) && !defined(__NetBSD__)
 # include <stdarg.h>
-# include "snprintf/snprintf.h"
+# include "contrib/snprintf/snprintf.h"
 #endif
 
 #endif

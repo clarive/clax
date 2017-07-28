@@ -20,14 +20,10 @@
 #ifndef CLAX_CRC32_H
 #define CLAX_CRC32_H
 
-#define CRC32_BUFSIZE 32768
+#include <stdlib.h>
 
-/*
- * Based on CRC-32 version 1.04 by Craig Bruce, 05-Dec-1994
- */
-
-void clax_crc32_gen(void);
-unsigned long clax_crc32_calc_fd(int fd);
-unsigned long clax_crc32_calc_file(char *filename);
+unsigned long clax_crc32_init();
+unsigned long clax_crc32_finalize(unsigned long crc);
+unsigned long clax_crc32_calc(unsigned long crc, unsigned char *buf, size_t len);
 
 #endif

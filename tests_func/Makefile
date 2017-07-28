@@ -4,7 +4,6 @@ OBJECTS=$(SOURCES:.c=.o)
 override CFLAGS += -I../contrib -I../contrib/mbedtls -I../
 LFLAGS=
 LIBS=../clax_*.o \
-	 ../popen2.o \
 	 ../scandir.o \
 	 ../contrib/*/*.o \
 	 ../tests/u_util.o

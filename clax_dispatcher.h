@@ -20,12 +20,15 @@
 #ifndef CLAX_DISPATCHER_H
 #define CLAX_DISPATCHER_H
 
-#include "clax.h"
+#include "clax_ctx.h"
 #include "clax_http.h"
+
+typedef void (*clax_dispatch_done_cb_t)(clax_ctx_t *clax_ctx, clax_http_request_t *request, clax_http_response_t *response);
 
 void clax_dispatch(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res);
 size_t clax_dispatcher_match(const char *path_info, size_t path_info_len, const char *path, size_t path_len);
 
+void clax_dispatch_continue(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res);
 void clax_dispatch_success(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res);
 void clax_dispatch_bad_gateway(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res);
 void clax_dispatch_not_found(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res);

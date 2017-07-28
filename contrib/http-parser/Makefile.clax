@@ -10,3 +10,4 @@ $(OBJECTS): $(SOURCES)
 
 clean:
 	rm -f $(OBJECTS)
+	rm -f *.gch

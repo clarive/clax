@@ -21,51 +21,24 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "u/u.h"
+#include "contrib/u/u.h"
 #include "u_util.h"
 
 #include "clax_crc32.h"
-#include "clax_util.h"
 
 SUITE_START(clax_crc32)
 
-TEST_START(calculates crc32 from fd)
+TEST_START(calculates crc32)
 {
-    char *tmp_dirname = clax_mktmpdir_alloc();
-    char *filename = clax_strjoin("/", tmp_dirname, "file", NULL);
+    unsigned long crc32 = clax_crc32_init();
 
-    FILE *fh = fopen(filename, "w");
-    fprintf(fh, "%s", "\xab\xcd\xef");
-    fclose(fh);
+    crc32 = clax_crc32_calc(crc32, (unsigned char *)"he", 2);
+    crc32 = clax_crc32_calc(crc32, (unsigned char *)"ll", 2);
+    crc32 = clax_crc32_calc(crc32, (unsigned char *)"o", 1);
 
-    fh = fopen(filename, "r");
+    crc32 = clax_crc32_finalize(crc32);
 
-    int crc32 = clax_crc32_calc_fd(fileno(fh));
-
-    fclose(fh);
-
-    ASSERT_EQ(crc32, 1686977913);
-
-    free(filename);
-    rmrf(tmp_dirname);
-}
-TEST_END
-
-TEST_START(calculates crc32 from file)
-{
-    char *tmp_dirname = clax_mktmpdir_alloc();
-    char *filename = clax_strjoin("/", tmp_dirname, "file", NULL);
-
-    FILE *fh = fopen(filename, "w");
-    fprintf(fh, "%s", "\xab\xcd\xef");
-    fclose(fh);
-
-    int crc32 = clax_crc32_calc_file(filename);
-
-    ASSERT_EQ(crc32, 1686977913);
-
-    free(filename);
-    rmrf(tmp_dirname);
+    ASSERT_EQ(crc32, 907060870);
 }
 TEST_END
 

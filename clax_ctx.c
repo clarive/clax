@@ -18,14 +18,42 @@
  */
 
 #include <string.h> /* memset */
+#include <stdlib.h>
 
 #include "clax_ctx.h"
+#include "clax_log.h"
 
-void clax_ctx_init(clax_ctx_t *ctx)
+#include "contrib/http-parser/http_parser.h" /* http_parser_init */
+
+clax_ctx_t *clax_ctx_alloc()
 {
+    return malloc(sizeof(clax_ctx_t));
+}
+
+void clax_ctx_init(clax_ctx_t *ctx, opt *options)
+{
+    clax_log("Initializing clax ctx");
+
     memset(ctx, 0, sizeof(clax_ctx_t));
+    memset(&ctx->parser, 0, sizeof(http_parser));
+
+    http_parser_init(&ctx->parser, HTTP_REQUEST);
+
+    ctx->options = options;
+
+    clax_http_request_init(&ctx->request, ctx->options->root);
+    clax_http_response_init(&ctx->response, ctx->options->root, 1024 * 1024);
+
+    ctx->request.data = ctx;
+    ctx->response.data = ctx;
 }
 
 void clax_ctx_free(clax_ctx_t *ctx)
 {
+    clax_log("Freeing clax ctx");
+
+    clax_http_request_free(&ctx->request);
+    clax_http_response_free(&ctx->response);
+
+    free(ctx);
 }

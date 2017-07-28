@@ -1,3 +1,22 @@
+/*
+ *  Copyright (C) 2015, Clarive Software, All Rights Reserved
+ *
+ *  This file is part of clax.
+ *
+ *  Clax is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Clax is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with Clax.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -5,20 +24,24 @@
 #include <errno.h>
 #include <unistd.h>
 #include <libgen.h>
+#include <unistd.h>
+#include <getopt.h>
 
 #ifdef _WIN32
 # include <windows.h>
 #endif
 
-#include "inih/ini.h"
-#include "clax.h"
+#include "contrib/inih/ini.h"
 #include "clax_log.h"
 #include "clax_errors.h"
 #include "clax_options.h"
 #include "clax_util.h"
 #include "clax_platform.h"
+#include "clax.h"
 
 extern char *optarg;
+extern int optopt;
+extern int optind;
 extern int opterr;
 
 void clax_options_init(opt *options)
@@ -94,6 +117,10 @@ int clax_config_handler(void *ctx, const char *section, const char *name, const 
         options->basic_auth_username = clax_strdup(value);
     } else if (MATCH("http_basic_auth", "password")) {
         options->basic_auth_password = clax_strdup(value);
+    } else if (MATCH("bind", "host")) {
+        options->bind_host = clax_strdup(value);
+    } else if (MATCH("bind", "port")) {
+        options->bind_port = atoi(clax_strdup(value));
     } else {
         return 0;
     }
@@ -217,6 +244,13 @@ int clax_parse_options(opt *options, int argc, char **argv)
         if (!strlen(options->cert_file) || !strlen(options->key_file)) {
             clax_log("Error: cert_file and key_file are required");
             return -1;
+        }
+    }
+
+    if (options->bind_host) {
+        options->standalone = 1;
+        if (!options->bind_port) {
+            options->bind_port = DEFAULT_PORT;
         }
     }
 
