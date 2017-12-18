@@ -54,7 +54,11 @@ char *clax_last_modified(uv_stat_t *stat, char *buf, size_t max_len)
     long epoch = stat->st_mtim.tv_sec;
     time_t time = epoch;
 
+#ifdef _WIN32
+    last_modified_time_p = gmtime_s(&last_modified_time, &time);
+#else
     last_modified_time_p = gmtime_r(&time, &last_modified_time);
+#endif
 
     strftime(buf, max_len, "%a, %d %b %Y %H:%M:%S GMT", last_modified_time_p);
 
