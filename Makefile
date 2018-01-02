@@ -104,10 +104,6 @@ tests_func: tests
 check: tests
 	$(MAKE) -C tests check
 
-check-all: tests tests_func $(PROGRAM)
-	$(MAKE) -C tests check
-	$(MAKE) -C tests_func check
-
 check-valgrind: tests
 	$(MAKE) -C tests check-valgrind
 

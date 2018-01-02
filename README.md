@@ -24,7 +24,11 @@ Clax is statically linked, so it can be moved around without worring about the l
 
 Clax has a rich unit and functional test suites.
 
-    $ make check-all
+    # Unit tests
+    $ make check
+
+    # Functional tests agains a running clax
+    $ TEST_CLAX_ENDPOINT=http://localhost:11801 prove t
 
 # Command-Line Usage
 
