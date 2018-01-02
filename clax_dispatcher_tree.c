@@ -497,24 +497,44 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
         return;
     }
 
+    char *tmpfile = clax_ctx->request.body_tmpfile;
+
+    if (!tmpfile || !strlen(tmpfile)) {
+        clax_dispatch_bad_request(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+
+        return;
+    }
+
     char *pathdup = clax_strdup((const char *)path);
     char *dir = dirname(pathdup);
 
     clax_log("Creating intermediate path '%s'", dir);
 
-    mkdir_req_t *mkdir_req = malloc(sizeof(mkdir_req_t));
-    mkdir_req->data = clax_ctx;
-    mkdir_req->path = path;
-
-    int r = clax_uv_mkdir_p(uv_default_loop(), (uv_fs_t *)mkdir_req, dir, 0755, clax_dispatch_upload_mkdir);
+    int r = clax_mkdir_p(dir);
 
     if (r < 0) {
         clax_log("Error: mkdirp failed");
 
-        uv_fs_req_cleanup((uv_fs_t *)mkdir_req);
-        free(mkdir_req);
+        clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+
+        free(pathdup);
+        return;
+    }
+
+    clax_log("Saving upload '%s' to file '%s'", tmpfile, path);
+
+    copy_req_t *copy_req = malloc(sizeof(copy_req_t));
+    copy_req->path = path;
+    copy_req->data = clax_ctx;
+
+    int rcopy = uv_fs_copyfile(uv_default_loop(), (uv_fs_t *)copy_req,
+            (char *)tmpfile, path, 0, clax_dispatch_upload_);
+
+    if (rcopy < 0) {
+        clax_log("Error: copy failed: %s", uv_strerror(r));
 
         clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+        return;
     }
 
     free(pathdup);

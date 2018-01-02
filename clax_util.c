@@ -599,13 +599,16 @@ void clax_uv_mkdir_p_cb(uv_fs_t *req)
 
     if (req->result == 0 || req->result == UV_EEXIST) {
         if (clax_req->prefix) {
-            clax_uv_mkdir_p_(req->loop, clax_req, clax_req->orig_path, req->path, clax_req->orig_mode, clax_uv_mkdir_p_cb);
+            int r = clax_uv_mkdir_p_(req->loop, clax_req, clax_req->orig_path, req->path, clax_req->orig_mode, clax_uv_mkdir_p_cb);
+
+            if (r < 0) {
+                clax_log("Error: mkdir failed: %s", uv_strerror(r));
+
+                free(clax_req->prefix);
+                uv_fs_req_cleanup(req);
+            }
         }
         else {
-            if (clax_req->prefix) {
-                free(clax_req->prefix);
-            }
-
             uv_fs_req_cleanup(req);
         }
     }
@@ -621,6 +624,9 @@ void clax_uv_mkdir_p_cb(uv_fs_t *req)
 int clax_uv_mkdir_p_(uv_loop_t *loop, clax_uv_mkdir_p_req_t *mkdir_req, const char *root, const char *path, int mode, uv_fs_cb cb) {
     char *p = (char *)root;
 
+    clax_log("root=%s", root);
+    clax_log("path=%s", path);
+
     if (path) {
         p += strlen(path);
     }
@@ -634,18 +640,25 @@ int clax_uv_mkdir_p_(uv_loop_t *loop, clax_uv_mkdir_p_req_t *mkdir_req, const ch
         mkdir_req->prefix = NULL;
     }
 
+    int r;
+
     if (p) {
         mkdir_req->prefix = malloc(sizeof(char) * (p - root) + 1);
         strncpy(mkdir_req->prefix, root, p - root);
         mkdir_req->prefix[p - root] = 0;
 
-        uv_fs_mkdir(loop, (uv_fs_t *)mkdir_req, mkdir_req->prefix, mode, cb);
+        r = uv_fs_mkdir(loop, (uv_fs_t *)mkdir_req, mkdir_req->prefix, mode, cb);
     }
     else if (path) {
-        uv_fs_mkdir(loop, (uv_fs_t *)mkdir_req, path, mode, mkdir_req->orig_cb);
+        r = uv_fs_mkdir(loop, (uv_fs_t *)mkdir_req, path, mode, mkdir_req->orig_cb);
     }
     else {
-        uv_fs_mkdir(loop, mkdir_req->orig_req, root, mode, mkdir_req->orig_cb);
+        r = uv_fs_mkdir(loop, mkdir_req->orig_req, root, mode, mkdir_req->orig_cb);
+    }
+
+    if (r < 0) {
+        clax_log("Error: mkdir failed: %s", uv_strerror(r));
+        return -1;
     }
 
     return 0;

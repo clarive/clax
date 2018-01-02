@@ -33,26 +33,31 @@ subtest 'uploads file' => sub {
     $response = $ua->head( TestEnv->endpoint . '/tree/test.file' );
 
     ok $response->{success};
-    is $response->{headers}->{'x-clax-crc32'}, '6d12e950';
+    is $response->{headers}->{'x-clax-crc32'},   '6d12e950';
     is $response->{headers}->{'content-length'}, '11';
     is $response->{content}, undef;
+};
 
-        $response = $ua->get( TestEnv->endpoint . '/tree/test.file' );
-    
-        ok $response->{success};
-        is $response->{headers}->{'x-clax-crc32'}, '6d12e950';
-        like $response->{content}, qr/hello there/;
-    
-        $response = $ua->delete( TestEnv->endpoint . '/tree/test.file' );
+subtest 'uploads file deeply nested' => sub {
+    my $ua       = TestEnv->build_ua;
+    my $response = $ua->post( TestEnv->endpoint . '/tree/deeply/nested/test.file',
+        { content => 'hello there' } );
 
-        ok $response->{success};
-        is $response->{status},  204;
-        is $response->{content}, undef;
+    ok $response->{success};
+    is $response->{status},  204;
+    is $response->{content}, undef;
+
+    $response = $ua->head( TestEnv->endpoint . '/tree/deeply/nested/test.file' );
+
+    ok $response->{success};
+    is $response->{headers}->{'content-length'}, '11';
+    is $response->{content}, undef;
 };
 
 subtest 'uploads file setting time' => sub {
-    my $ua       = TestEnv->build_ua;
-    my $response = $ua->post( TestEnv->endpoint . '/tree/test.file?time=1234567890',
+    my $ua = TestEnv->build_ua;
+    my $response =
+      $ua->post( TestEnv->endpoint . '/tree/test.file?time=1234567890',
         { content => 'hello there' } );
 
     ok $response->{success};
@@ -77,7 +82,7 @@ subtest 'uploads file with invalid crc32' => sub {
         { content => 'hello there' } );
 
     ok !$response->{success};
-    is $response->{status},  400;
+    is $response->{status}, 400;
 
     $ua       = TestEnv->build_ua;
     $response = $ua->get( TestEnv->endpoint . '/tree/test.file' );
@@ -87,12 +92,13 @@ subtest 'uploads file with invalid crc32' => sub {
 };
 
 subtest 'uploads file with valid crc32' => sub {
-    my $ua       = TestEnv->build_ua;
-    my $response = $ua->post( TestEnv->endpoint . '/tree/test.file?crc=6d12e950',
+    my $ua = TestEnv->build_ua;
+    my $response =
+      $ua->post( TestEnv->endpoint . '/tree/test.file?crc=6d12e950',
         { content => 'hello there' } );
 
     ok $response->{success};
-    is $response->{status},  204;
+    is $response->{status}, 204;
 
     $ua->delete( TestEnv->endpoint . '/tree/test.file' );
 };
