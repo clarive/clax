@@ -38,6 +38,7 @@ Clax has a rich unit and functional test suites.
     $ make check
 
     # Functional tests agains a running clax
+    $ ./clax -l clax.log -c t/clax.ini
     $ TEST_CLAX_ENDPOINT=http://localhost:11801 prove t
 
 ## Cross-Compiling for Win32
