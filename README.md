@@ -18,6 +18,16 @@ requests from stdin and write responses to stdout, which makes it suitable for i
 
 ## Compiling, testing and installing
 
+Getting the sources
+
+    $ git clone --recursive https://github.com/clarive/clax
+
+Configuring libuv (only for Unix-like)
+
+    $ cd contrib/libuv
+    $ ./autogen.sh
+    $ ./configure
+
 Clax is statically linked, so it can be moved around without worring about the libraries. Compiling is as simple as:
 
     $ make
@@ -29,6 +39,29 @@ Clax has a rich unit and functional test suites.
 
     # Functional tests agains a running clax
     $ TEST_CLAX_ENDPOINT=http://localhost:11801 prove t
+
+## Cross-Compiling for Win32
+
+Cross-compiling is possible using mingw.
+
+### Dependencies
+
+CentOS:
+
+    # yum install epel-release
+    # yum install mingw32-gcc mingw64-gcc
+
+Debian:
+
+    # apt-get install migw64-w64
+
+### Compiling
+
+    # 32-bit
+    $ make -f Makefile.cross.mingw32
+
+    # 64-bit
+    $ make -f Makefile.cross.mingw64
 
 # Command-Line Usage
 
