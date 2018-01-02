@@ -93,7 +93,7 @@ snprintf:
 	$(MAKE) -C contrib/snprintf CC="$(CC)" CFLAGS="$(CFLAGS)"
 
 libuv:
-	$(MAKE) -C contrib/libuv -f Makefile.clax CC="$(CC)" CFLAGS="$(CFLAGS)" WINDOWS="$(WINDOWS)"
+	$(MAKE) -C contrib/libuv -f Makefile.clax CC="$(CC)" AR="$(AR)" CFLAGS="$(CFLAGS)" WINDOWS="$(WINDOWS)"
 
 tests: lib
 	$(MAKE) -C tests CC="$(CC)" CFLAGS="$(CFLAGS)"
