@@ -62,15 +62,6 @@ $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS) -o $(EXE)
 	$(CP) $(EXE) $(PROGRAM)
 
-ifneq ($(MVS),1)
-depend: .depend
-
-.depend: clax_version.h $(SOURCES)
-	$(CC) $(CFLAGS) -MM $^ > .depend
-
--include .depend
-endif
-
 inih:
 	$(MAKE) -C contrib/inih CC="$(CC)" CFLAGS="$(CFLAGS)"
 
@@ -141,7 +132,6 @@ clean:
 	$(RMF)  *.gch
 	$(RMF)  a.out *.exe
 	$(RMF)  clax_version.h OS ARCH
-	$(RMF)  .depend
 	$(RMF)  *.gcno *.gcda
 	$(RMRF) coverage
 	$(MAKE) -C tests clean
