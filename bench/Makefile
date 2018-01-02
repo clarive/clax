@@ -12,14 +12,6 @@ all: $(PROGRAM)
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ $(LFLAGS) $(LIBS) -o $(PROGRAM)
 
-depend: .depend
-
-.depend: $(SOURCES)
-	rm -rf ./.depend
-	$(CC) $(CFLAGS) -MM $^ > ./.depend
-
-include .depend
-
 clax:
 	$(MAKE) -C ../
 
@@ -28,4 +20,3 @@ bench: clax $(PROGRAM)
 
 clean:
 	rm -f $(PROGRAM) $(OBJECTS)
-	rm -f ./.depend

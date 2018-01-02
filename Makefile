@@ -89,9 +89,6 @@ libuv:
 tests: lib
 	$(MAKE) -C tests CC="$(CC)" CFLAGS="$(CFLAGS)"
 
-tests_func: tests
-	$(MAKE) -C tests_func CC="$(CC)" CFLAGS="$(CFLAGS)"
-
 check: tests
 	$(MAKE) -C tests check
 
@@ -107,7 +104,6 @@ check-coverage: coverage-prepare
 
 check-coverage-all: coverage-prepare
 	$(MAKE) -C tests check-coverage
-	$(MAKE) -C tests_func check-coverage
 	$(MAKE) coverage-report
 
 coverage-report:
@@ -135,7 +131,6 @@ clean:
 	$(RMF)  *.gcno *.gcda
 	$(RMRF) coverage
 	$(MAKE) -C tests clean
-	$(MAKE) -C tests_func clean
 	$(MAKE) -C bench clean
 
 distclean:
