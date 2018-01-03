@@ -20,7 +20,12 @@ requests from stdin and write responses to stdout, which makes it suitable for i
 
 Getting the sources
 
-    $ git clone --recursive https://github.com/clarive/clax
+    $ git clone  https://github.com/clarive/clax
+    $ git submodule update --init
+
+Installing the toolchain
+
+    $ yum/apt-get install gcc automake make libtool which
 
 Configuring libuv (only for Unix-like)
 
