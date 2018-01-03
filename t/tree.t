@@ -38,6 +38,27 @@ subtest 'uploads file' => sub {
     is $response->{content}, undef;
 };
 
+subtest 'creates directory deeply nested' => sub {
+    my $ua       = TestEnv->build_ua;
+    my $response = $ua->post(
+        TestEnv->endpoint . '/tree/deeply/nested',
+        {
+            headers => { 'Content-Type' => 'application/vnd.clax.folder' }
+        }
+    );
+
+    ok $response->{success};
+    is $response->{status},  204;
+    is $response->{content}, undef;
+
+    $response = $ua->head( TestEnv->endpoint . '/tree/deeply/nested/' );
+
+    ok $response->{success};
+    is $response->{headers}->{'content-length'}, '0';
+    is $response->{headers}->{'content-type'}, 'application/vnd.clax.folder';
+    is $response->{content}, undef;
+};
+
 subtest 'uploads file deeply nested' => sub {
     my $ua       = TestEnv->build_ua;
     my $response = $ua->post( TestEnv->endpoint . '/tree/deeply/nested/test.file',

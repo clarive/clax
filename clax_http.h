@@ -26,6 +26,8 @@
 int clax_http_dispatch(clax_ctx_t *clax_ctx, const char *buf, ssize_t len);
 void clax_http_dispatch_done_cb(clax_ctx_t *clax_ctx, clax_http_request_t *request, clax_http_response_t *response);
 
+char *clax_http_request_header(clax_ctx_t *ctx, clax_http_request_t *request, const char *header);
+
 int clax_http_response_status(clax_ctx_t *ctx, clax_http_response_t *response, int status);
 int clax_http_response_header(clax_ctx_t *ctx, clax_http_response_t *response, const char *header, const char *value);
 int clax_http_response_body(clax_ctx_t *ctx, clax_http_response_t *response, const unsigned char *buf, size_t len);

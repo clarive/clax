@@ -251,6 +251,11 @@ void clax_dispatch_download_(uv_fs_t *req)
                     clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
                 }
             }
+            else if (S_ISDIR(req->statbuf.st_mode)) {
+                clax_http_response_status(clax_ctx, &clax_ctx->response, 200);
+                clax_http_response_header(clax_ctx, &clax_ctx->response, "Content-Type", "application/vnd.clax.folder");
+                clax_http_dispatch_done_cb(clax_ctx, &clax_ctx->request, &clax_ctx->response);
+            }
             else {
                 clax_log("File '%s' is not a regular file", req->path);
 
@@ -494,6 +499,26 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
 
     if (req->continue_expected) {
         clax_dispatch_continue(clax_ctx, req, res);
+        return;
+    }
+
+    if (strcmp(clax_http_request_header(clax_ctx, req, "Content-Type"), "application/vnd.clax.folder") == 0) {
+        clax_log("Creating directory");
+
+        int r = clax_mkdir_p(path);
+
+        if (r < 0) {
+            clax_log("Error: mkdirp failed");
+
+            clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+
+            return;
+        }
+
+        clax_http_response_status(clax_ctx, &clax_ctx->response, 204);
+
+        clax_http_dispatch_done_cb(clax_ctx, &clax_ctx->request, &clax_ctx->response);
+
         return;
     }
 

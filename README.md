@@ -206,6 +206,12 @@ There are several types of errors.
 
 Same as downloading a file without actually receiving the body.
 
+### Check if directory exists
+
+    HEAD /tree/directory
+
+Same as checking the file existance but with a `Content-Type` set to `application/vnd.clax.folder`.
+
 #### Response
 
     HTTP/1.1 200 OK
@@ -239,6 +245,31 @@ Download a file.
 #### Example
 
     curl http://clax-server/tree/my-file
+
+### Create directory
+
+    POST /tree/some/sub/directory
+    Content-Type: application/vnd.clax.folder
+
+Create file on the server.
+
+#### URL Params
+
+Required
+
+None
+
+#### Data
+
+None
+
+#### Response
+
+    204 OK
+
+#### Example
+
+    curl -X POST -H 'Content-Type: application/vnd.clax.folder' http://clax.local:11801/tree/nested/path/
 
 ### Upload file
 

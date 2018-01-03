@@ -190,6 +190,11 @@ int clax_http_response_status(clax_ctx_t *ctx, clax_http_response_t *response, i
     return 0;
 }
 
+char *clax_http_request_header(clax_ctx_t *ctx, clax_http_request_t *request, const char *header)
+{
+    return clax_kv_list_find(&request->headers, (char *)header);
+}
+
 int clax_http_response_header(clax_ctx_t *ctx, clax_http_response_t *response, const char *header, const char *value)
 {
     clax_kv_list_push(&response->headers, (char *)header, (char *)value);
