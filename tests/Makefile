@@ -3,7 +3,7 @@ SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
 override CFLAGS += -I../contrib -I../contrib/mbedtls -I../
 LFLAGS=
-LIBS=../clax_*.o ../scandir.o ../contrib/*/*.o ../contrib/libuv/.libs/libuv.a -lpthread
+LIBS=../clax_*.o ../contrib/*/*.o ../contrib/libuv/.libs/libuv.a -lpthread
 
 RM = rm
 RMF = rm -f
