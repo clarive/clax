@@ -5,14 +5,6 @@ use lib 't/lib';
 use Test::More;
 use TestEnv;
 
-subtest 'not a file' => sub {
-    my $ua       = TestEnv->build_ua;
-    my $response = $ua->get( TestEnv->endpoint . '/tree//' );
-
-    ok !$response->{success};
-    is $response->{status}, 400;
-};
-
 subtest 'does not exist' => sub {
     my $ua       = TestEnv->build_ua;
     my $response = $ua->get( TestEnv->endpoint . '/tree/unknown' );
