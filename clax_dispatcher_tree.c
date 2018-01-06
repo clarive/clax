@@ -55,7 +55,9 @@ char *clax_last_modified(uv_stat_t *stat, char *buf, size_t max_len)
     time_t time = epoch;
 
 #ifdef _WIN32
-    last_modified_time_p = gmtime_s(&last_modified_time, &time);
+    gmtime_s(&last_modified_time, &time);
+
+    last_modified_time_p = &last_modified_time;
 #else
     last_modified_time_p = gmtime_r(&time, &last_modified_time);
 #endif
