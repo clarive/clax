@@ -146,7 +146,9 @@ void clax_uv_crc32_(uv_fs_t *req)
 
             file_req->crc32 = clax_crc32_finalize(file_req->crc32);
 
-            req->result = 0;
+            uv_fs_t close_req;
+            uv_fs_close(uv_default_loop(), &close_req, file_req->handle, NULL);
+
             file_req->cb(req);
         }
         else if (req->result > 0) {
