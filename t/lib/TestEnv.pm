@@ -18,6 +18,6 @@ sub build_ua {
     );
 }
 
-sub endpoint { $ENV{TEST_CLAX_ENDPOINT} // 'http://localhost:3000' }
+sub endpoint { $ENV{TEST_CLAX_ENDPOINT} // 'http://localhost:11801' }
 
 1;
