@@ -59,7 +59,7 @@ CentOS:
 
 Debian:
 
-    # apt-get install migw64-w64
+    # apt-get install mingw64-w64
 
 ### Compiling
 
