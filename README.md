@@ -308,7 +308,7 @@ File data in bytes.
 
 #### Example
 
-    curl --data-binary @path_to_file http://clax.local:11801/tree/
+    curl -H 'Content-Type: application/octet-stream' --data-binary @path/to/file.txt http://clax.local:11801/tree/file.txt
 
 ### Delete path
 
