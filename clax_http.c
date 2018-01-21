@@ -121,7 +121,7 @@ int clax_http_dispatch(clax_ctx_t *clax_ctx, const char *buf, ssize_t len)
             clax_dispatch_bad_request(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
         }
 
-        return 0;
+        return -1;
     }
 
 //    if (clax_http_is_proxy(&request)) {

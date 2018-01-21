@@ -55,8 +55,13 @@ int on_http_parser_message_complete(http_parser *p)
     }
 
     if (request->body_tmpfile == NULL) {
+        clax_log("Request parsing done");
+
         if (request->done_cb)
             request->done_cb(request);
+    }
+    else {
+        clax_log("Waiting for body to be written (%d)", request->to_read);
     }
 
     return 0;
@@ -183,39 +188,41 @@ typedef struct {
     void *data;
 } clax_http_body_write_req_t;
 
-void clax_http_body_free_write_req(uv_write_t *req) {
-    clax_http_body_write_req_t *wr = (clax_http_body_write_req_t*) req;
-    free(wr->buf.base);
-    free(wr);
-}
-
 void clax_http_request_body_closed_cb(uv_fs_t *req)
 {
-    clax_log("Body file closed");
-    clax_http_body_write_req_t *write_req = (clax_http_body_write_req_t *)req;
+    clax_http_body_write_req_t *close_req = (clax_http_body_write_req_t *)req;
 
-    clax_http_request_t *request = write_req->data;
+    clax_http_request_t *request = close_req->data;
 
-    if (request && request->done_cb)
+    if (request && request->done_cb) {
+        clax_log("Request body parsing done");
         request->done_cb(request);
+    }
 }
 
 void clax_http_request_body_written_cb(uv_fs_t *req)
 {
+    clax_http_body_write_req_t *write_req = (clax_http_body_write_req_t *)req;
+
     if (req->result < 0) {
         clax_log("Error: writing to file: %s", uv_strerror(req->result));
 
+        uv_fs_req_cleanup(req);
+
+        if (write_req->buf.base) {
+            free(write_req->buf.base);
+        }
+        free(write_req);
+
         return;
     }
-
-    clax_http_body_write_req_t *write_req = (clax_http_body_write_req_t *)req;
 
     clax_http_request_t *request = write_req->data;
 
     request->to_read -= req->result;
 
     if (request->to_read <= 0) {
-        clax_http_body_write_req_t *close_req = (clax_http_body_write_req_t *)malloc(sizeof(clax_http_body_write_req_t));
+        clax_http_body_write_req_t *close_req = malloc(sizeof(clax_http_body_write_req_t));
 
         close_req->data = request;
 
@@ -232,28 +239,6 @@ void clax_http_request_body_written_cb(uv_fs_t *req)
         free(write_req->buf.base);
     }
     free(write_req);
-}
-
-void clax_http_body_opened_cb(uv_fs_t *req)
-{
-    if (req->result < 0) {
-        clax_log("Error: opening file: %s", uv_strerror(req->result));
-        return;
-    }
-
-    clax_log("Body file opened successfully");
-
-    clax_http_body_write_req_t *write_req = (clax_http_body_write_req_t *)req;
-
-    clax_http_request_t *request = write_req->data;
-
-    request->body_file = req->result;
-
-    int r = uv_fs_write(uv_default_loop(), (uv_fs_t *)write_req, req->result, &write_req->buf, 1, -1, clax_http_request_body_written_cb);
-
-    if (r < 0) {
-        clax_log("Error: write failed");
-    }
 }
 
 int on_http_parser_body(http_parser *p, const char *buf, size_t len)
@@ -283,19 +268,6 @@ int on_http_parser_body(http_parser *p, const char *buf, size_t len)
         }
     }
     else {
-        clax_http_body_write_req_t *write_req = (clax_http_body_write_req_t *)malloc(sizeof(clax_http_body_write_req_t));
-
-        if (write_req) {
-            write_req->buf.base = malloc(len);
-            write_req->buf.len = len;
-            memcpy(write_req->buf.base, buf, len);
-
-            write_req->data = request;
-        }
-        else {
-            return -1;
-        }
-
         if (!request->body_file) {
             char tmpbuf[1024];
             size_t tmpsize = 1024;
@@ -309,10 +281,12 @@ int on_http_parser_body(http_parser *p, const char *buf, size_t len)
 
                 clax_log("Opening body tempfile %s", request->body_tmpfile);
 
+                uv_fs_t open_req;
+
                 /* We have to open file here synchronously because it's pretty hard to avoid racing between opening this
                  * file and getting new data, making this sync mitigates the problem and keeps code simpler */
-                int r = uv_fs_open(uv_default_loop(), (uv_fs_t *)write_req,
-                        request->body_tmpfile, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR, NULL);
+                int r = uv_fs_open(uv_default_loop(), &open_req,
+                        request->body_tmpfile, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH, NULL);
 
                 if (r < 0) {
                     clax_log("Error creating body tmpfile");
@@ -320,18 +294,37 @@ int on_http_parser_body(http_parser *p, const char *buf, size_t len)
                     return -1;
                 }
 
-                clax_http_body_opened_cb((uv_fs_t *)write_req);
+                request->body_file = open_req.result;
             }
-        }
-        else {
-            int r = uv_fs_write(uv_default_loop(), (uv_fs_t *)write_req,
-                    request->body_file, &write_req->buf, 1, -1, clax_http_request_body_written_cb);
-
-            if (r < 0) {
-                clax_log("Error: appending file: %s", uv_strerror(r));
+            else {
+                clax_log("Error: not tmpdir found");
 
                 return -1;
             }
+        }
+
+        clax_http_body_write_req_t *write_req = malloc(sizeof(clax_http_body_write_req_t));
+
+        if (write_req) {
+            write_req->buf.base = malloc(len);
+            write_req->buf.len = len;
+            memcpy(write_req->buf.base, buf, len);
+
+            write_req->data = request;
+        }
+        else {
+            return -1;
+        }
+
+        int r = uv_fs_write(uv_default_loop(), (uv_fs_t *)write_req,
+                request->body_file, &write_req->buf, 1, -1, NULL);
+
+        clax_http_request_body_written_cb((uv_fs_t *)write_req);
+
+        if (r < 0) {
+            clax_log("Error: appending file: %s", uv_strerror(r));
+
+            return -1;
         }
     }
 
@@ -384,7 +377,10 @@ void clax_http_request_init(clax_http_request_t *request, char *tempdir)
 
 void clax_http_request_free(clax_http_request_t *request)
 {
-    free((void *)request->body);
+    if (request->body) {
+        free((void *)request->body);
+        request->body = NULL;
+    }
 
     clax_kv_list_free(&request->headers);
     clax_kv_list_free(&request->query_params);
@@ -394,6 +390,7 @@ void clax_http_request_free(clax_http_request_t *request)
         uv_fs_unlink(uv_default_loop(), NULL, request->body_tmpfile, NULL);
 
         free(request->body_tmpfile);
+        request->body_tmpfile = NULL;
     }
 }
 
@@ -410,6 +407,7 @@ void clax_http_response_free(clax_http_response_t *response)
 
     if (response->body_buf) {
         free((void *)response->body_buf);
+        response->body_buf = NULL;
     }
 }
 
