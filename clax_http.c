@@ -43,11 +43,14 @@ void clax_http_dispatch_done_cb(clax_ctx_t *clax_ctx, clax_http_request_t *reque
         if (response->status_code == 100) {
             clax_log("100 continue");
 
+            int to_write = response->to_write;
+
             memset(response, 0, sizeof(clax_http_response_t));
 
             clax_kv_list_init(&response->headers);
 
             response->data = clax_ctx;
+            response->to_write = to_write;
         }
         else {
             clax_log("Reject 100-continue");
