@@ -379,10 +379,13 @@ void clax_dispatch_upload_crc32_(uv_fs_t *req)
     clax_ctx_t *clax_ctx = file_req->data;
 
     if (req->result >= 0) {
-        char *exp = clax_kv_list_find(&clax_ctx->request.query_params, "crc");
-        clax_log("Checking crc32 of '%s': got=%08lx exp=%s", file_req->path, file_req->crc32, exp);
+        char *exp_hex = clax_kv_list_find(&clax_ctx->request.query_params, "crc");
+        long long int exp = strtoll(exp_hex, NULL, 16);
 
-        if (strtol(exp, NULL, 16) != file_req->crc32) {
+        clax_log("Checking crc32 of '%s': got=%08lx (%d) exp=%s (%d)",
+                file_req->path, file_req->crc32, file_req->crc32, exp_hex, exp);
+
+        if (exp != file_req->crc32) {
             clax_log("Error: crc32 is invalid, removing file");
 
             delete_req_t *delete_req = malloc(sizeof(delete_req_t));
