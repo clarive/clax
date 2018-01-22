@@ -190,6 +190,12 @@ void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_
 
     process->data = clax_ctx;
 
+    char cwd[1024] = {0};
+    size_t size = sizeof(cwd);
+
+    uv_cwd(cwd, &size);
+    clax_log("Process cwd='%s'", cwd);
+
     r = uv_spawn(uv_default_loop(), (uv_process_t *)process, options);
     if (r < 0) {
         /*free_process(process);*/
