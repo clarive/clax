@@ -22,7 +22,13 @@
 
 void clax_dispatch_index(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *response)
 {
-    const char *body = "{\"message\":\"Hello, world!\",\"version\":\"" CLAX_VERSION "\",\"os\":\"" CLAX_OS "\",\"arch\":\"" CLAX_ARCH "\"}";
+    const char *body = "{"
+        "\"message\":\"Hello, world!\""
+        ",\"version\":\"" CLAX_VERSION "\""
+        ",\"os\":\"" CLAX_OS "\""
+        ",\"arch\":\"" CLAX_ARCH "\""
+        ",\"backend\":\"libuv\""
+        "}";
 
     clax_http_response_status(clax_ctx, response, 200);
     clax_http_response_header(clax_ctx, response, "Content-Type", "application/json");
