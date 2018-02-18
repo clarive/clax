@@ -509,7 +509,8 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
         return;
     }
 
-    if (strcmp(clax_http_request_header(clax_ctx, req, "Content-Type"), "application/vnd.clax.folder") == 0) {
+    const char *content_type = clax_http_request_header(clax_ctx, req, "Content-Type");
+    if (content_type && strcmp(content_type, "application/vnd.clax.folder") == 0) {
         clax_log("Creating directory");
 
         int r = clax_mkdir_p(path);
@@ -529,14 +530,6 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
         return;
     }
 
-    char *tmpfile = clax_ctx->request.body_tmpfile;
-
-    if (!tmpfile || !strlen(tmpfile)) {
-        clax_dispatch_bad_request(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
-
-        return;
-    }
-
     char *pathdup = clax_strdup((const char *)path);
     char *dir = dirname(pathdup);
 
@@ -544,32 +537,60 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
 
     int r = clax_mkdir_p(dir);
 
+    free(pathdup);
+
     if (r < 0) {
         clax_log("Error: mkdirp failed");
 
         clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
 
-        free(pathdup);
         return;
     }
 
-    clax_log("Saving upload '%s' to file '%s'", tmpfile, path);
+    char *tmpfile = clax_ctx->request.body_tmpfile;
 
-    copy_req_t *copy_req = malloc(sizeof(copy_req_t));
-    copy_req->path = path;
-    copy_req->data = clax_ctx;
+    if (tmpfile && strlen(tmpfile)) {
+        clax_log("Saving upload '%s' to file '%s'", tmpfile, path);
 
-    int rcopy = uv_fs_copyfile(uv_default_loop(), (uv_fs_t *)copy_req,
-            (char *)tmpfile, path, 0, clax_dispatch_upload_);
+        copy_req_t *copy_req = malloc(sizeof(copy_req_t));
+        copy_req->path = path;
+        copy_req->data = clax_ctx;
 
-    if (rcopy < 0) {
-        clax_log("Error: copy failed: %s", uv_strerror(r));
+        int rcopy = uv_fs_copyfile(uv_default_loop(), (uv_fs_t *)copy_req,
+                (char *)tmpfile, path, 0, clax_dispatch_upload_);
 
-        clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
-        return;
+        if (rcopy < 0) {
+            clax_log("Error: copy failed: %s", uv_strerror(r));
+
+            clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
+            return;
+        }
     }
 
-    free(pathdup);
+    /* Empty file */
+    else {
+        uv_fs_t open_req;
+
+        int r = uv_fs_open(uv_default_loop(), &open_req,
+                path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH, NULL);
+
+        if (r < 0) {
+            clax_log("Error creating body file: %s", uv_strerror(r));
+
+            return;
+        }
+
+        uv_fs_t close_req;
+
+        uv_fs_close(uv_default_loop(), &close_req, open_req.result, NULL);
+
+        copy_req_t *copy_req = calloc(1, sizeof(copy_req_t));
+        copy_req->path = path;
+        copy_req->data = clax_ctx;
+        ((uv_fs_t *)copy_req)->result = 0;
+
+        clax_dispatch_upload_((uv_fs_t *)copy_req);
+    }
 }
 
 void clax_dispatch_delete_(uv_fs_t *req)

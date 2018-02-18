@@ -30,6 +30,23 @@ subtest 'uploads file' => sub {
     is $response->{content}, undef;
 };
 
+subtest 'uploads empty file' => sub {
+    my $ua       = TestEnv->build_ua;
+    my $response = $ua->post( TestEnv->endpoint . '/tree/empty.file',
+        { content => '' } );
+
+    ok $response->{success};
+    is $response->{status},  204;
+    is $response->{content}, undef;
+
+    $response = $ua->head( TestEnv->endpoint . '/tree/empty.file' );
+
+    ok $response->{success};
+    is $response->{headers}->{'x-clax-crc32'},   '00000000';
+    is $response->{headers}->{'content-length'}, '0';
+    is $response->{content}, undef;
+};
+
 subtest 'creates directory deeply nested' => sub {
     my $ua       = TestEnv->build_ua;
     my $response = $ua->post(
