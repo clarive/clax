@@ -516,7 +516,7 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
         int r = clax_mkdir_p(path);
 
         if (r < 0) {
-            clax_log("Error: mkdirp failed");
+            clax_log("Error: mkdirp '%s' failed: %s", path, strerror(r));
 
             clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
 
@@ -540,7 +540,7 @@ void clax_dispatch_upload(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_h
     free(pathdup);
 
     if (r < 0) {
-        clax_log("Error: mkdirp failed");
+        clax_log("Error: mkdirp '%s' failed: %s", dir, strerror(r));
 
         clax_dispatch_system_error(clax_ctx, &clax_ctx->request, &clax_ctx->response, NULL);
 

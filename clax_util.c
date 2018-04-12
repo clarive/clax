@@ -361,6 +361,10 @@ int clax_mkdir(char *dirname, int mode)
     int ret;
 
 #ifdef _WIN32
+    if (dirname[strlen(dirname) - 1] == ':') {
+        return 0;
+    }
+
     ret = mkdir(dirname);
 #else
     ret = mkdir(dirname, mode);
@@ -701,8 +705,10 @@ int clax_mkdir_p(const char *path)
             *p = '\0';
 
             if (clax_mkdir(_path, 0755) != 0) {
-                if (errno != EEXIST)
+                if (errno != EEXIST) {
+                    clax_log("mkdir '%s' failed: %s", _path, strerror(errno));
                     return -1;
+                }
             }
 
             *p = '/';
