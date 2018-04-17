@@ -69,7 +69,7 @@ mbedtls_ssl_cache_context ssl_cache;
 void clax_ssl_free();
 int clax_conn_write_cb(clax_ctx_t *clax_ctx, const unsigned char *buf, size_t size);
 
-void clax_exit(int code)
+void clax_cleanup()
 {
     if (options.ssl) {
         clax_ssl_free();
@@ -78,8 +78,6 @@ void clax_exit(int code)
     if (options._log_file) {
         clax_log("Closing log file '%s'", options.log_file);
         fclose(options._log_file);
-
-        clax_log("Exit=%d", code);
     }
 
     fflush(stdout);
@@ -89,6 +87,13 @@ void clax_exit(int code)
 
     uv_stop(uv_default_loop());
     uv_loop_close(uv_default_loop());
+}
+
+void clax_exit(int code)
+{
+    clax_cleanup();
+
+    clax_log("Exit=%d", code);
 
     exit(code);
 }
@@ -914,6 +919,8 @@ void WINAPI service_main(DWORD argc, LPTSTR *argv){
         clax_log("Service running");
     }
 
+    unlink("clax.service.log");
+
     clax_main(clax_argc, clax_argv);
 
     return;
@@ -938,7 +945,7 @@ void WINAPI service_ctrl_handler(DWORD Opcode) {
 
             clax_log("Leaving");
 
-            clax_exit(0);
+            clax_cleanup();
 
             return;
         case SERVICE_CONTROL_INTERROGATE:
@@ -968,10 +975,21 @@ int main(int argc, char **argv)
 {
     if (clax_service_mode()) {
 #ifdef _WIN32
-        FILE *stderr_redirect = freopen("C:/clax.log", "w", stderr);
-
         clax_argc = argc;
         clax_argv = argv;
+
+        clax_options_init(&options);
+
+        /* We have to parse the log file as soon as possible, otherwise the service crashes */
+        int ok = clax_parse_options(&options, argc, argv);
+        if (ok == 0 && options.log_file) {
+            freopen(options.log_file, "w", stderr);
+        }
+        else {
+            freopen("clax.service.log", "w", stderr);
+        }
+
+        clax_options_free(&options);
 
         SERVICE_TABLE_ENTRY service_dispatch_table[] = {
             {SERVICE_NAME, service_main}, {NULL, NULL}
@@ -979,9 +997,8 @@ int main(int argc, char **argv)
 
         if (!StartServiceCtrlDispatcher(service_dispatch_table)) {
             clax_log("Registering dispatch table failed: %ld", GetLastError());
-        }
-        else {
-            clax_log("Registering dispatch table ok");
+
+            return -1;
         }
 #endif
     }
