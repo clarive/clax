@@ -20,13 +20,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "contrib/libuv/include/uv.h"
+#include "contrib/frozen/frozen.c"
 
 #include "clax_http.h"
 #include "clax_log.h"
 #include "clax_dispatcher.h"
 #include "clax_util.h"
+
+#define MAX_ARGS 100
 
 extern char **environ;
 
@@ -101,6 +105,16 @@ static void on_read(uv_stream_t *pipe, ssize_t nread, const uv_buf_t *buf) {
     }
 }
 
+static void scan_array(const char *str, int len, char **args) {
+    struct json_token t;
+    int i;
+    for (i = 0; json_scanf_array_elem(str, len, "", i, &t) > 0; i++) {
+        char *buf = malloc( t.len + 1 );
+        sprintf(buf, "%.*s", t.len, t.ptr);
+        args[i] = buf;
+    }
+}
+
 void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_http_response_t *res)
 {
     char *command = clax_kv_list_find(&req->body_params, "command");
@@ -108,6 +122,8 @@ void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_
         clax_dispatch_bad_request(clax_ctx, req, res, "Missing required field: command");
         return;
     }
+
+    char *json = clax_kv_list_find(&req->body_params, "json");
 
     //char *timeout = clax_kv_list_find(&req->body_params, "timeout");
     //if (timeout && strlen(timeout)) {
@@ -144,7 +160,7 @@ void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_
     process_t *process = malloc(sizeof(process_t));
 
     int argc = 3;
-    char **args = malloc(sizeof(char *) * (argc + 1));
+    char **args = malloc(sizeof(char *) * MAX_ARGS);
 
 #ifdef _WIN32
     args[0] = "cmd.exe";
@@ -153,9 +169,37 @@ void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_
     args[0] = "sh";
     args[1] = "-c";
 #endif
+    if( json == NULL || strlen(json) == 0 ) {
+        args[2] = command;
+        args[3] = NULL;
+    }
+    else {
+        clax_log("JSON payload: %s", json);
+        int json_argc;
+        bool bare = false;
+        char *cmd = (char *) malloc(sizeof(char) * strlen(json));
+        char **args_array = (char **) malloc(sizeof(char *) * MAX_ARGS);
 
-    args[2] = command;
-    args[3] = NULL;
+        int json_status = json_scanf(json, strlen(json), "{ cmd:%Q, args:%M, argc:%d, bare:%B }",
+                &cmd, scan_array, args_array, &json_argc, &bare);
+
+        clax_log("JSON cmd=%s, argc=%d, bare=%d, status=%d", cmd, json_argc, bare, json_status);
+
+        if( bare ) {
+            args[0] = cmd;
+            argc = json_argc + 1;
+            for( int a=0; a<argc; a++ )
+                args[a+1] = args_array[a];
+            args[argc] = NULL;
+        }
+        else {
+            args[2] = cmd;
+            for( int a=0; a<argc; a++ )
+                args[a+3] = args_array[a];
+            argc = json_argc + 3;
+            args[argc] = NULL;
+        }
+    }
 
     uv_process_options_t *options = &process->options;
     memset(options, 0, sizeof(uv_process_options_t));
@@ -215,6 +259,10 @@ void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_
     int pid = uv_process->pid;
 
     clax_log("Started command '%s' with pid=%d", command, pid);
+    clax_log("Command arguments...");
+    for (int i = 0; i < argc; i++) {
+        clax_log("arg[%d]=%s", i, args[i]);
+    }
 
     r = uv_read_start((uv_stream_t *)out, alloc_buffer, on_read);
     if (r < 0) {

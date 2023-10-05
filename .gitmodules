@@ -1,3 +1,6 @@
 [submodule "contrib/libuv"]
 	path = contrib/libuv
 	url = https://github.com/vti/libuv
+[submodule "contrib/frozen"]
+	path = contrib/frozen
+	url = https://github.com/rodrigolive/frozen
