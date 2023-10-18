@@ -1,0 +1,184 @@
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Build & Release
+
+jobs:
+  Linux_Build:
+    name: Create Linux Release
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Make libuv
+        run: |
+          git submodule update --init
+          cd contrib/libuv
+          ./autogen.sh
+          ./configure
+          make
+
+      - name: Make clax
+        run: |
+          make
+          mkdir 'clax-linux-${{github.ref_name}}'
+          cp clax LICENSE clax-linux-${{github.ref_name}}
+          cp README.md clax-linux-${{github.ref_name}}/README
+          cp clax.ini.unix.example clax-linux-${{github.ref_name}}/clax.ini.example
+          tar cvzf clax-linux-${{github.ref_name}}.tgz clax-linux-${{github.ref_name}}
+
+      - name: Zip Linux Release
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'zip'
+          filename: 'clax-linux-${{github.ref_name}}.zip'
+          path: 'clax-linux-${{github.ref_name}}'
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+             clax-linux-${{github.ref_name}}.tgz
+             clax-linux-${{github.ref_name}}.zip
+
+#
+# We turned off the Windows Build and
+# use the Windows CrossBuild instead
+# because it's 2x faster
+#
+
+  Windows_Build:
+    if: false
+    name: Create Windows Release
+    needs: Linux_Build
+    runs-on: windows-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Checkout contrib
+        run: |
+          git submodule update --init
+      - name: Make clax
+        shell: cmd
+        run: |
+          make -f Makefile.mingw64
+          dir
+          mkdir "clax-windows-${{github.ref_name}}"
+          copy clax.exe "clax-windows-${{github.ref_name}}"
+          copy README.md "clax-windows-${{github.ref_name}}"/README.txt
+          copy LICENSE "clax-windows-${{github.ref_name}}"
+          copy clax.ini.win.example "clax-windows-${{github.ref_name}}"/clax.ini.example
+      - name: Zip Windows Release
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'zip'
+          filename: 'clax-windows-${{github.ref_name}}.zip'
+          path: 'clax-windows-${{github.ref_name}}'
+      - name: Upload to Release
+        uses: xresloader/upload-to-github-release@v1
+        with:
+          file: 'clax-windows-${{github.ref_name}}.zip'
+          tag_name: ${{github.ref_name}}
+          verbose: true
+          overwrite: true
+
+#
+# We use a cross-build by installing MingW 
+# because it's basically faster to run on GHA
+#
+
+  Windows_Cross_Build:
+    name: Create Windows Release from Linux
+    needs: Linux_Build
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Checkout contrib
+        run: |
+          git submodule update --init
+
+      - name: Make clax
+        run: |
+          sudo apt-get install gcc-mingw-w64
+          make -f Makefile.cross.mingw64
+          mkdir "clax-windows-${{github.ref_name}}"
+          cp clax.exe clax-windows-${{github.ref_name}}
+          cp clax.ini.win.example clax-windows-${{github.ref_name}}/clax.ini.example
+          cp LICENSE clax-windows-${{github.ref_name}}/LICENSE.txt
+          cp README.md clax-windows-${{github.ref_name}}/README.txt
+
+      - name: Zip Windows Release
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'zip'
+          filename: 'clax-windows-${{github.ref_name}}.zip'
+          path: 'clax-windows-${{github.ref_name}}'
+
+      - name: Upload to Release
+        uses: xresloader/upload-to-github-release@v1
+        with:
+          file: 'clax-windows-${{github.ref_name}}.zip'
+          tag_name: ${{github.ref_name}}
+          verbose: true
+          overwrite: true
+#
+# MacOS build
+#
+
+  MacOS_Build:
+    name: Create MacOS Release
+    needs: Linux_Build
+    runs-on: macos-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Make libuv
+        run: |
+          brew install automake
+          git submodule update --init
+          cd contrib/libuv
+          ./autogen.sh
+          ./configure
+          make
+
+      - name: Make clax
+        run: |
+          make
+          mkdir clax-macos-${{github.ref_name}}
+          cp clax LICENSE clax-macos-${{github.ref_name}}
+          cp README.md clax-macos-${{github.ref_name}}/README
+          cp clax.ini.unix.example clax-macos-${{github.ref_name}}/clax.ini.example
+          tar cvzf clax-macos-${{github.ref_name}}.tgz clax-macos-${{github.ref_name}}
+
+      - name: Zip Windows Release
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'zip'
+          filename: 'clax-macos-${{github.ref_name}}.zip'
+          path: 'clax-macos-${{github.ref_name}}'
+
+      - name: Upload Tar + Zip to Release
+        uses: xresloader/upload-to-github-release@v1
+        with:
+          file: 'clax-macos-${{github.ref_name}}.tgz;clax-macos-${{github.ref_name}}.zip'
+          tag_name: ${{github.ref_name}}
+          verbose: true
+          overwrite: true
