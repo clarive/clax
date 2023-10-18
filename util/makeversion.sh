@@ -1,7 +1,11 @@
 #!/bin/sh
 
 if which git > /dev/null && [ -d ".git" ]; then
-    GIT_VERSION="$(date +%Y%m%d)-$(git rev-parse --short HEAD)"
+    GIT_TAG="$(git describe --tags --abbrev=0)"
+    if [ "$GIT_TAG" != "" ]; then
+        GIT_TAG="$GIT_TAG-"
+    fi
+    GIT_VERSION="$GIT_TAG$(date +%Y%m%d)-$(git rev-parse --short HEAD)"
 
     echo "$GIT_VERSION" > VERSION
 fi
