@@ -375,7 +375,7 @@ In order of appearance:
 ## Copyright
 
 Clax is a portable HTTP(s) remote deployment agent
-Copyright (C) 2015  Clarive Software
+Copyright (C) 2015-2023  Commitive SL
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
