@@ -69,6 +69,6 @@ jobs:
         uses: xresloader/upload-to-github-release@v1
         with:
           file: 'clax-windows-${{github.ref_name}}.zip'
-          tag-name: ${{github.ref_name}}
+          tag_name: ${{github.ref_name}}
           verbose: true
           overwrite: true
