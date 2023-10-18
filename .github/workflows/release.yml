@@ -66,8 +66,9 @@ jobs:
           filename: 'clax-windows-${{github.ref_name}}.zip'
           path: 'clax-windows-${{github.ref_name}}'
       - name: Upload Zip to Release
-        uses: AButler/upload-release-assets@v2.0.2
+        uses: xresloader/upload-to-github-release@v1
         with:
-          files: 'clax-windows-${{github.ref_name}}.zip'
-          release-tag: ${{ github.ref_name }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          file: 'clax-windows-${{github.ref_name}}.zip'
+          tag-name: ${{github.ref_name}}
+          verbose: true
+          overwrite: true
