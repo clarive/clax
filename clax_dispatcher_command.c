@@ -207,7 +207,12 @@ void clax_dispatch_command(clax_ctx_t *clax_ctx, clax_http_request_t *req, clax_
     options->file = args[0];
     options->args = args;
     options->exit_cb = exit_cb;
+
+#ifdef _WIN32
+    options->flags = UV_PROCESS_WINDOWS_VERBATIM_ARGUMENTS;
+#else
     options->flags = 0;
+#endif
 
     uv_pipe_t *out = malloc(sizeof(uv_pipe_t));
     out->data = process;
