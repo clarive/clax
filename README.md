@@ -1,3 +1,5 @@
+<img src="https://github.com/clarive/clax/raw/master/clax-logo.png" width="200" align="right">
+
 # Clax
 
 Clax is a portable HTTP(s) remote deployment agent that can run commands, exchange files and more. Clax can read
